@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import './student.css';
 import {User} from '../../types';
 import UserService from '../../services/UserService';

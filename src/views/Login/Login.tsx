@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import axios from 'axios';
 import './login.css';
+import AuthService from '../../services/AuthService';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleEmailChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
     setEmail(e.target.value);
@@ -14,11 +17,32 @@ const LoginForm = () => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
-    console.log('Email:', email);
-    console.log('Password:', password);
-    // Aquí puedes agregar la lógica para autenticar al usuario o hacer una solicitud HTTP
+    
+    try {
+      const response = await  AuthService.loginUser(
+        email,
+        password,
+      );
+      if(response.success) {
+      // Guardar la información del usuario en el almacenamiento local o de sesión
+      localStorage.setItem('token', response.token); // Ejemplo: guardando el token de autenticación en el almacenamiento local
+
+      // Redirigir a la página de inicio o a la ruta deseada después del inicio de sesión
+      // history.push('/');
+
+      // Limpiar los campos de entrada después del inicio de sesión exitoso
+      setEmail('');
+      setPassword('');
+    }
+    else{
+ setError(response.message);
+    }
+  }
+    catch (error) {
+      setError('Error API.');
+    }
   };
 
   return (
@@ -37,6 +61,7 @@ const LoginForm = () => {
                 <Col lg={10} xl={7} className="mx-auto">
                   <h3 className="display-4">Bienvenido!</h3>
                   <h4 className="mb-4">Ingresa tus credenciales.</h4>
+                  {error && <div className="text-danger mb-3">{error}</div>}
                   <Form onSubmit={handleSubmit}>
                     <Form.Group controlId="formBasicEmail" className="mb-3">
                       <Form.Label>Correo</Form.Label>
