@@ -1,100 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './student.css';
+import {User} from '../../types';
+import UserService from '../../services/UserService';
+
 
 const Students = () => {
-    const [students, setStudents] = useState([
-        {
-            name: "Freddie J. Plourde",
-            role: "8-A",
-            website: "freddie@cecam.com",
-            imageUrl: "https://bootdey.com/img/Content/avatar/avatar2.png",
-            socialLinks: [
-                { icon: "fa fa-facebook", url: "#" },
-                { icon: "fa fa-twitter", url: "#" },
-                { icon: "fa fa-skype", url: "#" }
-            ],
-            metrics: [
-                { label: "Matematicas", value: 9 },
-                { label: "Ingles", value: 8 },
-                { label: "Lenguaje", value: 8 },
-                { label: "Sociales", value: 8 },
-                { label: "Total Inasistencias", value: 1 }
-            ]
-        },
-           {
-            name: "Jose J. Palle",
-            role: "8-A",
-            website: "jose@cecam.com",
-            imageUrl: "https://bootdey.com/img/Content/avatar/avatar1.png",
-            socialLinks: [
-                { icon: "fa fa-facebook", url: "#" },
-                { icon: "fa fa-twitter", url: "#" },
-                { icon: "fa fa-skype", url: "#" }
-            ],
-            metrics: [
-                { label: "Matematicas", value: 10 },
-                { label: "Ingles", value: 7 },
-                { label: "Lenguaje", value: 6 },
-                { label: "Sociales", value: 8 },
-                { label: "Total Inasistencias", value: 1 }
-            ]
-        },
-        {
-        name: "María L. Gómez",
-        role: "8-B",
-        website: "maria@cecam.com",
-        imageUrl: "https://bootdey.com/img/Content/avatar/avatar3.png",
-        socialLinks: [
-            { icon: "fa fa-facebook", url: "#" },
-            { icon: "fa fa-twitter", url: "#" },
-            { icon: "fa fa-linkedin", url: "#" }
-        ],
-        metrics: [
-            { label: "Matematicas", value: 9 },
-            { label: "Ingles", value: 8 },
-            { label: "Lenguaje", value: 7 },
-            { label: "Sociales", value: 9 },
-            { label: "Total Inasistencias", value: 0 }
-        ]
-    },
-    {
-        name: "Carlos M. Rodríguez",
-        role: "8-C",
-        website: "carlos@cecam.com",
-        imageUrl: "https://bootdey.com/img/Content/avatar/avatar4.png",
-        socialLinks: [
-            { icon: "fa fa-facebook", url: "#" },
-            { icon: "fa fa-instagram", url: "#" },
-            { icon: "fa fa-linkedin", url: "#" }
-        ],
-        metrics: [
-            { label: "Matematicas", value: 8 },
-            { label: "Ingles", value: 6 },
-            { label: "Lenguaje", value: 7 },
-            { label: "Sociales", value: 8 },
-            { label: "Total Inasistencias", value: 2 }
-        ]
-    },
-    {
-        name: "Ana R. López",
-        role: "8-D",
-        website: "ana@cecam.com",
-        imageUrl: "https://bootdey.com/img/Content/avatar/avatar8.png",
-        socialLinks: [
-            { icon: "fa fa-twitter", url: "#" },
-            { icon: "fa fa-linkedin", url: "#" },
-            { icon: "fa fa-github", url: "#" }
-        ],
-        metrics: [
-            { label: "Matematicas", value: 7 },
-            { label: "Ingles", value: 9 },
-            { label: "Lenguaje", value: 8 },
-            { label: "Sociales", value: 7 },
-            { label: "Total Inasistencias", value: 1 }
-        ]
-    }
-     
-    ]);
+   const [students, setStudents] = useState<User[]>([]);
+
+  useEffect(() => {
+    // Utiliza el servicio para obtener todos los usuarios cuando el componente se monta
+    const fetchData = async () => {
+      try {
+        const userList = await UserService.getAllUsers();
+        setStudents(userList);
+      } catch (error) {
+        // Manejar el error según sea necesario
+      }
+    };
+
+    fetchData(); // Llama a la función fetchData para obtener los usuarios
+  }, []); // 
 
     return (
         <div className="content">
