@@ -1,0 +1,12 @@
+.bg-register-image{
+     background-image:url('../../assets/traje.jpg');
+     background-size: cover;
+    background-position: center;
+}
+.form-instruction{
+    margin-bottom: 2rem;
+}
+.button-register{
+    margin: 1rem;
+    width: 100%;
+}

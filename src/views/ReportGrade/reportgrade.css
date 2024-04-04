@@ -1,0 +1,32 @@
+.boleta {
+  margin: 20px;
+  padding: 20px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.tabla-notas {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.tabla-notas th,
+.tabla-notas td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.tabla-notas th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
+
+.tabla-notas td {
+  text-align: center;
+}
+
+.btn-grade{
+    background-color: #a1a6fc;
+}
