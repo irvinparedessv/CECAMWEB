@@ -1,6 +1,8 @@
 import React from 'react';
 import AppRoutes from './router';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 import './App.css';
 
 const App: React.FC = () => {

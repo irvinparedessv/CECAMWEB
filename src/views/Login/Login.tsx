@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
-import axios from 'axios';
 import './login.css';
 import AuthService from '../../services/AuthService';
+import { useNavigate } from 'react-router-dom';
 
-const LoginForm = () => {
+interface LoginProps {
+  login: () => void; // Definimos el tipo de la función logout como una función que no toma argumentos y no devuelve nada
+}
+
+const LoginForm : React.FC<LoginProps>= ({login}) => {
+    const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,9 +33,9 @@ const LoginForm = () => {
       if(response.success) {
       // Guardar la información del usuario en el almacenamiento local o de sesión
       localStorage.setItem('token', response.token); // Ejemplo: guardando el token de autenticación en el almacenamiento local
-
+      login();
       // Redirigir a la página de inicio o a la ruta deseada después del inicio de sesión
-      // history.push('/');
+       navigate("/students");
 
       // Limpiar los campos de entrada después del inicio de sesión exitoso
       setEmail('');

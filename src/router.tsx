@@ -12,8 +12,15 @@ import { MiGrade } from './views/MiGrade';
 import { ReportGrade } from './views/ReportGrade';
 import { Login } from './views/Login';
 
+
+
+const App = () => {
+const [isAuthenticated,setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+
+
 const AuthGuard = ({ children }) => {
-  const [isAuthenticated] = useState(!!localStorage.getItem('token'));
+  
+  console.log(isAuthenticated);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,9 +32,19 @@ const AuthGuard = ({ children }) => {
 
   return children;
 };
+const logout = () => {
+  // Eliminar el token del localStorage
+  localStorage.removeItem('token');
+  setIsAuthenticated(false);
+
+};
 
 
-const App = () => {
+const login = () => {
+
+  setIsAuthenticated(true);
+
+};
   const notasEjemplo = [
     { materia: 'Matemáticas', nota: 9.0 },
     { materia: 'Ciencias', nota: 8.5 },
@@ -37,15 +54,15 @@ const App = () => {
     // Add more subjects and grades as needed
   ];
 
-  const [isAuthenticated] = useState(!!localStorage.getItem('token'));
+
 
   return (
     <Router>
-      {isAuthenticated && <Navbar />}
+      {isAuthenticated && <Navbar logout={logout} />}
       <div className="col py-3">
         <Routes>
           {/* Public routes */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login login={login} />} />
 
           {/* Protected routes */}
           <Route path="/" element={<AuthGuard />}>
