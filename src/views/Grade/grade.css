@@ -1,6 +1,18 @@
-.bg-calificacion-image{
-       background-image:url('../../assets/materia.jpg');
-     background-size: cover;
-    background-position: center;
-
+.bg-calificacion-image {
+  background-image: url("../../assets/materia.jpg");
+  background-size: cover;
+  background-position: center;
+}
+.c_ButtonAdd {
+  text-align: right;
+  margin: 3rem;
+}
+.c_margin1 {
+  margin: 1rem;
+}
+.c_padding1 {
+  padding: 1rem;
+}
+.c_padding2 {
+  padding: 2rem !important;
 }
