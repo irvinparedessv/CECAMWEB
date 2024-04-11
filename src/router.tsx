@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
   Routes,
-  useNavigate,
+  Navigate,
+  Outlet,
 } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
 import { Register } from "./views/Register";
@@ -23,19 +24,14 @@ const App = () => {
     !!localStorage.getItem("token")
   );
 
-  const AuthGuard = ({ children }) => {
-    console.log(isAuthenticated);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-      if (!isAuthenticated) {
-        // Redirect to login page if not authenticated
-        navigate("/login");
-      }
-    }, [isAuthenticated, navigate]);
-
-    return children;
+  const AuthGuard = () => {
+    if (!isAuthenticated) {
+      // Redirect to login page if not authenticated
+      return <Navigate to="/login" replace />;
+    }
+    return <Outlet />;
   };
+
   const logout = () => {
     // Eliminar el token del localStorage
     localStorage.removeItem("token");
@@ -57,44 +53,46 @@ const App = () => {
   return (
     <Router>
       {isAuthenticated && <Navbar logout={logout} />}
-      <Toaster
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: "#363636",
-            color: "#fff",
-          },
-        }}
-        position="top-center"
-      />
+
       <div className="col py-3">
+        <Toaster
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: "#363636",
+              color: "#fff",
+            },
+          }}
+          position="top-center"
+        />
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login login={login} />} />
+          <Route element={<AuthGuard />}>
+            <Route path="/register-student" element={<Register />} />
 
-          <Route path="/register-student" element={<Register />} />
-
-          <Route path="/grades" element={<GradeList />} />
-          <Route path="/grades/add" element={<GradeForm />} />
-          <Route path="/register-subjects" element={<Subject />} />
-          <Route path="/register-teachers" element={<Teacher />} />
-          <Route path="/subjects" element={<Subject />} />
-          <Route path="/grades/edit/:id" element={<GradeEdit />} />
-          <Route path="/students" element={<Students />} />
-          <Route path="/attendances" element={<Attendance />} />
-          <Route
-            path="/notes"
-            element={
-              <ReportGrade
-                estudiante="Irvin Paredes"
-                grado="7-A"
-                key={"ds"}
-                notas={notasEjemplo}
-              />
-            }
-          />
-          <Route path="/observations" element={<Observation />} />
-          <Route path="/migrades" element={<MiGrade />} />
+            <Route path="/grades" element={<GradeList />} />
+            <Route path="/grades/add" element={<GradeForm />} />
+            <Route path="/register-subjects" element={<Subject />} />
+            <Route path="/register-teachers" element={<Teacher />} />
+            <Route path="/subjects" element={<Subject />} />
+            <Route path="/grades/edit/:id" element={<GradeEdit />} />
+            <Route path="/students" element={<Students />} />
+            <Route path="/attendances" element={<Attendance />} />
+            <Route
+              path="/notes"
+              element={
+                <ReportGrade
+                  estudiante="Irvin Paredes"
+                  grado="7-A"
+                  key={"ds"}
+                  notas={notasEjemplo}
+                />
+              }
+            />
+            <Route path="/observations" element={<Observation />} />
+            <Route path="/migrades" element={<MiGrade />} />
+          </Route>
         </Routes>
       </div>
     </Router>
