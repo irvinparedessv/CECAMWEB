@@ -19,7 +19,7 @@ function GradeEdit() {
     section: "",
     description: "",
   });
-  const [success, setSuccess] = useState<boolean>(false);
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -140,11 +140,6 @@ function GradeEdit() {
           </div>
         </div>
       </form>
-      {success && (
-        <div className="alert alert-success" role="alert">
-          Grado editado correctamente!
-        </div>
-      )}
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { MiGrade } from "./views/MiGrade";
 import { ReportGrade } from "./views/ReportGrade";
 import { Login } from "./views/Login";
 import { Toaster } from "react-hot-toast";
+import { StudentsGrade } from "./views/StudentsGrade";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -73,6 +74,7 @@ const App = () => {
 
             <Route path="/grades" element={<GradeList />} />
             <Route path="/grades/add" element={<GradeForm />} />
+            <Route path="/students/grade/:id" element={<StudentsGrade />} />
             <Route path="/register-subjects" element={<Subject />} />
             <Route path="/register-teachers" element={<Teacher />} />
             <Route path="/subjects" element={<Subject />} />
