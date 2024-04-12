@@ -10,6 +10,7 @@ import { Teacher } from './views/Teacher';
 import { Observation } from './views/Observations';
 import { MiGrade } from './views/MiGrade';
 import { ReportGrade } from './views/ReportGrade';
+import { Rols } from './views/Rols';
 import { Login } from './views/Login';
 
 
@@ -63,6 +64,11 @@ const login = () => {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login login={login} />} />
+          {/* LA RUTA ESTUDIANTES NO FUNCIONA PORQUE ESTA EN UNA RUTA PROTEGIDA, las vistas que funcionan actualmente son estudiantes y asistencia */}
+          <Route path="/subjects" element={<Subject />} />
+            <Route path="/students" element={<Students />} />
+            <Route path="/attendances" element={<Attendance />} />
+            <Route path="/rols" element={<Rols />} />
 
           {/* Protected routes */}
           <Route path="/" element={<AuthGuard />}>
@@ -70,9 +76,9 @@ const login = () => {
             <Route path="/register-grades" element={<Grade />} />
             <Route path="/register-subjects" element={<Subject />} />
             <Route path="/register-teachers" element={<Teacher />} />
-            <Route path="/subjects" element={<Subject />} />
-            <Route path="/students" element={<Students />} />
-            <Route path="/attendances" element={<Attendance />} />
+            
+            
+            {/* <Route path="/rols" element={<Rols />} /> */}
             <Route
               path="/notes"
               element={<ReportGrade estudiante='Irvin Paredes' grado='7-A' key={'ds'} notas={notasEjemplo} />}

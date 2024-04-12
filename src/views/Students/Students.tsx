@@ -25,7 +25,7 @@ const Students = () => {
     return (
         <div className="content">
             <div className="container">
-               
+               <h1>sss</h1>
 
                 <div className="row">
                     {students.map((student, index) => (

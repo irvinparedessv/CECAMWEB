@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserGraduate, faClipboardList, faChalkboard, faStickyNote, faCommentAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUserGraduate, faClipboardList, faChalkboard, faStickyNote, faCommentAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 
 import './navbar.scss';
 
@@ -45,6 +45,12 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
             <Link to={"/observations"} className="nav-link px-0 align-middle" >
               <FontAwesomeIcon icon={faCommentAlt} className="me-2" />
               Observaciones
+            </Link>
+          </li>
+          <li>
+            <Link to={"/rols"} className="nav-link px-0 align-middle" >
+              <FontAwesomeIcon icon={faUser} className="me-2" />
+              Roles
             </Link>
           </li>
         </ul>
