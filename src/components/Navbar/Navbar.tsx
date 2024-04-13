@@ -29,6 +29,12 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
               Asistencias
             </Link>
           </li>
+            <li>
+            <Link to={"/grades"} className="nav-link px-0 align-middle" >
+              <FontAwesomeIcon icon={faUserGraduate} className="me-2" />
+              Grados
+            </Link>
+          </li>
           <li>
             <Link to={"/migrades"} className="nav-link px-0 align-middle" >
               <FontAwesomeIcon icon={faUserGraduate} className="me-2" />
