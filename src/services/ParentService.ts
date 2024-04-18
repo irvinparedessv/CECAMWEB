@@ -1,12 +1,12 @@
 import axios from 'axios';
 import API_BASE_URL from './apiConfig';
-import { Student } from '../types';
+import { Parent } from '../types/Parent';
 import { Rol } from '../types/Rol';
 
-const StudentService = {
+const ParentService = {
   getAllUsers: async () => {
     try {
-      const response = await axios.get<Student[]>(`${API_BASE_URL}/users`);
+      const response = await axios.get<Parent[]>(`${API_BASE_URL}/users`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
@@ -24,9 +24,9 @@ const StudentService = {
     }
   },
 
-  insertUser: async (userData: Student) => {
+  insertUser: async (userData: Parent) => {
     try {
-      const response = await axios.post<Student>(`${API_BASE_URL}/users`, userData);
+      const response = await axios.post<Parent>(`${API_BASE_URL}/users`, userData);
       return response.data;
     } catch (error) {
       console.error('Error al insertar usuario:', error);
@@ -34,9 +34,9 @@ const StudentService = {
     }
   },
   
-  updateUser: async (userId: number, userData: Student) => {
+  updateUser: async (userId: number, userData: Parent) => {
     try {
-      const response = await axios.put<Student>(`${API_BASE_URL}/users/${userId}`, userData);
+      const response = await axios.put<Parent>(`${API_BASE_URL}/users/${userId}`, userData);
       return response.data;
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
@@ -54,4 +54,4 @@ const StudentService = {
   },
 };
 
-export default StudentService;
+export default ParentService;

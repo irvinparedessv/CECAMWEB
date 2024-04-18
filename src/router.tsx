@@ -10,7 +10,9 @@ import { Teacher } from './views/Teacher';
 import { Observation } from './views/Observations';
 import { MiGrade } from './views/MiGrade';
 import { ReportGrade } from './views/ReportGrade';
+import { Rols } from './views/Rols';
 import { Login } from './views/Login';
+import { Parents } from './views/Parents';
 
 
 
@@ -63,6 +65,9 @@ const login = () => {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login login={login} />} />
+          <Route path="/students" element={<Students />} />
+          <Route path="/rols" element={<Rols />} />
+          <Route path="/parents" element={<Parents />} />
 
           {/* Protected routes */}
           <Route path="/" element={<AuthGuard />}>
@@ -71,7 +76,7 @@ const login = () => {
             <Route path="/register-subjects" element={<Subject />} />
             <Route path="/register-teachers" element={<Teacher />} />
             <Route path="/subjects" element={<Subject />} />
-            <Route path="/students" element={<Students />} />
+            {/*<Route path="/students" element={<Students />} />*/}
             <Route path="/attendances" element={<Attendance />} />
             <Route
               path="/notes"
