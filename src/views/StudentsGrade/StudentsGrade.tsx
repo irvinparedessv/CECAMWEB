@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { GradeStudents } from "../../types";
 import { GradeService } from "../../services";
 import { useParams } from "react-router-dom";
-import { confirmAlert } from "react-confirm-alert";
 import toast from "react-hot-toast";
 import Modal from "react-bootstrap/Modal";
 import { Button, Spinner, FormCheck } from "react-bootstrap";
