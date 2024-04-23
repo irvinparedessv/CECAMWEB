@@ -30,6 +30,12 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
             </Link>
           </li>
           <li>
+            <Link to={"/parentAssociations"} className="nav-link px-0 align-middle" >
+              <FontAwesomeIcon icon={faChalkboard} className="me-2" />
+              Asociacion de padres
+            </Link>
+          </li>
+          <li>
             <Link to={"/attendances"} className="nav-link px-0 align-middle" >
               <FontAwesomeIcon icon={faClipboardList} className="me-2" />
               Asistencias

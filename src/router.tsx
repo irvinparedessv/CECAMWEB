@@ -13,7 +13,7 @@ import { ReportGrade } from './views/ReportGrade';
 import { Rols } from './views/Rols';
 import { Login } from './views/Login';
 import { Parents } from './views/Parents';
-
+import { ParentAssociations } from './views/ParentAssociations';
 
 
 const App = () => {
@@ -68,6 +68,7 @@ const login = () => {
           <Route path="/students" element={<Students />} />
           <Route path="/rols" element={<Rols />} />
           <Route path="/parents" element={<Parents />} />
+          <Route path="/parentAssociations" element={<ParentAssociations />} />
 
           {/* Protected routes */}
           <Route path="/" element={<AuthGuard />}>

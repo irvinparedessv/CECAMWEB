@@ -178,7 +178,6 @@ const Parents = () => {
               <th>Nombres</th>
               <th>Apellidos</th>
               <th>Estado</th>
-              <th>Rol</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -194,11 +193,9 @@ const Parents = () => {
                   <td>{parent.firstName}</td>
                   <td>{parent.lastName}</td>
                   <td>{parent.enabled ? 'Activo' : 'Inactivo'}</td>
-                  <td>{roles.length > 0 ? roles.find(role => role.rolId === parent.rolId)?.roleName : ''}</td>
                   <td>
                     <Button variant="danger" className="mr-2" onClick={() => handleDeleteParent(parent.id)}>Eliminar</Button>
                     <Button variant="primary" onClick={() => handleAddModalShow(parent.id)}>Editar</Button>
-                    <Button variant="success" onClick={() => handleAddModalShow(parent.id)}>Agregar hijo</Button>
                   </td>
                 </tr>
               ))}
