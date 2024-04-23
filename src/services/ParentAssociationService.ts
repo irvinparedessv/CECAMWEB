@@ -39,7 +39,7 @@ const ParentAssociationService = {
   },
   getUsersWithParentAssociations: async (studentId: number): Promise<ParentAssociation[]> => {
     try {
-      const response = await axios.get<ParentAssociation[]>(`${API_BASE_URL}/parentAssociations/${studentId}`);
+      const response = await axios.get<ParentAssociation[]>(`${API_BASE_URL}/parentAssociations/students/${studentId}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener usuarios con asociaciones de padres:', error);
@@ -53,6 +53,16 @@ const ParentAssociationService = {
       return response.data;
     } catch (error) {
       console.error('Error al eliminar la asociación de padres:', error);
+      throw error;
+    }
+  },
+  
+  getUnassociatedParents: async (studentId: number): Promise<ParentAssociation[]> => {
+    try {
+      const response = await axios.get<ParentAssociation[]>(`${API_BASE_URL}/parentAssociations/parentsUnassociated/${studentId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener padres no asociados:', error);
       throw error;
     }
   }

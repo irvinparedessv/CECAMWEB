@@ -20,15 +20,67 @@ const ParentAssociations = () => {
   const [parents, setParents] = useState<Parent[]>([]);
   const [parentAssociations, setParentsAssociations] = useState<ParentAssociation[]>([]);
   const [filterValueParent, setFilterValueParent] = useState('');
-  const [selectedParents, setSelectedParents] = useState<Parent[]>([]);
+  const [selectedParents, setSelectedParents] = useState<ParentAssociation[]>([]);
   const [loading, setLoading] = useState(false);
+  const [unassociatedParents, setUnassociatedParents] = useState<ParentAssociation[]>([]);
+
+
+
+
+const ParentAssociations = () => {
+  const [unassociatedParents, setUnassociatedParents] = useState([]);
+
+  useEffect(() => {
+    fetchUnassociatedParents();
+  }, []);
+
+}
+
+const fetchUnassociatedParents = async () => {
+  try {
+    const studentId = 5; // Reemplaza con el ID del estudiante deseado
+    const parents = await ParentAssociationService.getUnassociatedParents(studentId);
+    setUnassociatedParents(() => [...parents]); // Actualiza el estado con los padres no asociados
+  } catch (error) {
+    console.error('Error al obtener padres no asociados:', error);
+  }
+};
+
+
+
+
 
   useEffect(() => {
     fetchStudents();
     fetchRoles();
     fetchParents();
+    // fetchUnassociatedParents();
   }, []);
 
+  // useEffect(() => {
+  //   if (selectedParentStudent) {
+  //     fetchUnassociatedParents(selectedParentStudent.id);
+  //   }
+  // }, [selectedParentStudent]);
+
+  // const fetchUnassociatedParents = async (studentId: number) => {
+  //   try {
+  //     const unassociatedParents = await ParentAssociationService.getUnassociatedParents(studentId);
+  //     setUnassociatedParents(unassociatedParents);
+  //   } catch (error) {
+  //     console.error('Error al obtener padres no asociados:', error);
+  //   }
+  // };
+  // const fetchUnassociatedParents = async () => {
+  //   try {
+  //     const studentId = 5; // Aquí debes proporcionar el ID del estudiante deseado
+  //     const unassociatedParents = await ParentAssociationService.getUnassociatedParents(studentId);
+  //     // Actualiza el estado con los padres no asociados
+  //     setUnassociatedParents(unassociatedParents);
+  //   } catch (error) {
+  //     console.error('Error al obtener padres no asociados:', error);
+  //   }
+  // };
   const fetchStudents = async () => {
     try {
       const studentList = await StudentService.getAllUsers();
@@ -55,6 +107,8 @@ const ParentAssociations = () => {
     setSelectedParentStudent(selectedStudent || null);
     if (selectedStudent) {
       setLoading(true);
+      const unassociatedParents = await ParentAssociationService.getUnassociatedParents(selectedStudent.id);
+      setUnassociatedParents(unassociatedParents);
         const parentAssociations = await ParentAssociationService.getUsersWithParentAssociations(selectedStudent.id);
         setParentsAssociations(parentAssociations);
         setLoading(false);
@@ -97,7 +151,7 @@ const ParentAssociations = () => {
 
 
 
-  const handleSelectParent = (parent: Parent) => {
+  const handleSelectParent = (parent: ParentAssociation) => {
     const isSelected = selectedParents.some(p => p.id === parent.id);
     if (isSelected) {
       setSelectedParents(selectedParents.filter(p => p.id !== parent.id));
@@ -210,6 +264,34 @@ const ParentAssociations = () => {
             
             
             <div className="container">
+
+              <div>
+                  <h1>Padres asociados a este estudiante</h1>
+                  {loading ? (
+                    <p>Cargando asociaciones de padres...</p>
+                  ) : parentAssociations.length > 0 ? (
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>Nombre del padre</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parentAssociations.map((parent, index) => (
+                          <tr key={index}>
+                            <td>{parent.firstName} {parent.lastName}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  ) : (
+                    <p>Este estudiante no tiene padres asociados.</p>
+                  )}
+                                  
+                    
+              </div>
+
+
               <h1>Listado de padres</h1>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <Form.Control
@@ -220,7 +302,21 @@ const ParentAssociations = () => {
                   style={{ width: '400px' }}
                 />
               </div>
-              <Table striped bordered hover>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              {/* <Table striped bordered hover>
                 <thead>
                   <tr>
                     <th>Usuario</th>
@@ -230,7 +326,8 @@ const ParentAssociations = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {parents
+
+                {parents
                     .filter((parent) =>
                       parent.userName.toLowerCase().includes(filterValueParent.toLowerCase())
                     )
@@ -253,45 +350,75 @@ const ParentAssociations = () => {
                         </td>
                       </tr>
                     ))}
-                </tbody>
-              </Table>
-              <div>
-                <h1>Pdres asociados a este estudiante</h1>
+              </tbody>
+              </Table> */}
+
+
+
+
+
+
+
 
 
                 {loading ? (
-      <p>Cargando asociaciones de padres...</p>
-    ) : parentAssociations.length > 0 ? (
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID del padre</th>
-            <th>Nombre del padre</th>
-          </tr>
-        </thead>
-        <tbody>
-          {parentAssociations.map((parent, index) => (
-            <tr key={index}>
-              <td>{parent.parentid}</td>
-              <td>{parent.firstName} {parent.lastName}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    ) : (
-      <p>Este estudiante no tiene padres asociados.</p>
+            <p>Cargando padres no asociados...</p>
+          ) : unassociatedParents.length > 0 ? (
+            
+            <Table striped bordered hover>
+              <thead>
+                        <tr>
+                          <th>Nombre del padre</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      
+              {/* <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                </tr>
+              </thead> */}
+                  <tbody>
+                  {unassociatedParents
+                    .filter((parent) => {
+                      const fullName = `${parent.firstName} ${parent.lastName}`.toLowerCase();
+                      const searchValue = filterValueParent.toLowerCase();
+                      return fullName.includes(searchValue);
+                    })
+                    .map((parent, index) => (
+                      <tr key={index}>
+                        <td>{parent.firstName} {parent.lastName}</td>
+                        <td>
+                          <Button
+                            variant="primary"
+                            onClick={() => handleSelectParent(parent)}
+                            style={{
+                              backgroundColor: selectedParents.some(p => p.id === parent.id) ? 'red' : null
+                            }}
+                          >
+                            {selectedParents.some(p => p.id === parent.id) ? 'Eliminar' : 'Seleccionar'}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+
+            </tbody>
+          </Table>
+        ) : (
+      <p>No hay padres no asociados para mostrar.</p>
     )}
-                    
-              <h1>Padres Seleccionados</h1>
-              {selectedParents.map((parent, index) => (
-                <div key={index}>
-                  <p>{parent.firstName} {parent.lastName}</p>
-                  <Button variant="danger" onClick={() => handleDeleteSelectedParent(parent.id)}>Eliminar</Button>
-                </div>
-              ))}
-              
+               
+               <h1>Padres Seleccionados</h1>
+                    {selectedParents.map((parent, index) => (
+                      <div key={index}>
+                        <p>{parent.firstName} {parent.lastName}</p>
+                        <Button variant="danger" onClick={() => handleDeleteSelectedParent(parent.id)}>Eliminar</Button>
+                      </div>
+                    ))}
             </div>
-            </div>
+
+            
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleAddParentModalClose}>Cancelar</Button>
