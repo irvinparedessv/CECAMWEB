@@ -36,21 +36,23 @@ const Rols = () => {
 
   const handleEditRole = (rol: Rol) => {
     setEditingRole(rol);
-    setUpdatedRoleName(rol.roleName);
+    setUpdatedRoleName(rol.roleName); // Establece el nombre del rol seleccionado en el campo de texto
   };
-
+  
+  
   const handleUpdateRole = async () => {
     if (!editingRole) return;
-
+  
     try {
       await RolService.updateRol(editingRole.rolId, updatedRoleName);
       await fetchRols();
       setEditingRole(null);
-      setUpdatedRoleName('');
+      // No necesitas restablecer updatedRoleName aquí
     } catch (error) {
       console.error('Error al actualizar rol:', error);
     }
   };
+  
 
   const handleDeleteRole = async (rolId: number) => {
     try {

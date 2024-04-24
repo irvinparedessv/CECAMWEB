@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserGraduate, faClipboardList, faChalkboard, faStickyNote, faCommentAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 
-import './navbar.scss';
+//import './navbar.scss';
 
 interface NavbarProps {
   logout: () => void; // Definimos el tipo de la función logout como una función que no toma argumentos y no devuelve nada
