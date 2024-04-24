@@ -6,3 +6,9 @@ export interface ParentAssociation {
     // studentId: number;
   }
 
+export interface Count{
+  id: number;
+  firstName: string;
+  lastName: string;
+  padres: number;
+}

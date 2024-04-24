@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import StudentService from '../../services/StudentService';
 import ParentService from '../../services/ParentService';
-import { Student } from '../../types';
+import { Student, Count } from '../../types';
 import { Rol } from '../../types/Rol';
 import { Parent } from '../../types/Parent';
 import { ParentAssociation } from '../../types';
 import ParentAssociationService from '../../services/ParentAssociationService';
+
 
 const ParentAssociations = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -16,35 +17,82 @@ const ParentAssociations = () => {
   const [showAddParentModal, setShowAddParentModal] = useState(false);
   const [showParentAssociationModal, setShowParentAssociationModal] = useState(false);
 
-  const [selectedParentStudent, setSelectedParentStudent] = useState<Student | null>(null);
+  const [selectedParentStudent, setSelectedParentStudent] = useState<Count | null>(null);
   const [parents, setParents] = useState<Parent[]>([]);
   const [parentAssociations, setParentsAssociations] = useState<ParentAssociation[]>([]);
   const [filterValueParent, setFilterValueParent] = useState('');
-  const [selectedParents, setSelectedParents] = useState<ParentAssociation[]>([]);
+  //const [selectedParents, setSelectedParents] = useState<ParentAssociation[]>([]);
   const [loading, setLoading] = useState(false);
   const [unassociatedParents, setUnassociatedParents] = useState<ParentAssociation[]>([]);
 
+// Estado para almacenar los padres seleccionados
+const [selectedParents, setSelectedParents] = useState<ParentAssociation[]>([]);
+
+const [counts, setCounts] = useState<Count[]>([]);
 
 
 
-const ParentAssociations = () => {
-  const [unassociatedParents, setUnassociatedParents] = useState([]);
+// Función para manejar la selección de un padre
+const handleSelectParent = async (parent: ParentAssociation) => {
+  // Verifica si selectedParentStudent es null
+  if (!selectedParentStudent) {
+    console.error('No se ha seleccionado ningún estudiante.');
+    return;
+  }
 
-  useEffect(() => {
-    fetchUnassociatedParents();
-  }, []);
-
-}
-
-const fetchUnassociatedParents = async () => {
   try {
-    const studentId = 5; // Reemplaza con el ID del estudiante deseado
+    // Guardar el padre seleccionado
+    await saveSelectedParent(selectedParentStudent.id, parent.id);
+
+    // Actualizar la lista de padres asociados
+    const updatedParentAssociations = await ParentAssociationService.getUsersWithParentAssociations(selectedParentStudent.id);
+    setParentsAssociations(updatedParentAssociations);
+
+    // Actualizar la lista de padres no asociados
+    await fetchUnassociatedParents(selectedParentStudent.id);
+    await fetchStudents();
+
+
+  } catch (error) {
+    console.error('Error al seleccionar el padre:', error);
+  }
+};
+
+
+// Función para enviar la solicitud y guardar el padre seleccionado en la base de datos
+const saveSelectedParent = async (studentId: number, parentId: number) => {
+  try {
+    // Aquí debes enviar la solicitud para guardar el padre asociado al estudiante
+    await ParentAssociationService.saveParentAssociations(studentId, parentId);
+    console.log('Padre asociado guardado correctamente');
+  } catch (error) {
+    console.error('Error al guardar el padre asociado:', error);
+  }
+};
+
+
+
+
+
+// const fetchUnassociatedParents = async () => {
+//   try {
+//     const studentId = 5; // Reemplaza con el ID del estudiante deseado
+//     const parents = await ParentAssociationService.getUnassociatedParents(studentId);
+//     setUnassociatedParents(() => [...parents]); // Actualiza el estado con los padres no asociados
+//   } catch (error) {
+//     console.error('Error al obtener padres no asociados:', error);
+//   }
+// };
+
+const fetchUnassociatedParents = async (studentId: number) => {
+  try {
     const parents = await ParentAssociationService.getUnassociatedParents(studentId);
     setUnassociatedParents(() => [...parents]); // Actualiza el estado con los padres no asociados
   } catch (error) {
     console.error('Error al obtener padres no asociados:', error);
   }
 };
+
 
 
 
@@ -83,9 +131,11 @@ const fetchUnassociatedParents = async () => {
   // };
   const fetchStudents = async () => {
     try {
-      const studentList = await StudentService.getAllUsers();
-      const filteredStudents = studentList.filter(student => student.rolId === 1);
-      setStudents(filteredStudents);
+      //const studentList = await ParentAssociationService.getAllUsers();
+      const studentList = await ParentAssociationService.getAllUsers();
+      setCounts(studentList);
+      //const filteredStudents = studentList.filter(student => student.rolId === 1);
+      //setStudents();
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
     }
@@ -103,7 +153,8 @@ const fetchUnassociatedParents = async () => {
   
 
   const handleAddParentModalShow = async (studentId: number) => {
-    const selectedStudent = students.find(student => student.id === studentId);
+    const selectedStudent = counts.find(student => student.id === studentId);
+    //console.log(selectedStudent);
     setSelectedParentStudent(selectedStudent || null);
     if (selectedStudent) {
       setLoading(true);
@@ -132,7 +183,7 @@ const fetchUnassociatedParents = async () => {
 
   const handleManageParents = async (studentId: number) => {
     try {
-      const student = students.find(student => student.id === studentId);
+      const student = counts.find(student => student.id === studentId);
       if (student) {
         setSelectedParentStudent(student);
         setLoading(true);
@@ -151,31 +202,31 @@ const fetchUnassociatedParents = async () => {
 
 
 
-  const handleSelectParent = (parent: ParentAssociation) => {
-    const isSelected = selectedParents.some(p => p.id === parent.id);
-    if (isSelected) {
-      setSelectedParents(selectedParents.filter(p => p.id !== parent.id));
-    } else {
-      setSelectedParents([...selectedParents, parent]);
-    }
-  };
+  // const handleSelectParent = (parent: ParentAssociation) => {
+  //   const isSelected = selectedParents.some(p => p.id === parent.id);
+  //   if (isSelected) {
+  //     setSelectedParents(selectedParents.filter(p => p.id !== parent.id));
+  //   } else {
+  //     setSelectedParents([...selectedParents, parent]);
+  //   }
+  // };
 
   
 
 
-  const handleAddParent = async () => {
-    try {
-      if (selectedParentStudent && selectedParents.length > 0) {
-        await ParentAssociationService.saveParentAssociations(selectedParentStudent.id, selectedParents.map(parent => parent.id));
-        console.log('Asociaciones de padres guardadas correctamente');
-        handleAddParentModalClose();
-      } else {
-        console.error('Por favor, seleccione al menos un padre');
-      }
-    } catch (error) {
-      console.error('Error al guardar las asociaciones de padres:', error);
-    }
-  };
+  // const handleAddParent = async () => {
+  //   try {
+  //     if (selectedParentStudent && selectedParents.length > 0) {
+  //       await ParentAssociationService.saveParentAssociations(selectedParentStudent.id, selectedParents.map(parent => parent.id));
+  //       console.log('Asociaciones de padres guardadas correctamente');
+  //       handleAddParentModalClose();
+  //     } else {
+  //       console.error('Por favor, seleccione al menos un padre');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error al guardar las asociaciones de padres:', error);
+  //   }
+  // };
 
   const handleDeleteSelectedParent = (parentId: number) => {
     setSelectedParents(selectedParents.filter(parent => parent.id !== parentId));
@@ -190,6 +241,9 @@ const fetchUnassociatedParents = async () => {
       const updatedParentAssociations = parentAssociations.filter(parent => parent.id !== parentId);
       setParentsAssociations(updatedParentAssociations);
       console.log('Registro eliminado exitosamente');
+      // Actualizar la lista de padres no asociados después de eliminar
+      await fetchUnassociatedParents(parentId);
+      await fetchStudents();
     } catch (error) {
       console.error('Error al eliminar el registro:', error);
     }
@@ -219,33 +273,68 @@ const fetchUnassociatedParents = async () => {
           />
         </div>
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <Table striped bordered hover>
           <thead>
             <tr>
-              <th>Usuario</th>
               <th>Nombre del estudiante</th>     
               <th>Padres</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {students
+            {counts
               .filter((student) =>
                 student.firstName.toLowerCase().includes(filterValue.toLowerCase())
               )
               .map((student, index) => (
                 <tr key={index}>
-                  <td>{student.userName}</td>
                   <td>{student.firstName} {student.lastName}</td>
-                  <td>--------</td>
+                  <td>{student.padres}</td>
                   <td>
                     <Button variant="success" onClick={() => handleAddParentModalShow(student.id)}>Agregar padre</Button>
-                    <Button variant="success" onClick={() => handleManageParents(student.id)}>Gestionar padres</Button>
+                    {/* <Button variant="success" onClick={() => handleManageParents(student.id)}>Gestionar padres</Button> */}
                   </td>
                 </tr>
               ))}
           </tbody>
         </Table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         <Modal show={showAddParentModal} onHide={handleAddParentModalClose} dialogClassName="modal-xl">
           <Modal.Header closeButton>
@@ -268,25 +357,31 @@ const fetchUnassociatedParents = async () => {
               <div>
                   <h1>Padres asociados a este estudiante</h1>
                   {loading ? (
-                    <p>Cargando asociaciones de padres...</p>
-                  ) : parentAssociations.length > 0 ? (
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>Nombre del padre</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {parentAssociations.map((parent, index) => (
-                          <tr key={index}>
-                            <td>{parent.firstName} {parent.lastName}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  ) : (
-                    <p>Este estudiante no tiene padres asociados.</p>
-                  )}
+      <p>Cargando asociaciones de padres...</p>
+    ) : parentAssociations.length > 0 ? (
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+          <th>ID del asociacion</th>
+            <th>ID del padre</th>
+            <th>Nombre del padre</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody>
+          {parentAssociations.map((parent, index) => (
+            <tr key={index}>
+              <td>{parent.id}</td>
+              <td>{parent.parentid}</td>
+              <td>{parent.firstName} {parent.lastName}</td>
+              <td><Button variant="danger" onClick={() => handleDeleteParent(parent.id)}>Eliminar</Button></td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    ) : (
+      <p>Este estudiante no tiene padres asociados.</p>
+    )}
                                   
                     
               </div>
@@ -363,7 +458,7 @@ const fetchUnassociatedParents = async () => {
 
                 {loading ? (
             <p>Cargando padres no asociados...</p>
-          ) : unassociatedParents.length > 0 ? (
+          ) : unassociatedParents.length > 2 ? (
             
             <Table striped bordered hover>
               <thead>
@@ -406,23 +501,23 @@ const fetchUnassociatedParents = async () => {
             </tbody>
           </Table>
         ) : (
-      <p>No hay padres no asociados para mostrar.</p>
+      <p>No se pueden asociar mas padres a este estudiante.</p>
     )}
                
-               <h1>Padres Seleccionados</h1>
+               {/* <h1>Padres Seleccionados</h1>
                     {selectedParents.map((parent, index) => (
                       <div key={index}>
                         <p>{parent.firstName} {parent.lastName}</p>
                         <Button variant="danger" onClick={() => handleDeleteSelectedParent(parent.id)}>Eliminar</Button>
                       </div>
-                    ))}
+                    ))} */}
             </div>
 
             
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleAddParentModalClose}>Cancelar</Button>
-            <Button variant="primary" onClick={handleAddParent}>Guardar</Button>
+            <Button variant="secondary" onClick={handleAddParentModalClose}>Cerrar</Button>
+            {/* <Button variant="primary" onClick={handleAddParent}>Guardar</Button> */}
           </Modal.Footer>
         </Modal>
 

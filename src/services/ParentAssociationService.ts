@@ -1,12 +1,12 @@
 import axios from 'axios';
 import API_BASE_URL from './apiConfig';
-import { Parent, ParentAssociation } from '../types';
+import { Parent, ParentAssociation, Student, Count } from '../types';
 import { User } from '../types';
 
 const ParentAssociationService = {
   getAllUsers: async () => {
     try {
-      const response = await axios.get<User[]>(`${API_BASE_URL}/parentAssociations`);
+      const response = await axios.get<Count[]>(`${API_BASE_URL}/parentAssociations`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
@@ -14,29 +14,50 @@ const ParentAssociationService = {
     }
   },
 
-  saveParentAssociations: async (studentId: number, selectedParents: number[]) => {
+  saveParentAssociations: async (studentId: number, parentId: number) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/parentAssociations`, {
         studentId,
-        selectedParents
+        parentId
       });
       return response.data;
     } catch (error) {
-      console.error('Error al guardar las asociaciones de padres:', error);
+      console.error('Error al guardar la asociación de padres:', error);
       throw error;
     }
   },
+
+  //PARA GUARDAR UN ARRAY
+  // saveParentAssociations: async (studentId: number, selectedParents: number[]) => {
+  //   try {
+  //     const response = await axios.post(`${API_BASE_URL}/parentAssociations`, {
+  //       studentId,
+  //       selectedParents
+  //     });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error al guardar las asociaciones de padres:', error);
+  //     throw error;
+  //   }
+  // },
   
 
-  getUsersWithParentCount: async (): Promise<User[]> => {
-    try {
-      const response = await axios.get<User[]>(`${API_BASE_URL}/users/with-parent-count`);
-      return response.data;
-    } catch (error) {
-      console.error('Error al obtener usuarios con el conteo de padres:', error);
-      throw error;
-    }
-  },
+  // getUsersWithParentCount: async (): Promise<User[]> => {
+  //   try {
+  //     const response = await axios.get<User[]>(`${API_BASE_URL}/parentAssociations`);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error al obtener usuarios con el conteo de padres:', error);
+  //     throw error;
+  //   }
+  // },
+
+
+
+
+
+
+
   getUsersWithParentAssociations: async (studentId: number): Promise<ParentAssociation[]> => {
     try {
       const response = await axios.get<ParentAssociation[]>(`${API_BASE_URL}/parentAssociations/students/${studentId}`);
