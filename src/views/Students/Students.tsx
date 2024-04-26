@@ -80,6 +80,36 @@ const Students = () => {
     }
   };
 
+
+
+
+  const handleUpdateEnabled = async (studentId: number, newEnabledValue: boolean) => {
+    try {
+      await StudentService.updateEnabled(studentId, newEnabledValue);
+      fetchStudents();
+      Swal.fire(
+        'Actualizado',
+        'El estado del estudiante ha sido actualizado correctamente.',
+        'success'
+      );
+    } catch (error) {
+      console.error('Error al actualizar el estado del estudiante:', error);
+      Swal.fire(
+        'Error',
+        'Se produjo un error al actualizar el estado del estudiante.',
+        'error'
+      );
+    }
+  };
+  
+  
+
+
+
+
+
+
+
   const handleAddModalClose = () => {
     setShowAddModal(false);
     setSelectedStudentId(null);
@@ -233,41 +263,52 @@ const Students = () => {
             </tr>
           </thead>
           <tbody>
-            {students
-              .filter((student) => {
-                      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
-                      const searchValue = filterValue.toLowerCase();
-                      return fullName.includes(searchValue);
-                    })
-              .map((student, index) => (
-                <tr key={index}>
-                  <td>{student.userName}</td>
-                  <td>{student.email}</td>
-                  <td>{student.firstName} {student.lastName}</td>
-                  <td>{student.enabled ? 'Activo' : 'Inactivo'}</td>
-                  <td>
-                  <Button
-                  variant="danger"
-                  onClick={() => handleDeleteStudent(student)}
-                  disabled={deletingStudentId === student.id}
-                >
-                  {deletingStudentId === student.id && (
-                    <Spinner
-                      as="span"
-                      animation="border"
-                      size="sm"
-                      role="status"
-                      aria-hidden="true"
-                      style={{ marginRight: '5px' }}
-                    />
-                  )}
-                  {deletingStudentId === student.id ? 'Eliminando...' : 'Eliminar'}
-                </Button>
-                    {/* <Button variant="danger" className="mr-2" onClick={() => handleDeleteStudent(student.id)}>Eliminar</Button> */}
-                    <Button variant="primary" onClick={() => handleAddModalShow(student.id)}>Editar</Button>
-                  </td>
-                </tr>
-              ))}
+          {students
+  .filter((student) => {
+    const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+    const searchValue = filterValue.toLowerCase();
+    return fullName.includes(searchValue);
+  })
+  .map((student, index) => (
+    <tr key={index}>
+      <td>{student.userName}</td>
+      <td>{student.email}</td>
+      <td>{student.firstName} {student.lastName}</td>
+      <td>{student.enabled ? 'Activo' : 'Inactivo'}</td>
+      <td>
+        <Button
+          variant="secondary"
+          onClick={() => handleUpdateEnabled(student.id, !student.enabled)}
+        >
+          {student.enabled ? 'Desactivar' : 'Activar'}
+        </Button>
+        <Button
+          variant="danger"
+          onClick={() => handleDeleteStudent(student)}
+          disabled={deletingStudentId === student.id}
+        >
+          {deletingStudentId === student.id && (
+            <Spinner
+              as="span"
+              animation="border"
+              size="sm"
+              role="status"
+              aria-hidden="true"
+              style={{ marginRight: '5px' }}
+            />
+          )}
+          {deletingStudentId === student.id ? 'Eliminando...' : 'Eliminar'}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={() => handleAddModalShow(student.id)}
+        >
+          Editar
+        </Button>
+      </td>
+    </tr>
+  ))}
+
           </tbody>
         </Table>
 

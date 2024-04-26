@@ -52,6 +52,18 @@ const StudentService = {
       throw error;
     }
   },
+  updateEnabled: async (studentId:number, newEnabledValue:boolean) => {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/users/${studentId}/enabled`, {
+        enabled: newEnabledValue,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error);
+      throw error;
+    }
+  },
+  
 };
 
 export default StudentService;
