@@ -3,6 +3,8 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import StudentService from '../../services/StudentService';
 import { Student } from '../../types';
 import { Rol } from '../../types/Rol';
+import Swal from 'sweetalert2';
+import { Spinner } from 'react-bootstrap';
 
 const Students = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -19,6 +21,8 @@ const Students = () => {
     enabled: true,
     rolId: 1,
   });
+  const [deletingStudentId, setDeletingStudentId] = useState<number | null>(null);
+  const [deletingStudent, setDeletingStudent] = useState(false);
   const [filterValue, setFilterValue] = useState('');
   useEffect(() => {
     fetchStudents();
@@ -135,14 +139,63 @@ const Students = () => {
     }
   };
 
-  const handleDeleteStudent = async (studentId: number) => {
+  // const handleDeleteStudent = async (studentId: number) => {
+  //   try {
+      
+  //   } catch (error) {
+  //     console.error('Error al eliminar estudiante:', error);
+  //   }
+  // };
+
+  const handleDeleteStudent = async (student: Student) => {
+
     try {
-      await StudentService.deleteUser(studentId);
-      fetchStudents();
+      setDeletingStudentId(student.id);
+      setDeletingStudent(true);
+  
+      // Mostrar la alerta de confirmación
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción eliminará el padre asociado.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminarlo'
+      });
+  
+      // Si el usuario confirma la eliminación
+      if (result.isConfirmed) {
+        // Realizar la solicitud para eliminar el registro utilizando el servicio
+        await StudentService.deleteUser(student.id);
+         fetchStudents();
+  
+        // Mostrar una alerta de éxito después de que se complete la eliminación
+        Swal.fire(
+          'Eliminado',
+          'El padre asociado ha sido eliminado correctamente.',
+          'success'
+        );
+      }
     } catch (error) {
-      console.error('Error al eliminar estudiante:', error);
+      console.error('Error al eliminar el registro:', error);
+      // Mostrar una alerta de error si ocurre algún problema durante la eliminación
+      Swal.fire(
+        'Error',
+        'Se produjo un error al eliminar el padre asociado.',
+        'error'
+      );
+    }
+    finally {
+      setDeletingStudentId(null);
+      setDeletingStudent(false);
     }
   };
+
+
+
+
+
 
   const generateUserName = (firstName: string, lastName: string): string => {
     if (!firstName || !lastName) {
@@ -174,26 +227,43 @@ const Students = () => {
             <tr>
               <th>Usuario</th>
               <th>Email</th>
-              <th>Nombres</th>
-              <th>Apellidos</th>
+              <th>Nombre del estudiante</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {students
-              .filter((student) =>
-                student.userName.toLowerCase().includes(filterValue.toLowerCase())
-              )
+              .filter((student) => {
+                      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+                      const searchValue = filterValue.toLowerCase();
+                      return fullName.includes(searchValue);
+                    })
               .map((student, index) => (
                 <tr key={index}>
                   <td>{student.userName}</td>
                   <td>{student.email}</td>
-                  <td>{student.firstName}</td>
-                  <td>{student.lastName}</td>
+                  <td>{student.firstName} {student.lastName}</td>
                   <td>{student.enabled ? 'Activo' : 'Inactivo'}</td>
                   <td>
-                    <Button variant="danger" className="mr-2" onClick={() => handleDeleteStudent(student.id)}>Eliminar</Button>
+                  <Button
+                  variant="danger"
+                  onClick={() => handleDeleteStudent(student)}
+                  disabled={deletingStudentId === student.id}
+                >
+                  {deletingStudentId === student.id && (
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      style={{ marginRight: '5px' }}
+                    />
+                  )}
+                  {deletingStudentId === student.id ? 'Eliminando...' : 'Eliminar'}
+                </Button>
+                    {/* <Button variant="danger" className="mr-2" onClick={() => handleDeleteStudent(student.id)}>Eliminar</Button> */}
                     <Button variant="primary" onClick={() => handleAddModalShow(student.id)}>Editar</Button>
                   </td>
                 </tr>

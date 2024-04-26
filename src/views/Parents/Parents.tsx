@@ -3,6 +3,8 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ParentService from '../../services/ParentService';
 import { Parent } from '../../types/Parent';
 import { Rol } from '../../types/Rol';
+import Swal from 'sweetalert2';
+import { Spinner } from 'react-bootstrap';
 
 
 const Parents = () => {
@@ -21,6 +23,10 @@ const Parents = () => {
     rolId: 2,
   });
   const [filterValue, setFilterValue] = useState('');
+
+
+  const [deletingParentId, setDeletingParentId] = useState<number | null>(null);
+  const [deletingParent, setDeletingParent] = useState(false);
 
   useEffect(() => {
     fetchParents();
@@ -138,14 +144,90 @@ const Parents = () => {
     }
   };
 
-  const handleDeleteParent = async (parentId: number) => {
+
+
+
+
+
+
+
+
+
+  // const handleDeleteParent = async (parentId: number) => {
+  //   try {
+      
+  //   } catch (error) {
+  //     console.error('Error al eliminar padre:', error);
+  //   }
+  // };
+
+
+
+  const handleDeleteParent = async (parent: Parent) => {
+
     try {
-      await ParentService.deleteUser(parentId);
+      setDeletingParentId(parent.id);
+      setDeletingParent(true);
+  
+      // Mostrar la alerta de confirmación
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción eliminará el padre asociado.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminarlo'
+      });
+  
+      // Si el usuario confirma la eliminación
+      if (result.isConfirmed) {
+        // Realizar la solicitud para eliminar el registro utilizando el servicio
+        await ParentService.deleteUser(parent.id);
       fetchParents();
+  
+        // Mostrar una alerta de éxito después de que se complete la eliminación
+        Swal.fire(
+          'Eliminado',
+          'El padre asociado ha sido eliminado correctamente.',
+          'success'
+        );
+      }
     } catch (error) {
-      console.error('Error al eliminar padre:', error);
+      console.error('Error al eliminar el registro:', error);
+      // Mostrar una alerta de error si ocurre algún problema durante la eliminación
+      Swal.fire(
+        'Error',
+        'Se produjo un error al eliminar el padre asociado.',
+        'error'
+      );
+    }
+    finally {
+      setDeletingParentId(null);
+      setDeletingParent(false);
     }
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const generateUserName = (firstName: string, lastName: string): string => {
     if (!firstName || !lastName) {
@@ -175,8 +257,7 @@ const Parents = () => {
             <tr>
               <th>Usuario</th>
               <th>Email</th>
-              <th>Nombres</th>
-              <th>Apellidos</th>
+              <th>Nombre del padre</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -184,17 +265,37 @@ const Parents = () => {
           <tbody>
             {parents
               .filter((parent) =>
-                parent.userName.toLowerCase().includes(filterValue.toLowerCase())
+                {
+                  const fullName = `${parent.firstName} ${parent.lastName}`.toLowerCase();
+                  const searchValue = filterValue.toLowerCase();
+                  return fullName.includes(searchValue);
+                }
               )
               .map((parent, index) => (
                 <tr key={index}>
                   <td>{parent.userName}</td>
                   <td>{parent.email}</td>
-                  <td>{parent.firstName}</td>
-                  <td>{parent.lastName}</td>
+                  <td>{parent.firstName} {parent.lastName}</td>
                   <td>{parent.enabled ? 'Activo' : 'Inactivo'}</td>
                   <td>
-                    <Button variant="danger" className="mr-2" onClick={() => handleDeleteParent(parent.id)}>Eliminar</Button>
+                  <Button
+                  variant="danger"
+                  onClick={() => handleDeleteParent(parent)}
+                  disabled={deletingParentId === parent.id}
+                >
+                  {deletingParentId === parent.id && (
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      style={{ marginRight: '5px' }}
+                    />
+                  )}
+                  {deletingParentId === parent.id ? 'Eliminando...' : 'Eliminar'}
+                </Button>
+                    {/* <Button variant="danger" className="mr-2" onClick={() => handleDeleteParent(parent.id)}>Eliminar</Button> */}
                     <Button variant="primary" onClick={() => handleAddModalShow(parent.id)}>Editar</Button>
                   </td>
                 </tr>

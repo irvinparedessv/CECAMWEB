@@ -7,15 +7,20 @@ import { Rol } from '../../types/Rol';
 import { Parent } from '../../types/Parent';
 import { ParentAssociation } from '../../types';
 import ParentAssociationService from '../../services/ParentAssociationService';
+import Swal from 'sweetalert2';
+import { Spinner } from 'react-bootstrap';
+
+
+
 
 
 const ParentAssociations = () => {
-  const [students, setStudents] = useState<Student[]>([]);
+  // const [students, setStudents] = useState<Student[]>([]);
   const [roles, setRoles] = useState<Rol[]>([]);
   
   const [filterValue, setFilterValue] = useState('');
   const [showAddParentModal, setShowAddParentModal] = useState(false);
-  const [showParentAssociationModal, setShowParentAssociationModal] = useState(false);
+  // const [showParentAssociationModal, setShowParentAssociationModal] = useState(false);
 
   const [selectedParentStudent, setSelectedParentStudent] = useState<Count | null>(null);
   const [parents, setParents] = useState<Parent[]>([]);
@@ -30,33 +35,138 @@ const [selectedParents, setSelectedParents] = useState<ParentAssociation[]>([]);
 
 const [counts, setCounts] = useState<Count[]>([]);
 
+const [deletingParentId, setDeletingParentId] = useState<number | null>(null);
+const [deletingParent, setDeletingParent] = useState(false);
+
+
+const [selectingParentId, setSelectingParentId] = useState<number | null>(null);
+const [selectingParent, setSelectingParent] = useState(false);
+
+// const [selectingParentId, setSelectingParentId] = useState<number | null>(null);
+// const [selectingParent, setSelectingParent] = useState(false);
+
+
+
+
 
 
 // Función para manejar la selección de un padre
+// const handleSelectParent = async (parent: ParentAssociation) => {
+//   // Verifica si selectedParentStudent es null
+//   if (!selectedParentStudent) {
+//     console.error('No se ha seleccionado ningún estudiante.');
+//     return;
+//   }
+
+//   try {
+//     // Guardar el padre seleccionado
+//     await saveSelectedParent(selectedParentStudent.id, parent.id);
+
+//     // Actualizar la lista de padres asociados
+//     const updatedParentAssociations = await ParentAssociationService.getUsersWithParentAssociations(selectedParentStudent.id);
+//     setParentsAssociations(updatedParentAssociations);
+
+//     // Actualizar la lista de padres no asociados
+//     await fetchUnassociatedParents(selectedParentStudent.id);
+//     await fetchStudents();
+
+
+//   } catch (error) {
+//     console.error('Error al seleccionar el padre:', error);
+//   }
+// };
+
+
 const handleSelectParent = async (parent: ParentAssociation) => {
-  // Verifica si selectedParentStudent es null
   if (!selectedParentStudent) {
     console.error('No se ha seleccionado ningún estudiante.');
     return;
   }
 
   try {
-    // Guardar el padre seleccionado
-    await saveSelectedParent(selectedParentStudent.id, parent.id);
 
-    // Actualizar la lista de padres asociados
-    const updatedParentAssociations = await ParentAssociationService.getUsersWithParentAssociations(selectedParentStudent.id);
-    setParentsAssociations(updatedParentAssociations);
-
-    // Actualizar la lista de padres no asociados
-    await fetchUnassociatedParents(selectedParentStudent.id);
-    await fetchStudents();
+    setSelectingParentId(parent.id);
+    setSelectingParent(true);
 
 
+    // Mostrar la alerta de confirmación
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción seleccionará el padre asociado.',
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, seleccionar'
+    });
+
+    if (result.isConfirmed) {
+      // Realizar la selección del padre
+      // Aquí puedes agregar la lógica para seleccionar el padre
+      //console.log('Padre seleccionado:', parent);
+
+      if (!selectedParentStudent) {
+        //     console.error('No se ha seleccionado ningún estudiante.');
+             return;
+           }
+        
+           try {
+             // Guardar el padre seleccionado
+             await saveSelectedParent(selectedParentStudent.id, parent.id);
+        
+             // Actualizar la lista de padres asociados
+             const updatedParentAssociations = await ParentAssociationService.getUsersWithParentAssociations(selectedParentStudent.id);
+             setParentsAssociations(updatedParentAssociations);
+        
+             // Actualizar la lista de padres no asociados
+             await fetchUnassociatedParents(selectedParentStudent.id);
+             await fetchStudents();
+
+            } catch (error) {
+                   console.error('Error al seleccionar el padre:', error);
+            }
+
+      // Aquí puedes realizar cualquier acción adicional necesaria después de seleccionar el padre
+
+      // Mostrar una alerta de éxito después de seleccionar el padre
+      Swal.fire(
+        '¡Seleccionado!',
+        'El padre asociado ha sido seleccionado correctamente.',
+        'success'
+      );
+    }
   } catch (error) {
     console.error('Error al seleccionar el padre:', error);
+    // Mostrar una alerta de error si ocurre algún problema durante la selección
+    Swal.fire(
+      'Error',
+      'Se produjo un error al seleccionar el padre asociado.',
+      'error'
+    );
+  }finally {
+    setSelectingParentId(null);
+    setSelectingParent(false);
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Función para enviar la solicitud y guardar el padre seleccionado en la base de datos
@@ -69,6 +179,11 @@ const saveSelectedParent = async (studentId: number, parentId: number) => {
     console.error('Error al guardar el padre asociado:', error);
   }
 };
+
+
+
+
+
 
 
 
@@ -96,6 +211,14 @@ const fetchUnassociatedParents = async (studentId: number) => {
 
 
 
+// const fetchDeleteUnassociatedParents = async (parentId: number) => {
+//   try {
+//     const parents = await ParentAssociationService.getUnassociatedParents(parentId);
+//     setUnassociatedParents(() => [...parents]); // Actualiza el estado con los padres no asociados
+//   } catch (error) {
+//     console.error('Error al obtener padres no asociados:', error);
+//   }
+// };
 
 
   useEffect(() => {
@@ -174,28 +297,28 @@ const fetchUnassociatedParents = async (studentId: number) => {
     setSelectedParents([]);
   };
 
-  const handleParentAssociationModalClose = () => {
-    setShowParentAssociationModal(false);
-    setSelectedParentStudent(null);
-    setSelectedParents([]);
-  };
+  // const handleParentAssociationModalClose = () => {
+  //   setShowParentAssociationModal(false);
+  //   setSelectedParentStudent(null);
+  //   setSelectedParents([]);
+  // };
 
 
-  const handleManageParents = async (studentId: number) => {
-    try {
-      const student = counts.find(student => student.id === studentId);
-      if (student) {
-        setSelectedParentStudent(student);
-        setLoading(true);
-        const parentAssociations = await ParentAssociationService.getUsersWithParentAssociations(student.id);
-        setParentsAssociations(parentAssociations);
-        setLoading(false);
-        setShowParentAssociationModal(true);
-      }
-    } catch (error) {
-      console.error('Error al obtener asociaciones de padres:', error);
-    }
-  };
+  // const handleManageParents = async (studentId: number) => {
+  //   try {
+  //     const student = counts.find(student => student.id === studentId);
+  //     if (student) {
+  //       setSelectedParentStudent(student);
+  //       setLoading(true);
+  //       const parentAssociations = await ParentAssociationService.getUsersWithParentAssociations(student.id);
+  //       setParentsAssociations(parentAssociations);
+  //       setLoading(false);
+  //       setShowParentAssociationModal(true);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error al obtener asociaciones de padres:', error);
+  //   }
+  // };
 
 
 
@@ -228,26 +351,184 @@ const fetchUnassociatedParents = async (studentId: number) => {
   //   }
   // };
 
-  const handleDeleteSelectedParent = (parentId: number) => {
-    setSelectedParents(selectedParents.filter(parent => parent.id !== parentId));
-  };
+  // const handleDeleteSelectedParent = (parentId: number) => {
+  //   setSelectedParents(selectedParents.filter(parent => parent.id !== parentId));
+  // };
 
 
-  const handleDeleteParent = async (parentId: number) => {
+
+
+
+  // const handleDeleteParent = async (parentId: number) => {
+  //   try {
+  //     // setDeletingParentId(parentId);
+  //     setDeletingParent(true);
+  
+  //     const result = await Swal.fire({
+  //       title: '¿Estás seguro?',
+  //       text: 'Esta acción eliminará el registro del padre asociado. ¿Estás seguro de continuar?',
+  //       icon: 'warning',
+  //       showCancelButton: true,
+  //       confirmButtonColor: '#3085d6',
+  //       cancelButtonColor: '#d33',
+  //       confirmButtonText: 'Sí, eliminar'
+  //     });
+  
+  //     if (result.isConfirmed) {
+  //       // Realizar la eliminación del padre asociado
+  //       await ParentAssociationService.deleteParentAssociation(parentId);
+  
+  //       // Actualizar la lista de asociaciones de padres después de eliminar
+  //       const updatedParentAssociations = parentAssociations.filter(parent => parent.id !== parentId);
+  //       setParentsAssociations(updatedParentAssociations);
+  //       console.log('Registro eliminado exitosamente');
+  
+  //       // Actualizar la lista de padres no asociados después de eliminar
+  //       await fetchUnassociatedParents(parentId);
+  //       await fetchStudents();
+
+  //       console.log(parentId);
+  //       //console.log(fetchUnassociatedParents(parentId));
+  //       //console.log(fetchStudents());
+  
+  //       // Mostrar un mensaje de éxito
+  //       Swal.fire(
+  //         '¡Eliminado!',
+  //         'El registro del padre asociado ha sido eliminado correctamente.',
+  //         'success'
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error('Error al eliminar el registro:', error);
+  //   } finally {
+  //     // setDeletingParentId(null);
+  //     setDeletingParent(false);
+  //   }
+  // };
+
+
+  // const handleDeleteParent = async (parentId: number) => {
+  //   try {
+  //     // Realizar la solicitud para eliminar el registro utilizando el servicio
+  //     await ParentAssociationService.deleteParentAssociation(parentId);
+  //     // Actualizar la lista de asociaciones de padres después de eliminar
+  //     const updatedParentAssociations = parentAssociations.filter(parent => parent.id !== parentId);
+  //     setParentsAssociations(updatedParentAssociations);
+  //     console.log('Registro eliminado exitosamente');
+  //     // Actualizar la lista de padres no asociados después de eliminar
+  //     await fetchUnassociatedParents();
+  //     await fetchStudents();
+  //   } catch (error) {
+  //     console.error('Error al eliminar el registro:', error);
+  //   }
+  // };
+  
+  // const handleDeleteParent = async (parent: ParentAssociation) => {
+  //   // Verifica si selectedParentStudent es null
+  //   if (!selectedParentStudent) {
+  //     console.error('No se ha seleccionado ningún estudiante.');
+  //     return;
+  //   }
+  
+  //   try {
+  //     // Guardar el padre seleccionado
+  //     //await saveSelectedParent(selectedParentStudent.id, parent.id);
+  //     await ParentAssociationService.deleteParentAssociation(parent.id);
+  
+  //     // Actualizar la lista de padres asociados
+  //     // const updatedParentAssociations = await ParentAssociationService.getUsersWithParentAssociations(selectedParentStudent.id);
+  //     // setParentsAssociations(updatedParentAssociations);
+  //     const updatedParentAssociations = parentAssociations.filter(p => p.id !== parent.id);
+  //     setParentsAssociations(updatedParentAssociations);
+  //     console.log('Registro eliminado exitosamente');
+  //     // Actualizar la lista de padres no asociados
+  //     await fetchUnassociatedParents(selectedParentStudent.id);
+  //     await fetchStudents();
+  
+  
+  //   } catch (error) {
+  //     console.error('Error al seleccionar el padre:', error);
+  //   }
+  // };
+
+  const handleDeleteParent = async (parent: ParentAssociation) => {
+    if (!selectedParentStudent) {
+      console.error('No se ha seleccionado ningún estudiante.');
+      return;
+    }
     try {
-      // Realizar la solicitud para eliminar el registro utilizando el servicio
-      await ParentAssociationService.deleteParentAssociation(parentId);
-      // Actualizar la lista de asociaciones de padres después de eliminar
-      const updatedParentAssociations = parentAssociations.filter(parent => parent.id !== parentId);
-      setParentsAssociations(updatedParentAssociations);
-      console.log('Registro eliminado exitosamente');
-      // Actualizar la lista de padres no asociados después de eliminar
-      await fetchUnassociatedParents(parentId);
-      await fetchStudents();
+      setDeletingParentId(parent.id);
+      setDeletingParent(true);
+  
+      // Mostrar la alerta de confirmación
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción eliminará el padre asociado.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminarlo'
+      });
+  
+      // Si el usuario confirma la eliminación
+      if (result.isConfirmed) {
+        // Realizar la solicitud para eliminar el registro utilizando el servicio
+        await ParentAssociationService.deleteParentAssociation(parent.id);
+  
+        // Actualizar la lista de padres asociados
+        // const updatedParentAssociations = await ParentAssociationService.getUsersWithParentAssociations(selectedParentStudent.id);
+        // setParentsAssociations(updatedParentAssociations);
+        const updatedParentAssociations = parentAssociations.filter(p => p.id !== parent.id);
+        setParentsAssociations(updatedParentAssociations);
+        console.log('Registro eliminado exitosamente');
+        // Actualizar la lista de padres no asociados
+        await fetchUnassociatedParents(selectedParentStudent.id);
+        await fetchStudents();
+  
+        // Mostrar una alerta de éxito después de que se complete la eliminación
+        Swal.fire(
+          'Eliminado',
+          'El padre asociado ha sido eliminado correctamente.',
+          'success'
+        );
+      }
     } catch (error) {
       console.error('Error al eliminar el registro:', error);
+      // Mostrar una alerta de error si ocurre algún problema durante la eliminación
+      Swal.fire(
+        'Error',
+        'Se produjo un error al eliminar el padre asociado.',
+        'error'
+      );
+    }
+    finally {
+      setDeletingParentId(null);
+      setDeletingParent(false);
     }
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
 
   const fetchParents = async () => {
     try {
@@ -364,6 +645,7 @@ const fetchUnassociatedParents = async (studentId: number) => {
           <tr>
           <th>ID del asociacion</th>
             <th>ID del padre</th>
+            <th>ID del estudiante</th>
             <th>Nombre del padre</th>
             <th>Accion</th>
           </tr>
@@ -373,10 +655,31 @@ const fetchUnassociatedParents = async (studentId: number) => {
             <tr key={index}>
               <td>{parent.id}</td>
               <td>{parent.parentid}</td>
+              <td>{parent.studentid}</td>
               <td>{parent.firstName} {parent.lastName}</td>
-              <td><Button variant="danger" onClick={() => handleDeleteParent(parent.id)}>Eliminar</Button></td>
+              <td>     
+                
+                <Button
+                  variant="danger"
+                  onClick={() => handleDeleteParent(parent)}
+                  disabled={deletingParentId === parent.id}
+                >
+                  {deletingParentId === parent.id && (
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      style={{ marginRight: '5px' }}
+                    />
+                  )}
+                  {deletingParentId === parent.id ? 'Eliminando...' : 'Eliminar'}
+                </Button>
+              </td>
             </tr>
           ))}
+          
         </tbody>
       </Table>
     ) : (
@@ -485,15 +788,39 @@ const fetchUnassociatedParents = async (studentId: number) => {
                       <tr key={index}>
                         <td>{parent.firstName} {parent.lastName}</td>
                         <td>
-                          <Button
-                            variant="primary"
-                            onClick={() => handleSelectParent(parent)}
-                            style={{
-                              backgroundColor: selectedParents.some(p => p.id === parent.id) ? 'red' : null
-                            }}
-                          >
-                            {selectedParents.some(p => p.id === parent.id) ? 'Eliminar' : 'Seleccionar'}
-                          </Button>
+                        <Button
+                          variant="primary"
+                          onClick={() => handleSelectParent(parent)}
+                          disabled={selectingParentId === parent.id}
+                        >
+                          {selectingParentId === parent.id && (
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      style={{ marginRight: '5px' }}
+                    />
+                  )}
+                  {selectingParentId === parent.id ? 'Asignando...' : 'Asignar'}
+                        </Button>
+
+                        
+
+
+
+                        
+
+
+
+
+
+
+
+
+
+
                         </td>
                       </tr>
                     ))}
@@ -534,7 +861,7 @@ const fetchUnassociatedParents = async (studentId: number) => {
 
 
 
-        <Modal show={showParentAssociationModal} onHide={handleParentAssociationModalClose} dialogClassName="modal-xl">
+        {/* <Modal show={showParentAssociationModal} onHide={handleParentAssociationModalClose} dialogClassName="modal-xl">
   <Modal.Header closeButton>
     <Modal.Title>Asociar padre al estudiante {selectedParentStudent && `${selectedParentStudent.firstName} ${selectedParentStudent.lastName}`}</Modal.Title>
   </Modal.Header>
@@ -569,7 +896,7 @@ const fetchUnassociatedParents = async (studentId: number) => {
   <Modal.Footer>
     <Button variant="secondary" onClick={handleParentAssociationModalClose}>Cerrar</Button>
   </Modal.Footer>
-</Modal>
+</Modal> */}
 
       </div>
     </div>

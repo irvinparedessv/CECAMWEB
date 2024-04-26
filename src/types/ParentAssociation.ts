@@ -3,6 +3,7 @@ export interface ParentAssociation {
     firstName: string;
     lastName: string;
     parentid: number;
+    studentid: number;
     // studentId: number;
   }
 
