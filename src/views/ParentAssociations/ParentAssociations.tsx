@@ -59,6 +59,8 @@ const currentItems = unassociatedParents.slice(indexOfFirstItem, indexOfLastItem
 // Calcula el número total de páginas
 const totalPages = Math.ceil(unassociatedParents.length / itemsPerPage);
 
+
+
 // Función para cambiar a la página anterior
 const goToPreviousPage = () => {
   setCurrentPage((prevPage) => prevPage - 1);
@@ -657,11 +659,13 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
             <div className="container">
 
               <div>
-                  <h1>Padres asociados a este estudiante</h1>
+                  
                   {loading ? (
       <p>Cargando asociaciones de padres...</p>
     ) : parentAssociations.length > 0 ? (
-      <Table striped bordered hover>
+      <>
+      <h1>Padres asociados al estudiante</h1>
+        <Table striped bordered hover>
         <thead>
           <tr>
           <th>ID del asociacion</th>
@@ -675,8 +679,8 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
           {parentAssociations.map((parent, index) => (
             <tr key={index}>
               <td>{parent.id}</td>
-              <td>{parent.parentid}</td>
-              <td>{parent.studentid}</td>
+              <td>{parent.parentId}</td>
+              <td>{parent.studentId}</td>
               <td>{parent.firstName} {parent.lastName}</td>
               <td>     
 
@@ -703,24 +707,29 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
           
         </tbody>
       </Table>
+      </>
+
+      
     ) : (
-      <p>Este estudiante no tiene padres asociados.</p>
+      // <div className="alert alert-info text-center" role="alert">
+      //   <h4 className="alert-heading">Información!</h4>
+      //   <p>Este estudiante no tiene padres asociados.</p>
+      // </div>
+
+<div className="alert alert-warning text-center" role="alert">
+<h4 className="alert-heading">Advertencia!</h4>
+<p>Este estudiante no tiene padres asociados.</p>
+</div>
+
+      
+
     )}
                                   
                     
               </div>
 
 
-              <h1>Listado de padres</h1>
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <Form.Control
-                  type="text"
-                  placeholder="Buscar..."
-                  value={filterValueParent}
-                  onChange={(e) => setFilterValueParent(e.target.value)}
-                  style={{ width: '400px' }}
-                />
-              </div>
+              
 
 
 
@@ -786,6 +795,20 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
             
             
             <div>
+
+              <h1>Listado de padres</h1>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <Form.Control
+                  type="text"
+                  placeholder="Buscar..."
+                  value={filterValueParent}
+                  onChange={(e) => setFilterValueParent(e.target.value)}
+                  style={{ width: '400px' }}
+                />
+              </div>
+
+
+
             <Table striped bordered hover>
               <thead>
                 <tr>
@@ -839,7 +862,15 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
           </div>
           
         ) : (
-      <p>No se pueden asociar mas padres a este estudiante.</p>
+          <div className="alert alert-warning text-center" role="alert">
+  <h4 className="alert-heading">Advertencia</h4>
+  <p>Solo se pueden asociar 2 padres por estudiante.</p>
+</div>
+
+
+
+        
+
     )}
                
                {/* <h1>Padres Seleccionados</h1>

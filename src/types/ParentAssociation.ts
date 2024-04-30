@@ -2,8 +2,8 @@ export interface ParentAssociation {
     id: number;
     firstName: string;
     lastName: string;
-    parentid: number;
-    studentid: number;
+    parentId: number;
+    studentId: number;
     // studentId: number;
   }
 
