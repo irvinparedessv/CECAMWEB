@@ -761,7 +761,7 @@ const fetchUnassociatedParents = async (studentId: number) => {
 
                 {loading ? (
             <p>Cargando padres no asociados...</p>
-          ) : unassociatedParents.length > 2 ? (
+          ) : parentAssociations.length < 2 ? (
             
             <Table striped bordered hover>
               <thead>

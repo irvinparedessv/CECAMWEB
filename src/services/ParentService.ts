@@ -45,7 +45,7 @@ const ParentService = {
   },
   deleteUser: async (userId: number) => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/users/${userId}`);
+      const response = await axios.delete(`${API_BASE_URL}/usersParent/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Error al eliminar usuario:', error);
