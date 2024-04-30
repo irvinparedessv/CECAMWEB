@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import StudentService from '../../services/StudentService';
 import ParentService from '../../services/ParentService';
-import { Student, Count } from '../../types';
+import { Student, Count, ParentsAssociationNames } from '../../types';
 import { Rol } from '../../types/Rol';
 import { Parent } from '../../types/Parent';
 import { ParentAssociation } from '../../types';
@@ -22,7 +22,9 @@ const ParentAssociations = () => {
   const [showAddParentModal, setShowAddParentModal] = useState(false);
   // const [showParentAssociationModal, setShowParentAssociationModal] = useState(false);
 
-  const [selectedParentStudent, setSelectedParentStudent] = useState<Count | null>(null);
+  const [selectedParentStudent, setSelectedParentStudent] = useState<ParentsAssociationNames | null>(null);
+
+  
   const [parents, setParents] = useState<Parent[]>([]);
   const [parentAssociations, setParentsAssociations] = useState<ParentAssociation[]>([]);
   const [filterValueParent, setFilterValueParent] = useState('');
@@ -33,7 +35,7 @@ const ParentAssociations = () => {
 // Estado para almacenar los padres seleccionados
 const [selectedParents, setSelectedParents] = useState<ParentAssociation[]>([]);
 
-const [counts, setCounts] = useState<Count[]>([]);
+const [parentsAssociationNames, setParentsAssociationNames] = useState<ParentsAssociationNames[]>([]);
 
 const [deletingParentId, setDeletingParentId] = useState<number | null>(null);
 const [deletingParent, setDeletingParent] = useState(false);
@@ -223,7 +225,7 @@ const fetchUnassociatedParents = async (studentId: number) => {
     try {
       //const studentList = await ParentAssociationService.getAllUsers();
       const studentList = await ParentAssociationService.getAllUsers();
-      setCounts(studentList);
+      setParentsAssociationNames(studentList);
       //const filteredStudents = studentList.filter(student => student.rolId === 1);
       //setStudents();
     } catch (error) {
@@ -243,7 +245,7 @@ const fetchUnassociatedParents = async (studentId: number) => {
   
 
   const handleAddParentModalShow = async (studentId: number) => {
-    const selectedStudent = counts.find(student => student.id === studentId);
+    const selectedStudent = parentsAssociationNames.find(student => student.id === studentId);
     //console.log(selectedStudent);
     setSelectedParentStudent(selectedStudent || null);
     if (selectedStudent) {
@@ -600,19 +602,35 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
           <thead>
             <tr>
               <th>Nombre del estudiante</th>     
-              <th>Padres</th>
+              {/* <th>Padres</th> */}
+              <th>Nombre de Padres</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {counts
+            {parentsAssociationNames
               .filter((student) =>
-                student.firstName.toLowerCase().includes(filterValue.toLowerCase())
+                student.studentName.toLowerCase().includes(filterValue.toLowerCase())
               )
               .map((student, index) => (
                 <tr key={index}>
-                  <td>{student.firstName} {student.lastName}</td>
-                  <td>{student.padres}</td>
+                  <td>{student.studentName} {student.studentLastName}</td>
+                  {/* <td>{student.padres}</td> */}
+                  <td>
+                    
+                    {student.padres === 0 ? (
+                      <div style={{ color: 'gray', fontStyle: 'italic' }}>
+                      (no se han asociado padres)
+                    </div>
+                    ) : (
+                      <>
+                        {student.parentsName.split('\n').map((name, index) => (
+                      <div key={index}>{name}</div>
+                    ))}
+                      </>
+                    )}
+                  </td>
+                  
                   <td>
                     <Button variant="success" onClick={() => handleAddParentModalShow(student.id)}>Agregar padre</Button>
                     {/* <Button variant="success" onClick={() => handleManageParents(student.id)}>Gestionar padres</Button> */}
@@ -646,7 +664,7 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
                 <small>
                 <strong>
                   <span style={{ color: 'red' }}>
-                    {selectedParentStudent.firstName} {selectedParentStudent.lastName}
+                    {selectedParentStudent.studentName} {selectedParentStudent.studentLastName}
                   </span>
                 </strong>
               </small>

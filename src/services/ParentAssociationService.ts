@@ -1,12 +1,12 @@
 import axios from 'axios';
 import API_BASE_URL from './apiConfig';
-import { Parent, ParentAssociation, Student, Count } from '../types';
+import { Parent, ParentAssociation, Student, Count, ParentsAssociationNames } from '../types';
 import { User } from '../types';
 
 const ParentAssociationService = {
   getAllUsers: async () => {
     try {
-      const response = await axios.get<Count[]>(`${API_BASE_URL}/parentAssociations`);
+      const response = await axios.get<ParentsAssociationNames[]>(`${API_BASE_URL}/parentAssociations`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener usuarios:', error);

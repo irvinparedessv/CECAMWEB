@@ -13,3 +13,11 @@ export interface Count{
   lastName: string;
   padres: number;
 }
+
+export interface ParentsAssociationNames{
+  id: number;
+  studentName: string;
+  studentLastName: string;
+  parentsName: string;
+  padres: number;
+}
