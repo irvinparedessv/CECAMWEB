@@ -59,10 +59,39 @@ const StudentService = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error al eliminar usuario:', error);
+      console.error('Error al actualizar usuario:', error);
       throw error;
     }
   },
+
+  updateParentsEnabled: async (studentId:number, parentIds: number[], newEnabledValue: boolean) => {
+    try {
+      // Agregar console.log para verificar los datos antes de enviar la solicitud
+      //console.log('parentIds:', parentIds);
+      //console.log('newEnabledValue:', newEnabledValue);
+  
+      const response = await axios.put(`${API_BASE_URL}/users/${studentId}/parentsEnabled`, {
+        parentIds: parentIds,
+        enabled: newEnabledValue,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar usuario:', error);
+      throw error;
+    }
+  },
+  
+  
+
+  getParentsWithSingleActiveChild: async (studentId: number) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/students/${studentId}/parentsWithSingleActiveChild`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener padres con un solo hijo activo:', error);
+      throw error;
+    }
+  }
   
 };
 

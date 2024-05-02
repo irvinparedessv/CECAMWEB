@@ -10,4 +10,9 @@ export interface Student {
   rolId: number;
 }
 
+export interface ParentsData {
+  id: number;
+  padre_nombre: string;
+}
+
 

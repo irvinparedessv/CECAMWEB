@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import StudentService from '../../services/StudentService';
-import { Student } from '../../types';
+import { ParentsData, Student } from '../../types';
 import { Rol } from '../../types/Rol';
 import Swal from 'sweetalert2';
 import { Spinner } from 'react-bootstrap';
@@ -24,6 +24,12 @@ const Students = () => {
   const [deletingStudentId, setDeletingStudentId] = useState<number | null>(null);
   const [deletingStudent, setDeletingStudent] = useState(false);
   const [filterValue, setFilterValue] = useState('');
+
+  const [parentsData, setParentsData] = useState<ParentsData[]>([]);
+
+
+
+
   useEffect(() => {
     fetchStudents();
     fetchRoles();
@@ -83,25 +89,123 @@ const Students = () => {
 
 
 
+  // const handleUpdateEnabled = async (studentId: number, newEnabledValue: boolean) => {
+  //   try {
+      
+      
+  //     // Obtener los padres con un solo hijo activo
+  //     const parentData = await StudentService.getParentsWithSingleActiveChild(studentId);
+
+  //     //SI SE PONE ESTO ANTES DE ARRUINA
+  //     // Actualizar el estado del estudiante
+  //     await StudentService.updateEnabled(studentId, newEnabledValue);
+  
+  //     // Procesar los datos de los padres (por ejemplo, mostrarlos en la consola)
+  //     console.log('Padres con un solo hijo activo:', parentData);
+  
+  //     // Actualizar la lista de estudiantes
+  //     fetchStudents();
+  
+  //     // Mostrar un mensaje de éxito
+  //     Swal.fire(
+  //       'Actualizado',
+  //       'El estado del estudiante ha sido actualizado correctamente.',
+  //       'success'
+  //     );
+  //   } catch (error) {
+  //     // Manejar errores
+  //     console.error('Error al actualizar el estado del estudiante:', error);
+  //     Swal.fire(
+  //       'Error',
+  //       'Se produjo un error al actualizar el estado del estudiante.',
+  //       'error'
+  //     );
+  //   }
+  // };
+  
+
+
   const handleUpdateEnabled = async (studentId: number, newEnabledValue: boolean) => {
     try {
-      await StudentService.updateEnabled(studentId, newEnabledValue);
-      fetchStudents();
-      Swal.fire(
-        'Actualizado',
-        'El estado del estudiante ha sido actualizado correctamente.',
-        'success'
-      );
+        // Obtener los datos de los padres con un solo hijo activo
+        const parentsData: ParentsData[] = await StudentService.getParentsWithSingleActiveChild(studentId);
+
+        // Construir el mensaje de confirmación
+        let action = newEnabledValue ? 'activar' : 'desactivar';
+        let message = `¿Está seguro de que desea ${action} a este estudiante?`;
+
+        // Obtener los IDs de los padres
+        const parentIds = parentsData.map(parent => parent.id);
+
+        // Si hay padres, agregar sus nombres al mensaje
+        if (parentsData && parentsData.length > 0) {
+            // Construir el mensaje con los nombres e IDs de los padres
+            message += '\n\nLos siguientes padres también se ';
+            message += newEnabledValue ? 'activarán' : 'desactivarán';
+            message += ':\n';
+            parentsData.forEach((parent: ParentsData) => {
+                const { id, padre_nombre } = parent;
+                message += `- ID del padre: ${id}, Nombre del padre: ${padre_nombre}\n`;
+            });
+            message += '\n¿Desea continuar?';
+        }
+
+        // Mostrar el Swal de confirmación
+        const result = await Swal.fire({
+            title: 'Confirmación',
+            text: message,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+        });
+
+        // Si el usuario confirma, actualizar el estado del estudiante
+        if (result.isConfirmed) {
+
+          console.log('Padres a activar:', parentsData);
+
+          if (parentsData && parentsData.length > 0) {
+            //SOLO SI LA CONSULTA ME DEVUEVLE UN PADRE, EJECUTA EL METODO Y LO DESACTIVA
+            await StudentService.updateParentsEnabled(studentId, parentIds, newEnabledValue);
+          }
+          
+            
+
+
+
+            await StudentService.updateEnabled(studentId, newEnabledValue);
+
+            // Actualizar la lista de estudiantes
+            fetchStudents();
+
+            // Mostrar un mensaje de éxito
+            Swal.fire(
+                'Actualizado',
+                `El estado del estudiante ha sido ${newEnabledValue ? 'activado' : 'desactivado'} correctamente.`,
+                'success'
+            );
+        } else {
+            console.log('Se canceló la acción.');
+        }
     } catch (error) {
-      console.error('Error al actualizar el estado del estudiante:', error);
-      Swal.fire(
-        'Error',
-        'Se produjo un error al actualizar el estado del estudiante.',
-        'error'
-      );
+        // Manejar errores
+        console.error('Error al actualizar el estado del estudiante:', error);
+        Swal.fire(
+            'Error',
+            'Se produjo un error al actualizar el estado del estudiante.',
+            'error'
+        );
     }
-  };
-  
+};
+
+
+
+
+
+
+
+
   
 
 
