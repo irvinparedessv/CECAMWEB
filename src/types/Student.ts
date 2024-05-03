@@ -13,6 +13,7 @@ export interface Student {
 export interface ParentsData {
   id: number;
   padre_nombre: string;
+  padre_apellido: string;
 }
 
 

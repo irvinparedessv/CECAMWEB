@@ -127,43 +127,65 @@ const Students = () => {
 
   const handleUpdateEnabled = async (studentId: number, newEnabledValue: boolean) => {
     try {
-        // Obtener los datos de los padres con un solo hijo activo
-        const parentsData: ParentsData[] = await StudentService.getParentsWithSingleActiveChild(studentId);
+      // Obtener los datos de los padres con un solo hijo activo
+      const parentsData: ParentsData[] = await StudentService.getParentsWithSingleActiveChild(studentId);
 
-        // Construir el mensaje de confirmación
-        let action = newEnabledValue ? 'activar' : 'desactivar';
-        let message = `¿Está seguro de que desea ${action} a este estudiante?`;
+      // Construir el mensaje de confirmación
+      let action = newEnabledValue ? 'activar' : 'desactivar';
+      let message = `<br><b>¿Está seguro de que desea ${action} a este estudiante?</b><br>`;
 
-        // Obtener los IDs de los padres
-        const parentIds = parentsData.map(parent => parent.id);
+      // Obtener los IDs de los padres
+      const parentIds = parentsData.map(parent => parent.id);
 
-        // Si hay padres, agregar sus nombres al mensaje
-        if (parentsData && parentsData.length > 0) {
-            // Construir el mensaje con los nombres e IDs de los padres
-            message += '\n\nLos siguientes padres también se ';
-            message += newEnabledValue ? 'activarán' : 'desactivarán';
-            message += ':\n';
-            parentsData.forEach((parent: ParentsData) => {
-                const { id, padre_nombre } = parent;
-                message += `- ID del padre: ${id}, Nombre del padre: ${padre_nombre}\n`;
-            });
-            message += '\n¿Desea continuar?';
-        }
-
-        // Mostrar el Swal de confirmación
-        const result = await Swal.fire({
-            title: 'Confirmación',
-            text: message,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí',
-            cancelButtonText: 'Cancelar',
+      // Si hay padres, agregar sus nombres al mensaje
+      if (parentsData && parentsData.length === 1) {
+        // Construir el mensaje con los nombres e IDs de los padres
+        message += '\n\n<br>Tenga en cuenta que al desactivar al estudiante, también se ';
+        message += newEnabledValue ? 'activará' : 'desactivará';
+        message += ' el siguiente padre asociado: ';
+    
+        parentsData.forEach((parent: ParentsData) => {
+            const { padre_nombre, padre_apellido } = parent;
+            message += `<span style="color: blue; text-decoration: underline;"><br><br><b>${padre_nombre} ${padre_apellido}.</b></span><br>\n`;
         });
+        message += '\n<br><span style="color: orange;"><b>¿Desea continuar?</b></span></br>';
+    } else if (parentsData && parentsData.length > 1) {
+          // Construir el mensaje con los nombres e IDs de los padres
+          // message += '\n\nLos siguientes padres también se ';
+          // message += newEnabledValue ? 'activarán' : 'desactivarán';
+          // message += ':\n';
+          // parentsData.forEach((parent: ParentsData) => {
+          //     const { padre_nombre, padre_apellido } = parent;
+          //     message += `<b>${padre_nombre} ${padre_apellido}</b>\n`;
+          // });
+          // message += '\n¿Desea continuar?<br>';
+          message += '\n\n<br>Tenga en cuenta que al desactivar al estudiante, también se ';
+          message += newEnabledValue ? 'activarán' : 'desactivarán';
+          message += ' los siguientes padres asociados: <br><br>';
+      
+          parentsData.forEach((parent: ParentsData) => {
+              const { padre_nombre, padre_apellido } = parent;
+              message += `<span style="color: blue; text-decoration: underline;"><b>${padre_nombre} ${padre_apellido}.</b></span><br>\n`;
+          });
+          message += '\n<br><span style="color: orange;"><b>¿Desea continuar?</b></span></br>';
+      }
+
+      // Mostrar el Swal de confirmación
+        const confirmResult = await Swal.fire({
+          title: 'Advertencia',
+          html: message,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí',
+          cancelButtonText: 'Cancelar',
+      });
+
+        
 
         // Si el usuario confirma, actualizar el estado del estudiante
-        if (result.isConfirmed) {
+        if (confirmResult.isConfirmed) {
 
-          console.log('Padres a activar:', parentsData);
+          //console.log('Padres a activar:', parentsData);
 
           if (parentsData && parentsData.length > 0) {
             //SOLO SI LA CONSULTA ME DEVUEVLE UN PADRE, EJECUTA EL METODO Y LO DESACTIVA
