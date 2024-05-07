@@ -24,9 +24,16 @@ const Students = () => {
   const [deletingStudentId, setDeletingStudentId] = useState<number | null>(null);
   const [deletingStudent, setDeletingStudent] = useState(false);
   const [filterValue, setFilterValue] = useState('');
+  const [updatingStudentId, setUpdatingStudentId] = useState<number | null>(null);
+  const [updatingStudent, setUpdatingStudent] = useState(false);
+
 
   const [parentsData, setParentsData] = useState<ParentsData[]>([]);
-
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: ''
+  });
 
 
 
@@ -127,6 +134,8 @@ const Students = () => {
 
   const handleUpdateEnabled = async (studentId: number, newEnabledValue: boolean) => {
     try {
+      setUpdatingStudentId(studentId);
+      setUpdatingStudent(true);
       // Obtener los datos de los padres con un solo hijo activo
       const parentsData: ParentsData[] = await StudentService.getParentsWithSingleActiveChild(studentId);
 
@@ -140,7 +149,9 @@ const Students = () => {
       // Si hay padres, agregar sus nombres al mensaje
       if (parentsData && parentsData.length === 1) {
         // Construir el mensaje con los nombres e IDs de los padres
-        message += '\n\n<br>Tenga en cuenta que al desactivar al estudiante, también se ';
+        message += '\n\n<br>Tenga en cuenta que al ';
+        message += newEnabledValue ? 'activar' : 'desactivar';
+        message += ' al estudiante, también se  ';
         message += newEnabledValue ? 'activará' : 'desactivará';
         message += ' el siguiente padre asociado: ';
     
@@ -159,9 +170,13 @@ const Students = () => {
           //     message += `<b>${padre_nombre} ${padre_apellido}</b>\n`;
           // });
           // message += '\n¿Desea continuar?<br>';
-          message += '\n\n<br>Tenga en cuenta que al desactivar al estudiante, también se ';
-          message += newEnabledValue ? 'activarán' : 'desactivarán';
+
+          message += '\n\n<br>Tenga en cuenta que al ';
+          message += newEnabledValue ? 'activar' : 'desactivar';
+          message += ' al estudiante, también se  ';
+          message += newEnabledValue ? 'activará' : 'desactivará';
           message += ' los siguientes padres asociados: <br><br>';
+          
       
           parentsData.forEach((parent: ParentsData) => {
               const { padre_nombre, padre_apellido } = parent;
@@ -218,6 +233,9 @@ const Students = () => {
             'Se produjo un error al actualizar el estado del estudiante.',
             'error'
         );
+    }finally {
+      setUpdatingStudentId(null);
+      setUpdatingStudent(false);
     }
 };
 
@@ -253,16 +271,51 @@ const Students = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    let newValue = value;
+    let errorMessage = '';
+
+    // Validación de nombres y apellidos: permitir solo letras y espacios
+    if (name === 'firstName' || name === 'lastName') {
+      const regex = /^[a-zA-ZáéíóúÁÉÍÓÚ\s]*$/;
+      if (value !== "" && !regex.test(value)) {
+        newValue = newStudentData[name]; // Mantener el valor actual
+        errorMessage = 'Solo se permiten letras y espacios.';
+      }
+    }
+
+    if (name === 'email') {
+      const emailRegex = /^\S+@\S+\.\S+$/;
+      if (value !== "" && !emailRegex.test(value)) {
+        errorMessage = 'Ingrese un correo electrónico válido.';
+      }
+    }
+    
     setNewStudentData(prevState => {
       const updatedData = {
         ...prevState,
-        [name]: value,
+        [name]: newValue,
       };
+      
+      // Generar nombre de usuario si se actualiza el nombre o apellido
       if (name === 'firstName' || name === 'lastName') {
         updatedData.userName = generateUserName(updatedData.firstName, updatedData.lastName);
       }
+  
       return updatedData;
     });
+
+     if (name === 'email') {
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (value !== "" && !emailRegex.test(value)) {
+      errorMessage = 'Ingrese un correo electrónico válido.';
+    }
+  }
+  
+    // Actualizar estado de errores
+    setErrors(prevErrors => ({
+      ...prevErrors,
+      [name]: errorMessage
+    }));
   };
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -275,23 +328,45 @@ const Students = () => {
 
   const handleAddStudent = async () => {
     try {
+      // Verificar campos obligatorios
+      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email || !newStudentData.password) {
+        return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+      }
+  
+      // Guardar el estudiante
       await StudentService.insertUser(newStudentData);
       setShowAddModal(false);
       fetchStudents();
+  
+      // Mostrar una alerta de éxito
+      Swal.fire('Éxito', 'El estudiante ha sido agregado correctamente.', 'success');
     } catch (error) {
       console.error('Error al insertar estudiante:', error);
+      Swal.fire('Error', 'Se produjo un error al intentar agregar el estudiante.', 'error');
     }
   };
 
   const handleUpdateStudent = async () => {
     try {
+      // Verificar campos obligatorios
+      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email || !newStudentData.password) {
+        return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+      }
+  
+      // Actualizar el padre
       if (selectedStudentId !== null) {
         await StudentService.updateUser(selectedStudentId, newStudentData);
         setShowAddModal(false);
         fetchStudents();
+
+        // Mostrar una alerta de éxito
+        Swal.fire('Éxito', 'Los cambios han sido guardados correctamente.', 'success');
       }
+        
+      
     } catch (error) {
       console.error('Error al actualizar estudiante:', error);
+      Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
     }
   };
 
@@ -401,13 +476,30 @@ const Students = () => {
       <td>{student.email}</td>
       <td>{student.firstName} {student.lastName}</td>
       <td>{student.enabled ? 'Activo' : 'Inactivo'}</td>
-      <td>
+        <td>
         <Button
+            variant="secondary"
+            onClick={() => handleUpdateEnabled(student.id, !student.enabled)}
+            disabled={updatingStudentId === student.id}
+          >
+            {updatingStudentId === student.id && (
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+                style={{ marginRight: '5px' }}
+              />
+            )}
+            {updatingStudentId === student.id ? 'Actualizando...' : (student.enabled ? 'Desactivar' : 'Activar')}
+          </Button>
+        {/* <Button
           variant="secondary"
           onClick={() => handleUpdateEnabled(student.id, !student.enabled)}
         >
           {student.enabled ? 'Desactivar' : 'Activar'}
-        </Button>
+        </Button> */}
         <Button
           variant="danger"
           onClick={() => handleDeleteStudent(student)}
@@ -464,7 +556,7 @@ const Students = () => {
                 <Form.Label>Usuario</Form.Label>
                 <Form.Control type="text" name="userName" disabled={true} value={newStudentData.userName} onChange={handleInputChange} />
               </Form.Group>
-              <Form.Group controlId="formEnabled">
+              {/* <Form.Group controlId="formEnabled">
                 <Form.Label>Estado</Form.Label>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <Form.Check
@@ -487,7 +579,7 @@ const Students = () => {
                     onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: false }))}
                   />
                 </div>
-              </Form.Group>
+              </Form.Group> */}
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
                 <Form.Control as="select" disabled={true} name="rolId" value={newStudentData.rolId} onChange={handleRoleChange}>

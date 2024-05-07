@@ -4,15 +4,17 @@ export interface ParentAssociation {
     lastName: string;
     parentId: number;
     studentId: number;
+    enabled: boolean;
+
     // studentId: number;
   }
 
-export interface Count{
-  id: number;
-  firstName: string;
-  lastName: string;
-  padres: number;
-}
+// export interface Count{
+//   id: number;
+//   firstName: string;
+//   lastName: string;
+//   padres: number;
+// }
 
 export interface ParentsAssociationNames{
   id: number;

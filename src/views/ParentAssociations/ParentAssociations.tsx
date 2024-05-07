@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import StudentService from '../../services/StudentService';
 import ParentService from '../../services/ParentService';
-import { Student, Count, ParentsAssociationNames } from '../../types';
+import { ParentsAssociationNames } from '../../types';
 import { Rol } from '../../types/Rol';
 import { Parent } from '../../types/Parent';
 import { ParentAssociation } from '../../types';
@@ -686,26 +686,22 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
         <Table striped bordered hover>
         <thead>
           <tr>
-          <th>ID del asociacion</th>
-            <th>ID del padre</th>
-            <th>ID del estudiante</th>
             <th>Nombre del padre</th>
+            <th>Estado</th>
             <th>Accion</th>
           </tr>
         </thead>
         <tbody>
           {parentAssociations.map((parent, index) => (
             <tr key={index}>
-              <td>{parent.id}</td>
-              <td>{parent.parentId}</td>
-              <td>{parent.studentId}</td>
               <td>{parent.firstName} {parent.lastName}</td>
+              <td>{parent.enabled ? 'Activo' : 'Inactivo'}</td>
               <td>     
 
                 <Button
                   variant="danger"
                   onClick={() => handleDeleteParent(parent)}
-                  disabled={isDeleteButtonDisabled(parent.id)}
+                  disabled={isDeleteButtonDisabled(parent.id) || deletingParentId === parent.id}
                 >
                   {deletingParentId === parent.id && (
                     <Spinner
@@ -853,7 +849,7 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
                       <Button
                         variant="btn btn-secondary"
                         onClick={() => handleSelectParent(parent)}
-                        disabled={isSelectButtonDisabled(parent.id)}
+                        disabled={isSelectButtonDisabled(parent.id) || selectingParentId === parent.id}
                       >
                         {selectingParentId === parent.id && (
                           <Spinner

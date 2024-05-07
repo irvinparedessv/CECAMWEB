@@ -1,7 +1,6 @@
 import axios from 'axios';
 import API_BASE_URL from './apiConfig';
-import { Parent, ParentAssociation, Student, Count, ParentsAssociationNames } from '../types';
-import { User } from '../types';
+import { ParentAssociation, ParentsAssociationNames } from '../types';
 
 const ParentAssociationService = {
   getAllUsers: async () => {

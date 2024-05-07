@@ -27,6 +27,13 @@ const Parents = () => {
 
   const [deletingParentId, setDeletingParentId] = useState<number | null>(null);
   const [deletingParent, setDeletingParent] = useState(false);
+  const [updatingParentId, setUpdatingParentId] = useState<number | null>(null);
+  const [updatingParent, setUpdatingParent] = useState(false);
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: ''
+  });
 
   useEffect(() => {
     fetchParents();
@@ -102,16 +109,51 @@ const Parents = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    let newValue = value;
+    let errorMessage = '';
+
+    // Validación de nombres y apellidos: permitir solo letras y espacios
+    if (name === 'firstName' || name === 'lastName') {
+      const regex = /^[a-zA-ZáéíóúÁÉÍÓÚ\s]*$/;
+      if (value !== "" && !regex.test(value)) {
+        newValue = newParentData[name]; // Mantener el valor actual
+        errorMessage = 'Solo se permiten letras y espacios.';
+      }
+    }
+
+    if (name === 'email') {
+      const emailRegex = /^\S+@\S+\.\S+$/;
+      if (value !== "" && !emailRegex.test(value)) {
+        errorMessage = 'Ingrese un correo electrónico válido.';
+      }
+    }
+    
     setNewParentData(prevState => {
       const updatedData = {
         ...prevState,
-        [name]: value,
+        [name]: newValue,
       };
+      
+      // Generar nombre de usuario si se actualiza el nombre o apellido
       if (name === 'firstName' || name === 'lastName') {
         updatedData.userName = generateUserName(updatedData.firstName, updatedData.lastName);
       }
+  
       return updatedData;
     });
+
+     if (name === 'email') {
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (value !== "" && !emailRegex.test(value)) {
+      errorMessage = 'Ingrese un correo electrónico válido.';
+    }
+  }
+  
+    // Actualizar estado de errores
+    setErrors(prevErrors => ({
+      ...prevErrors,
+      [name]: errorMessage
+    }));
   };
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -124,26 +166,46 @@ const Parents = () => {
 
   const handleAddParent = async () => {
     try {
+      // Verificar campos obligatorios
+      if (!newParentData.firstName || !newParentData.lastName || !newParentData.email || !newParentData.password) {
+        return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+      }
+  
+      // Guardar el padre
       await ParentService.insertUser(newParentData);
       setShowAddModal(false);
       fetchParents();
+  
+      // Mostrar una alerta de éxito
+      Swal.fire('Éxito', 'El padre ha sido agregado correctamente.', 'success');
     } catch (error) {
       console.error('Error al insertar padre:', error);
+      Swal.fire('Error', 'Se produjo un error al intentar agregar el padre.', 'error');
     }
   };
-
+  
   const handleUpdateParent = async () => {
     try {
+      // Verificar campos obligatorios
+      if (!newParentData.firstName || !newParentData.lastName || !newParentData.email || !newParentData.password) {
+        return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+      }
+  
+      // Actualizar el padre
       if (selectedParentId !== null) {
         await ParentService.updateUser(selectedParentId, newParentData);
         setShowAddModal(false);
         fetchParents();
+  
+        // Mostrar una alerta de éxito
+        Swal.fire('Éxito', 'Los cambios han sido guardados correctamente.', 'success');
       }
     } catch (error) {
       console.error('Error al actualizar padre:', error);
+      Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
     }
   };
-
+  
 
 
 
@@ -212,6 +274,55 @@ const Parents = () => {
 
 
 
+  const handleUpdateEnabled = async (parentId: number, newEnabledValue: boolean) => {
+    try {
+      setUpdatingParentId(parentId);
+      setUpdatingParent(true);
+      // Obtener los datos de los padres con un solo hijo activo
+
+      // Mostrar el Swal de confirmación
+        const confirmResult = await Swal.fire({
+          title: 'Advertencia',
+          text: '¿Está seguro de que desea desactivar a este padre?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí',
+          cancelButtonText: 'Cancelar',
+      });
+
+        
+
+        // Si el usuario confirma, actualizar el estado del estudiante
+        if (confirmResult.isConfirmed) {
+
+  
+            await ParentService.updateEnabled(parentId, newEnabledValue);
+
+            // Actualizar la lista de estudiantes
+            fetchParents();
+
+            // Mostrar un mensaje de éxito
+            Swal.fire(
+                'Actualizado',
+                `El estado del estudiante ha sido ${newEnabledValue ? 'activado' : 'desactivado'} correctamente.`,
+                'success'
+            );
+        } else {
+            console.log('Se canceló la acción.');
+        }
+    } catch (error) {
+        // Manejar errores
+        console.error('Error al actualizar el estado del estudiante:', error);
+        Swal.fire(
+            'Error',
+            'Se produjo un error al actualizar el estado del estudiante.',
+            'error'
+        );
+    }finally {
+      setUpdatingParentId(null);
+      setUpdatingParent(false);
+    }
+};
 
 
 
@@ -279,6 +390,23 @@ const Parents = () => {
                   <td>{parent.enabled ? 'Activo' : 'Inactivo'}</td>
                   <td>
                   <Button
+                    variant="secondary"
+                    onClick={() => handleUpdateEnabled(parent.id, !parent.enabled)}
+                    disabled={updatingParentId === parent.id}
+                  >
+                    {updatingParentId === parent.id && (
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        style={{ marginRight: '5px' }}
+                      />
+                    )}
+                    {updatingParentId === parent.id ? 'Actualizando...' : (parent.enabled ? 'Desactivar' : 'Activar')}
+                  </Button>
+                  <Button
                   variant="danger"
                   onClick={() => handleDeleteParent(parent)}
                   disabled={deletingParentId === parent.id}
@@ -310,7 +438,7 @@ const Parents = () => {
             <Form>
               <Form.Group controlId="formFirstName">
                 <Form.Label>Nombres</Form.Label>
-                <Form.Control type="text" name="firstName" value={newParentData.firstName} onChange={handleInputChange} />
+                <Form.Control type="text" name="firstName" value={newParentData.firstName}  onChange={handleInputChange} />
               </Form.Group>
               <Form.Group controlId="formLastName">
                 <Form.Label>Apellidos</Form.Label>
@@ -319,6 +447,7 @@ const Parents = () => {
               <Form.Group controlId="formEmail">
                 <Form.Label>Email</Form.Label>
                 <Form.Control type="email" name="email" value={newParentData.email} onChange={handleInputChange} />
+                {errors.email && <Form.Text className="text-danger">{errors.email}</Form.Text>}
               </Form.Group>
               <Form.Group controlId="formPassword">
                 <Form.Label>Password</Form.Label>
@@ -326,31 +455,13 @@ const Parents = () => {
               </Form.Group>
               <Form.Group controlId="formUserName">
                 <Form.Label>Usuario</Form.Label>
-                <Form.Control type="text" name="userName" disabled={true} value={newParentData.userName} onChange={handleInputChange} />
-              </Form.Group>
-              <Form.Group controlId="formEnabled">
-                <Form.Label>Estado</Form.Label>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Activo"
-                    checked={newParentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedParentId}
-                    onChange={() => setNewParentData(prevState => ({ ...prevState, enabled: true }))}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Inactivo"
-                    checked={!newParentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedParentId}
-                    onChange={() => setNewParentData(prevState => ({ ...prevState, enabled: false }))}
-                  />
-                </div>
+                <Form.Control
+                  type="text"
+                  name="userName"
+                  disabled={true}
+                  value={(newParentData.userName || '')}
+                  onChange={handleInputChange}
+                />
               </Form.Group>
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
