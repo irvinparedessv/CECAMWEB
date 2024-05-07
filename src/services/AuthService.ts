@@ -8,7 +8,7 @@ import { LoginResponse } from '../types';
 const AuthService = {
 loginUser: async (email: string, password: string): Promise<LoginResponse> => {
     try {
-      const response = await axios.post<LoginResponse>(`${API_BASE_URL}/login`, {
+      const response = await axios.post<LoginResponse>(`${API_BASE_URL}/login-web`, {
         email,
         password,
       });
