@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserGraduate, faClipboardList, faChalkboard, faStickyNote, faCommentAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUserGraduate, faClipboardList, faChalkboard, faStickyNote, faCommentAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 
 import './navbar.scss';
 
@@ -21,6 +21,18 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
             <Link to={"/students"} className="nav-link px-0 align-middle" >
               <FontAwesomeIcon icon={faChalkboard} className="me-2" />
               Estudiantes
+            </Link>
+          </li>
+          <li>
+            <Link to={"/parents"} className="nav-link px-0 align-middle" >
+              <FontAwesomeIcon icon={faChalkboard} className="me-2" />
+              Padres
+            </Link>
+          </li>
+          <li>
+            <Link to={"/parentAssociations"} className="nav-link px-0 align-middle" >
+              <FontAwesomeIcon icon={faChalkboard} className="me-2" />
+              Asociacion de padres
             </Link>
           </li>
           <li>
@@ -45,6 +57,12 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
             <Link to={"/notes"} className="nav-link px-0 align-middle" >
               <FontAwesomeIcon icon={faStickyNote} className="me-2" />
               Notas
+            </Link>
+          </li>
+          <li>
+            <Link to={"/rols"} className="nav-link px-0 align-middle" >
+              <FontAwesomeIcon icon={faUser} className="me-2" />
+              Roles
             </Link>
           </li>
           <li>

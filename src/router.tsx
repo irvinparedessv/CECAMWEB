@@ -1,24 +1,23 @@
-import React, { useState } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-  Outlet,
-} from "react-router-dom";
-import { Navbar } from "./components/Navbar";
-import { Register } from "./views/Register";
-import { GradeForm, GradeList, GradeEdit } from "./views/Grade";
-import { Subject } from "./views/Subject";
-import { Students } from "./views/Students";
-import { Attendance } from "./views/Attendance";
-import { Teacher } from "./views/Teacher";
-import { Observation } from "./views/Observations";
-import { MiGrade } from "./views/MiGrade";
-import { ReportGrade } from "./views/ReportGrade";
-import { Login } from "./views/Login";
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate, Outlet} from 'react-router-dom';
+import { Navbar } from './components/Navbar';
+import { Register } from './views/Register';
+import { Grade } from './views/Grade';
+import { Subject } from './views/Subject';
+import { Students } from './views/Students';
+import { Attendance } from './views/Attendance';
+import { Teacher } from './views/Teacher';
+import { Observation } from './views/Observations';
+import { MiGrade } from './views/MiGrade';
+import { ReportGrade } from './views/ReportGrade';
+import { Rols } from './views/Rols';
+import { Login } from './views/Login';
+import { Parents } from './views/Parents';
+import { ParentAssociations } from './views/ParentAssociations';
 import { Toaster } from "react-hot-toast";
+import { GradeForm, GradeList, GradeEdit } from "./views/Grade";
 import { StudentsGrade } from "./views/StudentsGrade";
+
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -70,7 +69,13 @@ const App = () => {
           {/* Public routes */}
           <Route path="/" element={<Login login={login} />} />
           <Route path="/login" element={<Login login={login} />} />
-          <Route element={<AuthGuard />}>
+          <Route path="/students" element={<Students />} />
+          <Route path="/rols" element={<Rols />} />
+          <Route path="/parents" element={<Parents />} />
+          <Route path="/parentAssociations" element={<ParentAssociations />} />
+
+          {/* Protected routes */}
+          <Route path="/" element={<AuthGuard />}>
             <Route path="/register-student" element={<Register />} />
 
             <Route path="/grades" element={<GradeList />} />
@@ -79,8 +84,7 @@ const App = () => {
             <Route path="/register-subjects" element={<Subject />} />
             <Route path="/register-teachers" element={<Teacher />} />
             <Route path="/subjects" element={<Subject />} />
-            <Route path="/grades/edit/:id" element={<GradeEdit />} />
-            <Route path="/students" element={<Students />} />
+            {/*<Route path="/students" element={<Students />} />*/}
             <Route path="/attendances" element={<Attendance />} />
             <Route
               path="/notes"
