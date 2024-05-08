@@ -9,6 +9,9 @@ import { ParentAssociation } from '../../types';
 import ParentAssociationService from '../../services/ParentAssociationService';
 import Swal from 'sweetalert2';
 import { Spinner } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+
 
 
 
@@ -45,11 +48,16 @@ const [selectingParentId, setSelectingParentId] = useState<number | null>(null);
 const [selectingParent, setSelectingParent] = useState(false);
 
 
+const [allItems, setAllItems] = useState([]);
+
+
+
+
 
 // Define el estado para el número de página actual
 const [currentPage, setCurrentPage] = useState(1);
 // Define la cantidad de elementos por página
-const itemsPerPage = 10;
+const itemsPerPage = 2;
 
 // Calcula el índice del primer elemento en la página actual
 const indexOfFirstItem = (currentPage - 1) * itemsPerPage;
@@ -61,17 +69,35 @@ const currentItems = unassociatedParents.slice(indexOfFirstItem, indexOfLastItem
 // Calcula el número total de páginas
 const totalPages = Math.ceil(unassociatedParents.length / itemsPerPage);
 
+// Calcula la lista de números de página
+const pageNumbers = [];
+for (let i = 1; i <= totalPages; i++) {
+  pageNumbers.push(i);
+}
 
-
-// Función para cambiar a la página anterior
+// Modifica la función para cambiar a la página anterior
 const goToPreviousPage = () => {
   setCurrentPage((prevPage) => prevPage - 1);
 };
 
-// Función para cambiar a la página siguiente
+// Modifica la función para cambiar a la página siguiente
 const goToNextPage = () => {
   setCurrentPage((prevPage) => prevPage + 1);
 };
+
+// Modifica la función para cambiar a una página específica
+const goToPage = (page: number) => {
+  setCurrentPage(page);
+};
+
+// Renderiza los números de página como botones
+const renderPageNumbers = pageNumbers.map((number) => (
+  <Button key={number} onClick={() => goToPage(number)} disabled={currentPage === number}>
+    {number}
+  </Button>
+));
+
+
 
 
 
@@ -831,47 +857,52 @@ const handleDeleteParent = async (parent: ParentAssociation) => {
                 </tr>
               </thead>
               <tbody>
-                {unassociatedParents.filter((parent) => {
-                  const fullName = `${parent.firstName} ${parent.lastName}`.toLowerCase();
-                  const firstName = parent.firstName.toLowerCase();
-                  const lastName = parent.lastName.toLowerCase();
-                  const searchValue = filterValueParent.toLowerCase();
-                  return (
-                    fullName.includes(searchValue) || 
-                    (firstName.includes(searchValue.split(' ')[0]) && lastName.includes(searchValue.split(' ')[1]))
-                  );
-                })
-
-                  .map((parent, index) => (
-                    <tr key={index}>
-                      <td>{parent.firstName} {parent.lastName}</td>
-                      <td>
-                      <Button
-                        variant="btn btn-secondary"
-                        onClick={() => handleSelectParent(parent)}
-                        disabled={isSelectButtonDisabled(parent.id) || selectingParentId === parent.id}
-                      >
-                        {selectingParentId === parent.id && (
-                          <Spinner
+              {currentItems
+    .filter((parent) => {
+        const fullName = `${parent.firstName} ${parent.lastName}`.toLowerCase();
+        const firstName = parent.firstName.toLowerCase();
+        const lastName = parent.lastName.toLowerCase();
+        const searchValue = filterValueParent.toLowerCase();
+        return (
+            fullName.includes(searchValue) ||
+            (firstName.includes(searchValue.split(' ')[0]) && lastName.includes(searchValue.split(' ')[1]))
+        );
+    })
+    .map((parent, index) => (
+        <tr key={index}>
+            <td>{parent.firstName} {parent.lastName}</td>
+            <td>
+                <Button
+                    variant="btn btn-secondary"
+                    onClick={() => handleSelectParent(parent)}
+                    disabled={isSelectButtonDisabled(parent.id) || selectingParentId === parent.id}
+                >
+                    {selectingParentId === parent.id && (
+                        <Spinner
                             as="span"
                             animation="border"
                             size="sm"
                             role="status"
                             aria-hidden="true"
                             style={{ marginRight: '5px' }}
-                          />
-                        )}
-                        {selectingParentId === parent.id ? 'Asignando...' : 'Asignar'}
+                        />
+                    )}
+                    {selectingParentId === parent.id ? 'Asignando...' : 'Asignar'}
                 </Button>
-                      </td>
-                    </tr>
-                  ))}
+            </td>
+        </tr>
+    ))}
+
               </tbody>
             </Table>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <Button onClick={goToPreviousPage} disabled={currentPage === 1}>Anterior</Button>
-              <span className="mx-2">Página {currentPage} de {totalPages}</span>
-              <Button onClick={goToNextPage} disabled={currentPage === totalPages}>Siguiente</Button>
+            <Button onClick={goToPreviousPage} disabled={currentPage === 1}>
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </Button>
+            {renderPageNumbers}
+            <Button onClick={goToNextPage} disabled={currentPage === totalPages}>
+              <FontAwesomeIcon icon={faChevronRight} />
+  </Button>
             </div>
           </div>
           
