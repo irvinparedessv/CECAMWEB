@@ -113,7 +113,7 @@ const StudentsGrade = () => {
         <tbody>
           {gradeStudent?.student.map((student) => (
             <tr key={student.id + "grade"}>
-              <td className="c_padding2">{student.name}</td>
+              <td className="c_padding2">{student.firstName}</td>
               <td className="c_padding2">{student.lastName}</td>
 
               <td>
@@ -159,7 +159,7 @@ const StudentsGrade = () => {
               <tbody>
                 {allStudents.map((student) => (
                   <tr key={student.id + "student"}>
-                    <td>{student.name}</td>
+                    <td>{student.firstName}</td>
                     <td>{student.lastName}</td>
                     <td>
                       <FormCheck

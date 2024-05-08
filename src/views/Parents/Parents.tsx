@@ -465,7 +465,7 @@ const Parents = () => {
               </Form.Group>
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
-                <Form.Control as="select" disabled={true} name="rolId" value={newParentData.rolId} onChange={handleRoleChange}>
+                <Form.Control as="select" disabled={true} name="rolId" value={newParentData.rolId} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>handleRoleChange}>
                   <option value="">Seleccionar Rol</option>
                   {roles.map((role, index) => (
                     <option key={index} value={role.rolId}>{role.roleName}</option>

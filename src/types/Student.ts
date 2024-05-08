@@ -1,4 +1,7 @@
 
+import { GeneralResponse } from "./General";
+import { GradeStudents } from "./Grade";
+
 export interface Student {
   id: number;
   userName: string;
@@ -8,6 +11,7 @@ export interface Student {
   lastName: string;
   enabled: boolean;
   rolId: number;
+  gradeId: number;
 }
 
 export interface ParentsData {
@@ -16,4 +20,10 @@ export interface ParentsData {
   padre_apellido: string;
 }
 
-
+export interface StudentsGradeResponse extends GeneralResponse {
+  data: GradeStudents;
+}
+ 
+export interface StudentsResponse extends GeneralResponse {
+  data: Student[];
+}

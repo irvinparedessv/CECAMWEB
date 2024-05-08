@@ -20,6 +20,7 @@ const Students = () => {
     lastName: '',
     enabled: true,
     rolId: 1,
+    gradeId: 1,
   });
   const [deletingStudentId, setDeletingStudentId] = useState<number | null>(null);
   const [deletingStudent, setDeletingStudent] = useState(false);
@@ -77,6 +78,7 @@ const Students = () => {
           lastName: selectedStudent.lastName,
           enabled: selectedStudent.enabled,
           rolId: selectedStudent.rolId,
+          gradeId: 1,
         });
       }
     } else {
@@ -89,6 +91,7 @@ const Students = () => {
         lastName: '',
         enabled: true,
         rolId: 1,
+        gradeId: 1,
       });
     }
   };
@@ -266,6 +269,7 @@ const Students = () => {
       lastName: '',
       enabled: true,
       rolId: 1,
+      gradeId: 1,
     });
   };
 
@@ -582,7 +586,7 @@ const Students = () => {
               </Form.Group> */}
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
-                <Form.Control as="select" disabled={true} name="rolId" value={newStudentData.rolId} onChange={handleRoleChange}>
+                <Form.Control as="select" disabled={true} name="rolId" value={newStudentData.rolId} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>handleRoleChange}>
                 {/* <Form.Control as="select" name="rolId"  value={newStudentData.rolId}> */}
                   <option value="">Seleccionar Rol</option>
                   {roles.map((role, index) => (
