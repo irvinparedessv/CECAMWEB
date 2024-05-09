@@ -10,6 +10,7 @@ import {
   MiGradeResponse,
 } from "../types";
 import { StudentsGradeResponse } from "../types/Student";
+import { itemsPerPage } from "../const/Pagination";
 const TOKEN_HEADER = "X-AUTH-TOKEN";
 const ACCOUNT_ID = "X-ACCOUNT-ID";
 
@@ -46,10 +47,10 @@ const GradeService = {
       throw error;
     }
   },
-  getStudents: async (id: number) => {
+  getStudents: async (id: number,page:number) => {
     try {
       const response = await axiosInstance.get<StudentsGradeResponse>(
-        `${API_BASE_URL}/students/grade/${id}`
+        `${API_BASE_URL}/students/grade/${id}?page=${page}&itemsperpage=${itemsPerPage}`
       );
       return response.data;
     } catch (error) {

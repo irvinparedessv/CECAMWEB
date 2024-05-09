@@ -1,3 +1,4 @@
+import {  PaginationType } from "./Paginations";
 import { Student } from "./Student";
 
 export interface GradeResponse {
@@ -20,7 +21,8 @@ export interface Grade {
 
 export interface GradeStudents {
   grade: Grade;
-  student: Student[];
+  students: Student[];
+  pagination:PaginationType;
 }
 
 export interface MiGradeData {

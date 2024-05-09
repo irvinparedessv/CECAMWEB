@@ -5,6 +5,7 @@ import API_BASE_URL from "./apiConfig"; // Importa la URL base de la API
  
 import { StudentsResponse } from "../types/Student";
 import { GeneralResponse } from "../types";
+import { itemsPerPage } from '../const/Pagination';
 const TOKEN_HEADER = "X-AUTH-TOKEN";
 const ACCOUNT_ID = "X-ACCOUNT-ID";
 
@@ -23,9 +24,9 @@ const StudentService = {
     try {
       const response = await axiosInstance.post<StudentsResponse>(
 
-        `${API_BASE_URL}/students/search`,
+        `${API_BASE_URL}/students/search?page=${page}&itemsperpage=${itemsPerPage}`,
 
-        { page, search }
+        { search }
 
       );
 

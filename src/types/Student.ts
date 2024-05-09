@@ -1,6 +1,7 @@
 
 import { GeneralResponse } from "./General";
 import { GradeStudents } from "./Grade";
+import { PaginationType } from "./Paginations";
 
 export interface Student {
   id: number;
@@ -26,4 +27,5 @@ export interface StudentsGradeResponse extends GeneralResponse {
  
 export interface StudentsResponse extends GeneralResponse {
   data: Student[];
+  pagination:PaginationType;
 }
