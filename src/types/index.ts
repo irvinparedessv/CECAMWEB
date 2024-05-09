@@ -5,3 +5,4 @@ export * from './Parent';
 export * from './ParentAssociation';
 export * from "./Grade";
 export * from "./General";
+export * from "./Paginations";
