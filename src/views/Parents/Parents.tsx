@@ -171,6 +171,12 @@ const Parents = () => {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
+      // Verificar si el correo ya existe
+      const emailExists = await ParentService.checkEmailExists(newParentData.email);
+      if (emailExists) {
+        return Swal.fire('Error', 'El correo ya existe.', 'error');
+      }
+
       // Guardar el padre
       await ParentService.insertUser(newParentData);
       setShowAddModal(false);
@@ -190,7 +196,13 @@ const Parents = () => {
       if (!newParentData.firstName || !newParentData.lastName || !newParentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
-  
+      
+       // Verificar si el correo ya existe
+       const emailExists = await ParentService.checkEmailExists(newParentData.email);
+       if (emailExists) {
+         return Swal.fire('Error', 'El correo ya existe.', 'error');
+       }
+
       // Actualizar el padre
       if (selectedParentId !== null) {
         await ParentService.updateUser(selectedParentId, newParentData);

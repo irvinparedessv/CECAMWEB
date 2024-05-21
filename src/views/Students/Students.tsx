@@ -337,6 +337,12 @@ const Students = () => {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
+      // Verificar si el correo ya existe
+      const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+      if (emailExists) {
+        return Swal.fire('Error', 'El correo ya existe.', 'error');
+      }
+  
       // Guardar el estudiante
       await StudentService.insertUser(newStudentData);
       setShowAddModal(false);
@@ -349,12 +355,19 @@ const Students = () => {
       Swal.fire('Error', 'Se produjo un error al intentar agregar el estudiante.', 'error');
     }
   };
+  
+  
 
   const handleUpdateStudent = async () => {
     try {
       // Verificar campos obligatorios
       if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email ) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+      }
+  
+      const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+      if (emailExists) {
+        return Swal.fire('Error', 'El correo ya existe.', 'error');
       }
   
       // Actualizar el padre
@@ -373,7 +386,6 @@ const Students = () => {
       Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
     }
   };
-
   // const handleDeleteStudent = async (studentId: number) => {
   //   try {
       
@@ -557,7 +569,9 @@ const Students = () => {
               <Form.Group controlId="formEmail">
                 <Form.Label>Email</Form.Label>
                 <Form.Control type="email" name="email" value={newStudentData.email} onChange={handleInputChange} />
+                {errors.email && <Form.Text className="text-danger">{errors.email}</Form.Text>}
               </Form.Group>
+
               {/* <Form.Group controlId="formPassword">
                 <Form.Label>Password</Form.Label>
                 <Form.Control type="password" name="password" value={newStudentData.password} onChange={handleInputChange} />

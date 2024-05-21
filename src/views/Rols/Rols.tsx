@@ -336,7 +336,13 @@ const Students = () => {
       if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
-  
+      
+      // Verificar si el correo ya existe
+      const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+      if (emailExists) {
+        return Swal.fire('Error', 'El correo ya existe.', 'error');
+      }
+
       // Guardar el estudiante
       await StudentService.insertUser(newStudentData);
       setShowAddModal(false);
@@ -356,7 +362,13 @@ const Students = () => {
       if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
-  
+      
+      // Verificar si el correo ya existe
+      const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+      if (emailExists) {
+        return Swal.fire('Error', 'El correo ya existe.', 'error');
+      }
+
       // Actualizar el padre
       if (selectedStudentId !== null) {
         await StudentService.updateUser(selectedStudentId, newStudentData);
@@ -566,7 +578,9 @@ const Students = () => {
               <Form.Group controlId="formEmail">
                 <Form.Label>Email</Form.Label>
                 <Form.Control type="email" name="email" value={newStudentData.email} onChange={handleInputChange} />
+                {errors.email && <Form.Text className="text-danger">{errors.email}</Form.Text>}
               </Form.Group>
+
               {/* <Form.Group controlId="formPassword">
                 <Form.Label>Password</Form.Label>
                 <Form.Control type="password" name="password" value={newStudentData.password} onChange={handleInputChange} />

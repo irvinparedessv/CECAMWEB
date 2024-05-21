@@ -64,6 +64,17 @@ const ParentService = {
       throw error;
     }
   },
+  
+  checkEmailExists: async (email: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/check-email?email=${email}`);
+      const result = await response.json();
+      return result.exists;
+    } catch (error) {
+      console.error('Error verificando si el correo existe:', error);
+      throw error;
+    }
+  },
 };
 
 export default ParentService;
