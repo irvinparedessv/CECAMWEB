@@ -300,7 +300,7 @@ const Students = () => {
         [name]: newValue,
       };
       
-      // Generar nombre de usuario si se actualiza el nombre o apellido
+      //Generar nombre de usuario si se actualiza el nombre o apellido
       if (name === 'firstName' || name === 'lastName') {
         updatedData.userName = generateUserName(updatedData.firstName, updatedData.lastName);
       }
@@ -333,7 +333,7 @@ const Students = () => {
   const handleAddStudent = async () => {
     try {
       // Verificar campos obligatorios
-      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email || !newStudentData.password) {
+      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
@@ -353,7 +353,7 @@ const Students = () => {
   const handleUpdateStudent = async () => {
     try {
       // Verificar campos obligatorios
-      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email || !newStudentData.password) {
+      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email ) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
@@ -436,10 +436,16 @@ const Students = () => {
     if (!firstName || !lastName) {
       return '';
     }
-    const firstInitial = firstName;
-    const lastInitial = lastName.substring(0, 2);
-    return `${firstInitial.toLowerCase()}${lastInitial.toLowerCase()}24`;
-  };
+    const firstNames = firstName.split(' ');
+    const firstInitial = firstNames[0].toLowerCase();
+    const lastNames = lastName.split(' ');
+    let lastNamePart = '';
+    if (lastNames.length > 1) {
+        lastNamePart = lastNames.slice(1).join('');
+    }
+    return `${firstInitial}.${lastNames[0].toLowerCase()}${lastNamePart.toLowerCase()}24`;
+};
+
 
 
   return (
@@ -552,14 +558,14 @@ const Students = () => {
                 <Form.Label>Email</Form.Label>
                 <Form.Control type="email" name="email" value={newStudentData.email} onChange={handleInputChange} />
               </Form.Group>
-              <Form.Group controlId="formPassword">
+              {/* <Form.Group controlId="formPassword">
                 <Form.Label>Password</Form.Label>
                 <Form.Control type="password" name="password" value={newStudentData.password} onChange={handleInputChange} />
-              </Form.Group>
-              <Form.Group controlId="formUserName">
+              </Form.Group> */}
+              {/* <Form.Group controlId="formUserName">
                 <Form.Label>Usuario</Form.Label>
                 <Form.Control type="text" name="userName" disabled={true} value={newStudentData.userName} onChange={handleInputChange} />
-              </Form.Group>
+              </Form.Group> */}
               {/* <Form.Group controlId="formEnabled">
                 <Form.Label>Estado</Form.Label>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
