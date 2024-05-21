@@ -5,7 +5,7 @@ import AuthService from "../../services/AuthService";
 import { useNavigate } from "react-router-dom";
 
 interface LoginProps {
-  login: () => void; // Definimos el tipo de la función logout como una función que no toma argumentos y no devuelve nada
+  login: () => void; // Definimos el tipo de la función login como una función que no toma argumentos y no devuelve nada
 }
 
 const LoginForm: React.FC<LoginProps> = ({ login }) => {
@@ -14,15 +14,11 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleEmailChange = (e: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
+  const handleEmailChange = (e: { target: { value: React.SetStateAction<string> } }) => {
     setEmail(e.target.value);
   };
 
-  const handlePasswordChange = (e: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
+  const handlePasswordChange = (e: { target: { value: React.SetStateAction<string> } }) => {
     setPassword(e.target.value);
   };
 
@@ -32,20 +28,25 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
     try {
       const response = await AuthService.loginUser(email, password);
       if (response.success) {
-        // Guardar la información del usuario en el almacenamiento local o de sesión
-        localStorage.setItem("token", response.token);
-        console.log(response.data.id.toString());
-        localStorage.setItem("userId", response.data.id.toString());
-        // Ejemplo: guardando el token de autenticación en el almacenamiento local
-        login();
-        // Redirigir a la página de inicio o a la ruta deseada después del inicio de sesión
-        navigate("/students");
+        // Crear un objeto con la información del usuario
+        const userInfo = {
+          token: response.token,
+          username: response.data.userName,
+          roleName: response.data.role,
+          firstName: response.data.firstName,
+          lastName: response.data.lastName,
+          id: response.data.id
+        };
 
-        // Limpiar los campos de entrada después del inicio de sesión exitoso
+        // Convertir el objeto a una cadena JSON y guardarlo en localStorage
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+        login();
+        navigate("/students");
         setEmail("");
         setPassword("");
       } else {
-        setError(response.message);
+        setError(response.message || "An error occurred."); // Aquí se maneja el caso en el que 'message' es undefined
       }
     } catch (error) {
       setError("Error API.");

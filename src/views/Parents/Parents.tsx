@@ -167,7 +167,7 @@ const Parents = () => {
   const handleAddParent = async () => {
     try {
       // Verificar campos obligatorios
-      if (!newParentData.firstName || !newParentData.lastName || !newParentData.email || !newParentData.password) {
+      if (!newParentData.firstName || !newParentData.lastName || !newParentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
@@ -187,7 +187,7 @@ const Parents = () => {
   const handleUpdateParent = async () => {
     try {
       // Verificar campos obligatorios
-      if (!newParentData.firstName || !newParentData.lastName || !newParentData.email || !newParentData.password) {
+      if (!newParentData.firstName || !newParentData.lastName || !newParentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
@@ -449,7 +449,7 @@ const Parents = () => {
                 <Form.Control type="email" name="email" value={newParentData.email} onChange={handleInputChange} />
                 {errors.email && <Form.Text className="text-danger">{errors.email}</Form.Text>}
               </Form.Group>
-              <Form.Group controlId="formPassword">
+              {/* <Form.Group controlId="formPassword">
                 <Form.Label>Password</Form.Label>
                 <Form.Control type="password" name="password" value={newParentData.password} onChange={handleInputChange} />
               </Form.Group>
@@ -462,7 +462,7 @@ const Parents = () => {
                   value={(newParentData.userName || '')}
                   onChange={handleInputChange}
                 />
-              </Form.Group>
+              </Form.Group> */}
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
                 <Form.Control as="select" disabled={true} name="rolId" value={newParentData.rolId} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>handleRoleChange}>
