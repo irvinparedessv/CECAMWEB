@@ -5,8 +5,10 @@ import AuthService from "../../services/AuthService";
 import { useNavigate } from "react-router-dom";
 
 interface LoginProps {
-  login: () => void; // Definimos el tipo de la función login como una función que no toma argumentos y no devuelve nada
+  login: () => void;
 }
+
+
 
 const LoginForm: React.FC<LoginProps> = ({ login }) => {
   const navigate = useNavigate();
@@ -14,21 +16,20 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleEmailChange = (e: { target: { value: React.SetStateAction<string> } }) => {
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   };
 
-  const handlePasswordChange = (e: { target: { value: React.SetStateAction<string> } }) => {
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       const response = await AuthService.loginUser(email, password);
       if (response.success) {
-        // Crear un objeto con la información del usuario
         const userInfo = {
           token: response.token,
           username: response.data.userName,
@@ -38,7 +39,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
           id: response.data.id
         };
 
-        // Convertir el objeto a una cadena JSON y guardarlo en localStorage
+        localStorage.setItem("token", response.token);
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
 
         login();
@@ -46,7 +47,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
         setEmail("");
         setPassword("");
       } else {
-        setError(response.message || "An error occurred."); // Aquí se maneja el caso en el que 'message' es undefined
+        setError(response.message || "An error occurred.");
       }
     } catch (error) {
       setError("Error API.");
@@ -56,13 +57,9 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
   return (
     <Container fluid>
       <Row className="no-gutter">
-        {/* The image half */}
         <Col md={6} className="d-none d-md-flex bg-image"></Col>
-
-        {/* The content half */}
         <Col md={6} className="bg-img">
           <div className="login d-flex align-items-center py-5">
-            {/* Demo content*/}
             <Container>
               <Row>
                 <Col lg={10} xl={7} className="mx-auto">
@@ -102,10 +99,8 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
                 </Col>
               </Row>
             </Container>
-            {/* End Demo content */}
           </div>
         </Col>
-        {/* End The content half */}
       </Row>
     </Container>
   );
