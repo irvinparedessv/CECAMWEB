@@ -37,6 +37,18 @@ const GradeList = () => {
   useEffect(() => {
     fetchData();
   }, []);
+  
+  // const fetchProfessors = async () => {
+  //   try {
+  //     //const studentList = await ParentAssociationService.getAllUsers();
+  //     const professorList = await GradeService.getAllUsers();
+  //     setParentsAssociationNames(studentList);
+  //     //const filteredStudents = studentList.filter(student => student.rolId === 1);
+  //     //setStudents();
+  //   } catch (error) {
+  //     console.error('Error al obtener usuarios:', error);
+  //   }
+  // };
 
   const handleDelete = async (id: number) => {
     try {

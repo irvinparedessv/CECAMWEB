@@ -164,6 +164,16 @@ const StudentService = {
       throw error;
     }
   },
+
+  getUser: async (userId: number) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error);
+      throw error;
+    }
+  }
   
 };
 

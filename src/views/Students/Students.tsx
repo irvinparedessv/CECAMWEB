@@ -357,35 +357,42 @@ const Students = () => {
   };
   
   
-
   const handleUpdateStudent = async () => {
     try {
       // Verificar campos obligatorios
-      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email ) {
+      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
-      const emailExists = await StudentService.checkEmailExists(newStudentData.email);
-      if (emailExists) {
-        return Swal.fire('Error', 'El correo ya existe.', 'error');
+      // Verificar que selectedStudentId no sea null
+      if (selectedStudentId === null) {
+        return Swal.fire('Error', 'No se ha seleccionado un estudiante para actualizar.', 'error');
       }
   
-      // Actualizar el padre
-      if (selectedStudentId !== null) {
-        await StudentService.updateUser(selectedStudentId, newStudentData);
-        setShowAddModal(false);
-        fetchStudents();
-
-        // Mostrar una alerta de éxito
-        Swal.fire('Éxito', 'Los cambios han sido guardados correctamente.', 'success');
+      // Obtener el usuario actual para comparar el correo
+      const currentStudentData = await StudentService.getUser(selectedStudentId);
+  
+      // Solo verificar la existencia del correo si ha sido modificado
+      if (newStudentData.email !== currentStudentData.email) {
+        const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+        if (emailExists) {
+          return Swal.fire('Error', 'El correo ya existe.', 'error');
+        }
       }
-        
-      
+  
+      // Actualizar el estudiante
+      await StudentService.updateUser(selectedStudentId, newStudentData);
+      setShowAddModal(false);
+      fetchStudents();
+  
+      // Mostrar una alerta de éxito
+      Swal.fire('Éxito', 'Los cambios han sido guardados correctamente.', 'success');
     } catch (error) {
       console.error('Error al actualizar estudiante:', error);
       Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
     }
   };
+  
   // const handleDeleteStudent = async (studentId: number) => {
   //   try {
       
