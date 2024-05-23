@@ -55,6 +55,12 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                   Asociacion de padres
                 </Link>
               </li>
+              <li>
+                <Link to={"/migrades"} className="nav-link px-0 align-middle" >
+                  <FontAwesomeIcon icon={faUserGraduate} className="me-2" />
+                  Mis Grados
+                </Link>
+              </li>
               {/* Agrega aquí más opciones específicas para el rol de Profesor si es necesario */}
             </>
           ) : (
@@ -89,12 +95,7 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                   Grados
                 </Link>
               </li>
-              <li>
-                <Link to={"/migrades"} className="nav-link px-0 align-middle" >
-                  <FontAwesomeIcon icon={faUserGraduate} className="me-2" />
-                  Mis Grados
-                </Link>
-              </li>
+              
               <li>
                 <Link to={"/notes"} className="nav-link px-0 align-middle" >
                   <FontAwesomeIcon icon={faStickyNote} className="me-2" />

@@ -38,14 +38,12 @@ const GradeService = {
       throw error;
     }
   },
-  getMyGrades: async () => {
+  getMyGrades: async (professorId: string) => {
     try {
-      const response = await axiosInstance.get<MiGradeResponse>(
-        `${API_BASE_URL}/migrades`
-      );
+      const response = await axiosInstance.get<MiGradeResponse>(`/migrades/${professorId}`);
       return response.data;
     } catch (error) {
-      console.error("Error al obtener usuarios:", error);
+      console.error("Error al obtener grados:", error);
       throw error;
     }
   },
