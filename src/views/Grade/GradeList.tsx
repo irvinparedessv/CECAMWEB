@@ -7,9 +7,10 @@ import { confirmAlert } from "react-confirm-alert";
 import toast from "react-hot-toast";
 import StudentService from "../../services/StudentService";
 import Swal from 'sweetalert2';
-import { ParentAssociations } from "../ParentAssociations";
+import { useNavigate } from 'react-router-dom';
 
 const GradeList = () => {
+  const navigate = useNavigate();
   const [grades, setGrades] = useState<Grade[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [error, setError] = useState<string>("");
@@ -24,6 +25,7 @@ const GradeList = () => {
   const [selectingProfessorId, setSelectingProfessorId] = useState<number | null>(null);
   const [selectingProfessor, setSelectingProfessor] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
+  
 
   // Estado para almacenar los padres seleccionados
   const [selectedProfessors, setSelectedProfessors] = useState<Professor[]>([]);
@@ -36,6 +38,8 @@ const GradeList = () => {
 // Calcula el índice del último elemento en la página actual
   const indexOfLastItem = indexOfFirstItem + itemsPerPage;
   const currentItems = unassociatedProfessors.slice(indexOfFirstItem, indexOfLastItem);
+  
+ 
   const fetchData = async () => {
     try {
       const response = await GradeService.getAllGrades();
@@ -48,11 +52,67 @@ const GradeList = () => {
       setError("Failed to fetch grades");
     }
   };
+
   useEffect(() => {
     fetchData();
     fetchProfessors();
+    fetchGradeProfessors();
   }, []);
   
+
+   
+  const handleAddClick = () => {
+    navigate('/grades/add');
+  };
+
+  const handleEditClick = (gradeId: number) => {
+    navigate(`/grades/edit/${gradeId}`); // Utiliza navigate en lugar de history.push
+  };
+  
+  const handleDelete = async (id: number) => {
+    try {
+      confirmAlert({
+        title: "Eliminar",
+        message: "Esta seguro de eliminar este registro?",
+        buttons: [
+          {
+            label: "Si",
+            onClick: () =>
+              toast.promise(
+                GradeService.deleteGrade(id).then((response) => {
+                  if (response.success) {
+                    fetchGradeProfessors();
+                  }
+                }),
+                {
+                  loading: "Eliminando...",
+                  success: "Eliminado correctamente!",
+                  error: <b>Error al eliminar.</b>,
+                }
+              ),
+          },
+          {
+            label: "No",
+          },
+        ],
+      });
+    } catch (error) {
+      setError("Failed to delete grade");
+    }
+  };
+
+  const fetchGradeProfessors = async () => {
+    try {
+      //const studentList = await ParentAssociationService.getAllUsers();
+      const professorList = await GradeService.getAllGradeProfessors();
+      setGradeProfessors(professorList);
+      // const filteredProfessors = professorList.filter(professor => professor.rolId === 3);
+      // setProfessors(filteredProfessors);
+    } catch (error) {
+      console.error('Error al obtener grados:', error);
+    }
+  };
+
   const fetchProfessors = async () => {
     try {
       //const studentList = await ParentAssociationService.getAllUsers();
@@ -74,37 +134,7 @@ const GradeList = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      confirmAlert({
-        title: "Eliminar",
-        message: "Esta seguro de eliminar este registro?",
-        buttons: [
-          {
-            label: "Si",
-            onClick: () =>
-              toast.promise(
-                GradeService.deleteGrade(id).then((response) => {
-                  if (response.success) {
-                    fetchData();
-                  }
-                }),
-                {
-                  loading: "Eliminando...",
-                  success: "Eliminado correctamente!",
-                  error: <b>Error al eliminar.</b>,
-                }
-              ),
-          },
-          {
-            label: "No",
-          },
-        ],
-      });
-    } catch (error) {
-      setError("Failed to delete grade");
-    }
-  };
+  
   const handleAddParentModalShow = async (gradeId: number) => {
     if (gradeId !== null) {
       setLoading(true);
@@ -129,9 +159,9 @@ const GradeList = () => {
     try {
       // Aquí debes enviar la solicitud para guardar el padre asociado al estudiante
       await GradeService.saveGradeProfessors(gradeId, professorId);
-      console.log('Padre asociado guardado correctamente');
+      console.log('profesor asociado guardado correctamente');
     } catch (error) {
-      console.error('Error al guardar el padre asociado:', error);
+      console.error('Error al guardar el profesor asociado:', error);
     }
   };
   
@@ -175,22 +205,22 @@ const handleSelectProfessor = async (professor: Professor) => {
 
       // Actualizar la lista de padres no asociados
       await fetchUnassociatedProfessors(professor.id);
-      await fetchData();
+      await fetchGradeProfessors();
 
       // Mostrar una alerta de éxito después de seleccionar el padre
       await Swal.fire({
         title: '¡Seleccionado!',
-        text: 'El padre asociado ha sido seleccionado correctamente.',
+        text: 'El profesor asociado ha sido seleccionado correctamente.',
         icon: 'success',
         allowOutsideClick: false
       });
     }
   } catch (error) {
-    console.error('Error al seleccionar el padre:', error);
+    console.error('Error al seleccionar el profesor:', error);
     // Mostrar una alerta de error si ocurre algún problema durante la selección
     Swal.fire(
       'Error',
-      'Se produjo un error al seleccionar el padre asociado.',
+      'Se produjo un error al seleccionar el profesor asociado.',
       'error'
     );
   } finally {
@@ -223,7 +253,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
       // Muestra el diálogo de confirmación antes de realizar la eliminación
       const result = await Swal.fire({
         title: '¿Estás seguro?',
-        text: 'Esta acción eliminará el padre asociado. ¿Estás seguro de continuar?',
+        text: 'Esta acción eliminará el profesor asociado. ¿Estás seguro de continuar?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -248,12 +278,12 @@ const isDeleteButtonDisabled = (professorId:number) => {
   
         // Actualiza la lista de padres no asociados
         await fetchUnassociatedProfessors(professor.id);
-        await fetchData();
+        await fetchGradeProfessors();
   
         // Muestra una alerta de éxito después de que se complete la eliminación
         Swal.fire(
           'Eliminado',
-          'El padre asociado ha sido eliminado correctamente.',
+          'El profesor asociado ha sido eliminado correctamente.',
           'success'
         );
       }
@@ -262,7 +292,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
       // Muestra una alerta de error si ocurre algún problema durante la eliminación
       Swal.fire(
         'Error',
-        'Se produjo un error al eliminar el padre asociado.',
+        'Se produjo un error al eliminar el profesor asociado.',
         'error'
       );
     } finally {
@@ -278,39 +308,51 @@ const isDeleteButtonDisabled = (professorId:number) => {
       <h1>Grados</h1>
       {error && <p>{error}</p>}
       <div className="col c_ButtonAdd">
-        <Link className="btn btn-primary" to="/grades/add">
-          Agregar
-        </Link>
+        <Button
+          className="btn btn-primary"
+          onClick={handleAddClick}
+        >
+          Agregar Grado
+        </Button>
       </div>
       <table className="table">
         <thead>
           <tr>
-            <th>Name</th>
+            <th>Nombre</th>
             <th>Seccion</th>
-            <th>Descipcion</th>
+            <th>Descripcion</th>
+            <th>Coordinador</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {grades.map((grade) => (
+          {gradeProfessors.map((grade) => (
             <tr key={grade.gradeId}>
               <td>{grade.name}</td>
               <td>{grade.section}</td>
               <td>{grade.description}</td>
-              {/* <td>{grade.professorName || "Sin Profesor Asociado"}</td> */}
               <td>
-                <Link
-                  className="btn btn-primary c_margin1"
-                  to={`/grades/edit/${grade.gradeId}`}
-                >
-                  Editar
-                </Link>
-                <button
+                {grade.firstName && grade.lastName ? (
+                  `${grade.firstName} ${grade.lastName}`
+                ) : (
+                  <span style={{ fontStyle: 'italic', color: 'grey' }}>
+                    Sin Profesor Asociado
+                  </span>
+                )}
+              </td>
+              <td>
+              <Button
+                className="btn btn-primary"
+                onClick={() => handleEditClick(grade.gradeId)}
+              >
+                Editar
+              </Button>
+                <Button
                   className="btn btn-danger"
                   onClick={() => handleDelete(grade.gradeId)}
                 >
                   Eliminar
-                </button>
+                </Button>
                 <Button variant="success" onClick={() => handleAddParentModalShow(grade.gradeId)}>Agregar profesor</Button>
               </td>
             </tr>
@@ -320,7 +362,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
       <Modal show={showAddParentModal} onHide={handleAddParentModalClose} dialogClassName="modal-xl">
           <Modal.Header closeButton>
           
-            <Modal.Title>Asociar Profesor a Grados {selectedGrade && (
+            <Modal.Title>Asociar Profesor a Grado {selectedGrade && (
                 <small>
                 <strong>
                   <span style={{ color: 'red' }}>
@@ -390,42 +432,17 @@ const isDeleteButtonDisabled = (professorId:number) => {
       //   <p>Este estudiante no tiene padres asociados.</p>
       // </div>
 
-<div className="alert alert-warning text-center" role="alert">
-<h4 className="alert-heading">Advertencia!</h4>
-<p>Este grado no tiene profesor asociado.</p>
-</div>
+      <div className="alert alert-warning text-center" role="alert">
+      <h4 className="alert-heading">Advertencia!</h4>
+      <p>Este grado no tiene profesor asociado.</p>
+      </div>
 
-      
+            
 
-    )}
+          )}
                                   
                     
               </div>
-
-
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-             
-
-
-
-
-
-
-
 
 
                 {loading ? (

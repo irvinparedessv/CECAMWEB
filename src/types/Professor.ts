@@ -14,5 +14,6 @@ export interface Professor {
     name: string;
     section: string;
     description: string;
-    professorName: string;
+    firstName: string;
+    lastName: string;
   }

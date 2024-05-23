@@ -5,6 +5,7 @@ import API_BASE_URL from "./apiConfig"; // Importa la URL base de la API
 import {
   Grade,
   GradeFormAdd,
+  GradeProfessors,
   GradeResponse,
   GradeResponseOne,
   MiGradeResponse,
@@ -109,6 +110,16 @@ const GradeService = {
     }
   },
   // Otros métodos para otras operaciones CRUD si es necesario
+
+  getAllGradeProfessors: async () => {
+    try {
+      const response = await axios.get<GradeProfessors[]>(`${API_BASE_URL}/gradeProfessors`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error);
+      throw error;
+    }
+  },
 
   getGradesWithProfessorAssociations: async (gradeId: number): Promise<Professor[]> => {
     try {
