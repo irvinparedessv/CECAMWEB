@@ -8,6 +8,7 @@ import {
   GradeResponse,
   GradeResponseOne,
   MiGradeResponse,
+  Professor,
 } from "../types";
 import { StudentsGradeResponse } from "../types/Student";
 import { itemsPerPage } from "../const/Pagination";
@@ -108,6 +109,49 @@ const GradeService = {
     }
   },
   // Otros métodos para otras operaciones CRUD si es necesario
+
+  getGradesWithProfessorAssociations: async (gradeId: number): Promise<Professor[]> => {
+    try {
+      const response = await axios.get<Professor[]>(`${API_BASE_URL}/grades/professors/${gradeId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener usuarios con asociaciones de padres:', error);
+      throw error;
+    }
+  },
+
+  getUnassociatedProfessors: async (gradeId: number): Promise<Professor[]> => {
+    try {
+      const response = await axios.get<Professor[]>(`${API_BASE_URL}/grades/professorsUnassociated/${gradeId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener padres no asociados:', error);
+      throw error;
+    }
+  },
+
+  saveGradeProfessors: async (gradeId: number, professorId: number) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/gradeProfessors`, {
+        gradeId,
+        professorId
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error al guardar la asociación de profesores:', error);
+      throw error;
+    }
+  },
+
+  deleteGradeProfessor: async (gradeId:number) => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/gradeProfessors/${gradeId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al eliminar la asociación de padres:', error);
+      throw error;
+    }
+  },
 };
 
 export default GradeService;

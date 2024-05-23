@@ -8,3 +8,11 @@ export interface Professor {
     enabled: boolean;
     rolId: number;
   }
+
+  export interface GradeProfessors{
+    gradeId: number;
+    name: string;
+    section: string;
+    description: string;
+    professorName: string;
+  }
