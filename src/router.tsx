@@ -316,7 +316,7 @@ import LoginForm from "./views/Login/Login";
 import { Parents } from "./views/Parents";
 import { ParentAssociations } from "./views/ParentAssociations";
 import { Toaster } from "react-hot-toast";
-import { GradeForm, GradeList, GradeEdit } from "./views/Grade";
+import { GradeList} from "./views/Grade";
 import { StudentsGrade } from "./views/StudentsGrade";
 import { AdminDashboard, ProfessorDashboard } from "./views/Dashboard";
 
@@ -427,12 +427,12 @@ const App = () => {
             <Route path="/parentAssociations" element={<ParentAssociations />} />
             <Route path="/register-student" element={<Register />} />
             <Route path="/grades" element={<GradeList />} />
-            <Route path="/grades/add" element={<GradeForm />} />
+            {/* <Route path="/grades/add" element={<GradeForm />} /> */}
             <Route path="/students/grade/:id" element={<StudentsGrade />} />
             <Route path="/register-subjects" element={<Subject />} />
             <Route path="/register-teachers" element={<Teacher />} />
             <Route path="/subjects" element={<Subject />} />
-            <Route path="/grades/edit/:id" element={<GradeEdit />} />
+            {/* <Route path="/grades/edit/:id" element={<GradeEdit />} /> */}
             <Route path="/attendances" element={<Attendance />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
             <Route path="/professorDashboard" element={<ProfessorDashboard />} />

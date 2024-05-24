@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Table, Button, Modal, Form, Spinner } from 'react-bootstrap';
 import { Link } from "react-router-dom"; // Importa Link desde react-router-dom
 import GradeService from "../../services/GradeService";
-import { Grade, Professor, GradeProfessors } from "../../types";
+import { Grade, Professor, GradeProfessors, GradeFormAdd } from "../../types";
 import { confirmAlert } from "react-confirm-alert";
 import toast from "react-hot-toast";
 import StudentService from "../../services/StudentService";
@@ -25,7 +25,9 @@ const GradeList = () => {
   const [selectingProfessorId, setSelectingProfessorId] = useState<number | null>(null);
   const [selectingProfessor, setSelectingProfessor] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
-  
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedGradeId, setSelectedGradeId] = useState<number | null>(null);
+  const [filterValue, setFilterValue] = useState('');
 
   // Estado para almacenar los padres seleccionados
   const [selectedProfessors, setSelectedProfessors] = useState<Professor[]>([]);
@@ -38,6 +40,105 @@ const GradeList = () => {
 // Calcula el índice del último elemento en la página actual
   const indexOfLastItem = indexOfFirstItem + itemsPerPage;
   const currentItems = unassociatedProfessors.slice(indexOfFirstItem, indexOfLastItem);
+
+  const [formData, setFormData] = useState<GradeFormAdd>({
+    gradeId: 0,
+    name: "",
+    section: "",
+    description: "",
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  //const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // const handleCancel = () => {
+  //   navigate("/grades");
+  // };
+  // const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+
+  //   // Validar campos requeridos
+  //   const newErrors: { [key: string]: string } = {};
+  //   Object.entries(formData).forEach(([key, value]) => {
+  //     if (value.trim() === "") {
+  //       newErrors[key] =
+  //         `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+  //     }
+  //   });
+  //   if (Object.keys(newErrors).length > 0) {
+  //     setErrors(newErrors);
+  //     return;
+  //   }
+
+  //   try {
+  //     setIsLoading(true);
+  //     toast.promise(GradeService.addGrade(formData), {
+  //       loading: "Guardando...",
+  //       success: <b>Grado guardado!</b>,
+  //       error: <b>Error en guardado.</b>,
+  //     });
+  //     setTimeout(() => {
+  //       navigate("/grades");
+  //     }, 1000);
+  //   } catch (error) {
+  //     console.error("Error creating grade:", error);
+  //   }
+  // };
+
+
+  const handleAddModalShow = (gradeId: number | null) => {
+    setSelectedGradeId(gradeId);
+    setShowAddModal(true);
+  
+    if (gradeId !== null) {
+      const selectedGrade = grades.find(grade => grade.gradeId === gradeId);
+      if (selectedGrade) {
+        setFormData({
+          gradeId: selectedGrade.gradeId,
+          name: selectedGrade.name,
+          section: selectedGrade.section,
+          description: selectedGrade.description,
+        });
+      }
+    } else {
+      setFormData({
+        gradeId: 0,
+        name: "",
+        section: "",
+        description: "",
+      });
+    }
+  };
+
+
+
+  const handleAddModalClose = () => {
+    setShowAddModal(false);
+    setSelectedGradeId(null);
+    setFormData({
+      gradeId: 0,
+      name: "",
+      section: "",
+      description: "",
+    });
+  };
+
+
+
+
+
+
+
+
+
+
+
+
   
  
   const fetchData = async () => {
@@ -154,6 +255,83 @@ const GradeList = () => {
      setSelectedProfessorGrade(null);
      setSelectedProfessors([]);
   };
+
+
+  const handleAddGrade = async () => {
+    try {
+      // Verificar campos obligatorios
+      if (!formData.name || !formData.section || !formData.description) {
+        return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+      }
+  
+      //  // Validar campos requeridos
+      // const newErrors: { [key: string]: string } = {};
+      // Object.entries(formData).forEach(([key, value]) => {
+      //   if (value.trim() === "") {
+      //     newErrors[key] =
+      //       `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+      //   }
+      // });
+      // if (Object.keys(newErrors).length > 0) {
+      //   setErrors(newErrors);
+      //   return;
+      // }
+
+      // Guardar el padre
+      await GradeService.addGrade(formData);
+      setShowAddModal(false);
+      fetchGradeProfessors();
+  
+      // Mostrar una alerta de éxito
+      Swal.fire('Éxito', 'El grado ha sido agregado correctamente.', 'success');
+    } catch (error) {
+      console.error('Error al insertar grado:', error);
+      Swal.fire('Error', 'Se produjo un error al intentar agregar el grado.', 'error');
+    }
+  };
+
+
+  const handleUpdateGrade = async () => {
+    try {
+      // Verificar campos obligatorios
+      if (!formData.name || !formData.section || !formData.description) {
+        return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+      }
+      
+      // const newErrors: { [key: string]: string } = {};
+      // Object.entries(formData).forEach(([key, value]) => {
+      //   if (value.trim() === "") {
+      //     newErrors[key] =
+      //       `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+      //   }
+      // });
+      // if (Object.keys(newErrors).length > 0) {
+      //   setErrors(newErrors);
+      //   return;
+      // }
+
+      // Actualizar el padre
+      if (selectedGradeId !== null) {
+        await GradeService.updateGrade(selectedGradeId, formData);
+        setShowAddModal(false);
+        fetchGradeProfessors();
+  
+        // Mostrar una alerta de éxito
+        Swal.fire('Éxito', 'Los cambios han sido guardados correctamente.', 'success');
+      }
+    } catch (error) {
+      console.error('Error al actualizar padre:', error);
+      Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
+    }
+  };
+  
+
+
+
+
+
+
+
 
   const saveSelectedProfessor = async (gradeId: number, professorId: number) => {
     try {
@@ -306,15 +484,16 @@ const isDeleteButtonDisabled = (professorId:number) => {
   return (
     <div>
       <h1>Grados</h1>
-      {error && <p>{error}</p>}
-      <div className="col c_ButtonAdd">
-        <Button
-          className="btn btn-primary"
-          onClick={handleAddClick}
-        >
-          Agregar Grado
-        </Button>
-      </div>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <Form.Control
+            type="text"
+            placeholder="Buscar..."
+            value={filterValue}
+            onChange={(e) => setFilterValue(e.target.value)}
+            style={{ width: '400px' }}
+          />
+          <Button variant="primary" onClick={() => handleAddModalShow(null)}>Agregar Grado</Button>
+        </div>
       <table className="table">
         <thead>
           <tr>
@@ -341,12 +520,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
                 )}
               </td>
               <td>
-              <Button
-                className="btn btn-primary"
-                onClick={() => handleEditClick(grade.gradeId)}
-              >
-                Editar
-              </Button>
+              <Button variant="primary" onClick={() => handleAddModalShow(grade.gradeId)}>Editar</Button>
                 <Button
                   className="btn btn-danger"
                   onClick={() => handleDelete(grade.gradeId)}
@@ -543,7 +717,61 @@ const isDeleteButtonDisabled = (professorId:number) => {
             {/* <Button variant="primary" onClick={handleAddParent}>Guardar</Button> */}
           </Modal.Footer>
         </Modal>
+
+        <Modal show={showAddModal} onHide={handleAddModalClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>{selectedGradeId !== null ? 'Editar Padre' : 'Agregar Padre'}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="formName">
+                <Form.Label>Nombre</Form.Label>
+                <Form.Control  className="form-control"
+                  type="text"
+                  name="name"
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required />
+                  {errors.name && <div className="error-message">{errors.name}</div>}
+              </Form.Group>
+              <Form.Group controlId="formSeccion">
+                <Form.Label>Seccion</Form.Label>
+                <Form.Control  className="form-control"
+                  type="text"
+                  name="section"
+                  placeholder="Section"
+                  value={formData.section}
+                  onChange={handleChange}
+                  required />
+                  {errors.section && (
+                    <div className="error-message">{errors.section}</div>
+                  )}
+              </Form.Group>
+              <Form.Group controlId="formDescription">
+                <Form.Label>Descripcion</Form.Label>
+                <Form.Control  className="form-control"
+                  type="text"
+                  name="description"
+                  placeholder="Description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required/>
+                  {errors.description && (
+                    <div className="error-message">{errors.description}</div>
+                  )}
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleAddModalClose}>Cancelar</Button>
+            <Button variant="primary" onClick={selectedGradeId !== null ? handleUpdateGrade : handleAddGrade}>
+              {selectedGradeId !== null ? 'Guardar Cambios' : 'Agregar'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
     </div>
+    
 
     
   );

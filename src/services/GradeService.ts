@@ -95,10 +95,10 @@ const GradeService = {
     }
   },
 
-  updateGrade: async (grade: Grade) => {
+  updateGrade: async (gradeId: number, grade: Grade) => {
     try {
       const response = await axiosInstance.put(
-        `${API_BASE_URL}/grades/${grade.gradeId}`,
+        `${API_BASE_URL}/grades/${gradeId}`,
         grade
       );
       return response.data;

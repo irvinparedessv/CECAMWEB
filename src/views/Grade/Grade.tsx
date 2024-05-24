@@ -64,7 +64,7 @@ const CombinedForm = () => {
                 <div className="col-md-12">
                   <Form.Group controlId="formEmail">
                     <Form.Label>
-                       Seccion 
+                       Seccionessss
                     </Form.Label>
                     <Form.Control
                       type="text"
