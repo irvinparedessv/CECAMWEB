@@ -114,6 +114,12 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                   Observaciones
                 </Link>
               </li>
+              <li>
+                <Link to="/subjects" className="nav-link px-0 align-middle">
+                  <FontAwesomeIcon icon={faChalkboard} className="me-2" />
+                  Asignaturas
+                </Link>
+              </li>
               {/* Agrega aquí más opciones específicas para otros roles si es necesario */}
             </>
           )}

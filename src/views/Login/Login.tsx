@@ -150,6 +150,9 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
         localStorage.setItem("token", response.token ?? "");
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
 
+        //AHI OBTENGO EL ID, PARA PROBARLO CON EL SERVICE DE MIGRADE
+        //localStorage.setItem("userId", response.data.id);
+
         // Redirigir según el rol del usuario
         if (response.data.role === "Administrador") {
           navigate("/adminDashboard");

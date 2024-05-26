@@ -197,11 +197,20 @@ const Parents = () => {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
       
-       // Verificar si el correo ya existe
-       const emailExists = await ParentService.checkEmailExists(newParentData.email);
-       if (emailExists) {
-         return Swal.fire('Error', 'El correo ya existe.', 'error');
-       }
+      if (selectedParentId === null) {
+        return Swal.fire('Error', 'No se ha seleccionado un estudiante para actualizar.', 'error');
+      }
+      
+        // Obtener el usuario actual para comparar el correo
+      const currentParentData = await ParentService.getUser(selectedParentId);
+  
+      // Solo verificar la existencia del correo si ha sido modificado
+      if (newParentData.email !== currentParentData.email) {
+        const emailExists = await ParentService.checkEmailExists(newParentData.email);
+        if (emailExists) {
+          return Swal.fire('Error', 'El correo ya existe.', 'error');
+        }
+      }
 
       // Actualizar el padre
       if (selectedParentId !== null) {

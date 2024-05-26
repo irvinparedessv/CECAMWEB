@@ -162,43 +162,82 @@ const GradeList = () => {
   
 
    
-  const handleAddClick = () => {
-    navigate('/grades/add');
-  };
+  // const handleAddClick = () => {
+  //   navigate('/grades/add');
+  // };
 
-  const handleEditClick = (gradeId: number) => {
-    navigate(`/grades/edit/${gradeId}`); // Utiliza navigate en lugar de history.push
-  };
+  // const handleEditClick = (gradeId: number) => {
+  //   navigate(`/grades/edit/${gradeId}`); // Utiliza navigate en lugar de history.push
+  // };
   
+  // const handleDelete = async (id: number) => {
+  //   try {
+  //     confirmAlert({
+  //       title: "Eliminar",
+  //       message: "Esta seguro de eliminar este registro?",
+  //       buttons: [
+  //         {
+  //           label: "Si",
+  //           onClick: () =>
+  //             toast.promise(
+  //               GradeService.deleteGrade(id).then((response) => {
+  //                 if (response.success) {
+  //                   fetchGradeProfessors();
+  //                 }
+  //               }),
+  //               {
+  //                 loading: "Eliminando...",
+  //                 success: "Eliminado correctamente!",
+  //                 error: <b>Error al eliminar.</b>,
+  //               }
+  //             ),
+  //         },
+  //         {
+  //           label: "No",
+  //         },
+  //       ],
+  //     });
+  //   } catch (error) {
+  //     setError("Failed to delete grade");
+  //   }
+  // };
+
   const handleDelete = async (id: number) => {
     try {
-      confirmAlert({
-        title: "Eliminar",
-        message: "Esta seguro de eliminar este registro?",
-        buttons: [
-          {
-            label: "Si",
-            onClick: () =>
-              toast.promise(
-                GradeService.deleteGrade(id).then((response) => {
-                  if (response.success) {
-                    fetchGradeProfessors();
-                  }
-                }),
-                {
-                  loading: "Eliminando...",
-                  success: "Eliminado correctamente!",
-                  error: <b>Error al eliminar.</b>,
-                }
-              ),
-          },
-          {
-            label: "No",
-          },
-        ],
+      const result = await Swal.fire({
+        title: 'Eliminar',
+        text: '¿Está seguro de eliminar este grado?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'No'
       });
+  
+      if (result.isConfirmed) {
+        const response = await GradeService.deleteGrade(id);
+        if (response.success) {
+          await fetchGradeProfessors();
+          Swal.fire(
+            'Eliminado',
+            'El grado se ha sido eliminado correctamente.',
+            'success'
+          );
+        } else {
+          Swal.fire(
+            'Error',
+            'Se produjo un error al intentar eliminar este grado.',
+            'error'
+          );
+        }
+      }
     } catch (error) {
-      setError("Failed to delete grade");
+      Swal.fire(
+        'Error',
+        'Se produjo un error al intentar eliminar el grado.',
+        'error'
+      );
     }
   };
 
@@ -226,9 +265,9 @@ const GradeList = () => {
     }
   };
 
-  const fetchUnassociatedProfessors = async (professorId: number) => {
+  const fetchUnassociatedProfessors = async (gradeId: number) => {
     try {
-      const professors = await GradeService.getUnassociatedProfessors(professorId);
+      const professors = await GradeService.getUnassociatedProfessors(gradeId);
       setUnassociatedProfessors(() => [...professors]); // Actualiza el estado con los padres no asociados
     } catch (error) {
       console.error('Error al obtener padres no asociados:', error);
@@ -237,16 +276,27 @@ const GradeList = () => {
 
   
   const handleAddParentModalShow = async (gradeId: number) => {
-    if (gradeId !== null) {
+    // if (gradeId !== null) {
+    //   setLoading(true);
+     
+    //   const selectedGrade = grades.find(grade => grade.gradeId === gradeId);
+    //   setSelectedGrade(selectedGrade || null); // Guarda el grado seleccionado
+    //   setLoading(false);
+    //   setShowAddParentModal(true);
+    // }
+
+
+    const selectedGrade = gradeProfessors.find(grade => grade.gradeId === gradeId);
+    //console.log(selectedStudent);
+    setSelectedProfessorGrade(selectedGrade || null);
+    if (selectedGrade) {
       setLoading(true);
-      const unassociatedProfessors = await GradeService.getUnassociatedProfessors(gradeId);
+      const unassociatedProfessors = await GradeService.getUnassociatedProfessors(selectedGrade.gradeId);
       setUnassociatedProfessors(unassociatedProfessors);
-      const professorAssociations = await GradeService.getGradesWithProfessorAssociations(gradeId);
+      const professorAssociations = await GradeService.getGradesWithProfessorAssociations(selectedGrade.gradeId);
       setProfessors(professorAssociations);
-      const selectedGrade = grades.find(grade => grade.gradeId === gradeId);
-      setSelectedGrade(selectedGrade || null); // Guarda el grado seleccionado
-      setLoading(false);
-      setShowAddParentModal(true);
+        setLoading(false);
+    setShowAddParentModal(true);
     }
   };
 
@@ -254,41 +304,42 @@ const GradeList = () => {
     setShowAddParentModal(false);
      setSelectedProfessorGrade(null);
      setSelectedProfessors([]);
+     //fetchGradeProfessors();
   };
 
 
+  //ERROR EN EL HANDLEADDGRADE, AQUI ESTA CORREGIDO, TENIA QUE CARGAR LOS METODOS DEL useEffect(())
   const handleAddGrade = async () => {
     try {
       // Verificar campos obligatorios
       if (!formData.name || !formData.section || !formData.description) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
-  
-      //  // Validar campos requeridos
-      // const newErrors: { [key: string]: string } = {};
-      // Object.entries(formData).forEach(([key, value]) => {
-      //   if (value.trim() === "") {
-      //     newErrors[key] =
-      //       `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
-      //   }
-      // });
-      // if (Object.keys(newErrors).length > 0) {
-      //   setErrors(newErrors);
-      //   return;
-      // }
 
-      // Guardar el padre
+      // Agregar el grado
       await GradeService.addGrade(formData);
       setShowAddModal(false);
       fetchGradeProfessors();
   
-      // Mostrar una alerta de éxito
+      // Actualizar manualmente selectedGrade con el nuevo grado agregado
+      const newGrade = { ...formData };
+      setSelectedGrade(newGrade);
+
+      fetchData();
+      fetchProfessors();
+    //fetchGradeProfessors();
+  
+      // Mostrar el modal y pasar el ID del nuevo grado agregado
+      //handleAddParentModalShow(newGrade.gradeId);
+  
+      // Mostrar una alerta de éxito después de agregar el grado
       Swal.fire('Éxito', 'El grado ha sido agregado correctamente.', 'success');
     } catch (error) {
       console.error('Error al insertar grado:', error);
       Swal.fire('Error', 'Se produjo un error al intentar agregar el grado.', 'error');
     }
   };
+  
 
 
   const handleUpdateGrade = async () => {
@@ -344,8 +395,8 @@ const GradeList = () => {
   };
   
 const handleSelectProfessor = async (professor: Professor) => {
-  if (!selectedGrade) {
-    console.error('No se ha seleccionado ningún estudiante.');
+  if (!selectedProfessorGrade) {
+    console.error('No se ha seleccionado ningún professor.');
     return;
   }
 
@@ -375,14 +426,14 @@ const handleSelectProfessor = async (professor: Professor) => {
       }
 
       // Realizar la selección del padre
-      await saveSelectedProfessor(selectedGrade.gradeId, professor.id);
+      await saveSelectedProfessor(selectedProfessorGrade.gradeId, professor.id);
 
       // Actualizar la lista de padres asociados
-      const updatedGradeProfessor = await GradeService.getGradesWithProfessorAssociations(professor.id);
+      const updatedGradeProfessor = await GradeService.getGradesWithProfessorAssociations(selectedProfessorGrade.gradeId);
       setProfessors(updatedGradeProfessor);
 
       // Actualizar la lista de padres no asociados
-      await fetchUnassociatedProfessors(professor.id);
+      await fetchUnassociatedProfessors(selectedProfessorGrade.gradeId);
       await fetchGradeProfessors();
 
       // Mostrar una alerta de éxito después de seleccionar el padre
@@ -422,10 +473,10 @@ const isDeleteButtonDisabled = (professorId:number) => {
   const handleDeleteProfessor = async (professor: Professor) => {
     // Verifica si selectedParentStudent es null
     // console.log(selectedProfessorGrade)
-    // if (!selectedProfessorGrade) {
-    //   console.error('No se ha seleccionado ningún estudiante.');
-    //   return;
-    // }
+    if (!selectedProfessorGrade) {
+      console.error('No se ha seleccionado ningún estudiante.');
+      return;
+    }
     
     try {
       // Muestra el diálogo de confirmación antes de realizar la eliminación
@@ -455,7 +506,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
         console.log('Registro eliminado exitosamente');
   
         // Actualiza la lista de padres no asociados
-        await fetchUnassociatedProfessors(professor.id);
+        await fetchUnassociatedProfessors(selectedProfessorGrade.gradeId);
         await fetchGradeProfessors();
   
         // Muestra una alerta de éxito después de que se complete la eliminación
@@ -505,8 +556,14 @@ const isDeleteButtonDisabled = (professorId:number) => {
           </tr>
         </thead>
         <tbody>
-          {gradeProfessors.map((grade) => (
-            <tr key={grade.gradeId}>
+          {gradeProfessors
+          .filter((grade) => {
+            const gradeName = `${grade.name}`.toLowerCase();
+            const searchValue = filterValue.toLowerCase();
+            return gradeName.includes(searchValue);
+        }).map((grade, gradeIndex) => (
+            
+            <tr key={gradeIndex}>
               <td>{grade.name}</td>
               <td>{grade.section}</td>
               <td>{grade.description}</td>
@@ -527,7 +584,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
                 >
                   Eliminar
                 </Button>
-                <Button variant="success" onClick={() => handleAddParentModalShow(grade.gradeId)}>Agregar profesor</Button>
+                <Button variant="success" onClick={() => handleAddParentModalShow(grade.gradeId)}>Asignar coordinador</Button>
               </td>
             </tr>
           ))}
@@ -536,11 +593,11 @@ const isDeleteButtonDisabled = (professorId:number) => {
       <Modal show={showAddParentModal} onHide={handleAddParentModalClose} dialogClassName="modal-xl">
           <Modal.Header closeButton>
           
-            <Modal.Title>Asociar Profesor a Grado {selectedGrade && (
+            <Modal.Title>Asociar Profesor a Grado {selectedProfessorGrade && (
                 <small>
                 <strong>
                   <span style={{ color: 'red' }}>
-                    {selectedGrade.name} {selectedGrade.section}
+                    {selectedProfessorGrade.name} {selectedProfessorGrade.section}
                   </span>
                 </strong>
               </small>
@@ -720,7 +777,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
 
         <Modal show={showAddModal} onHide={handleAddModalClose}>
           <Modal.Header closeButton>
-            <Modal.Title>{selectedGradeId !== null ? 'Editar Padre' : 'Agregar Padre'}</Modal.Title>
+            <Modal.Title>{selectedGradeId !== null ? 'Editar Grado' : 'Agregar Grado'}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form>
@@ -729,7 +786,6 @@ const isDeleteButtonDisabled = (professorId:number) => {
                 <Form.Control  className="form-control"
                   type="text"
                   name="name"
-                  placeholder="Name"
                   value={formData.name}
                   onChange={handleChange}
                   required />
@@ -740,7 +796,6 @@ const isDeleteButtonDisabled = (professorId:number) => {
                 <Form.Control  className="form-control"
                   type="text"
                   name="section"
-                  placeholder="Section"
                   value={formData.section}
                   onChange={handleChange}
                   required />
@@ -753,7 +808,6 @@ const isDeleteButtonDisabled = (professorId:number) => {
                 <Form.Control  className="form-control"
                   type="text"
                   name="description"
-                  placeholder="Description"
                   value={formData.description}
                   onChange={handleChange}
                   required/>

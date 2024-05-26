@@ -47,6 +47,17 @@ const GradeService = {
       throw error;
     }
   },
+
+  //SE BUGUEA POR ESO LO PASE A ID DE UN SOLO YA QUE CON COUNTID ME LO TOMA PERO TENGO QUE RECARGAR LA PAGINA
+  // getMyGrades: async (professorId: string) => {
+  //   try {
+  //     const response = await axiosInstance.get<MiGradeResponse>(`/migrades`);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error al obtener grados:", error);
+  //     throw error;
+  //   }
+  // },
   getStudents: async (id: number,page:number) => {
     try {
       const response = await axiosInstance.get<StudentsGradeResponse>(

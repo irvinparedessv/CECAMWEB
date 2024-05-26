@@ -144,7 +144,7 @@ const Students = () => {
 
       // Construir el mensaje de confirmación
       let action = newEnabledValue ? 'activar' : 'desactivar';
-      let message = `<br><b>¿Está seguro de que desea ${action} a este estudiante?</b><br>`;
+      let message = `<br><b>¿Está seguro de que desea ${action} a este usuario?</b><br>`;
 
       // Obtener los IDs de los padres
       const parentIds = parentsData.map(parent => parent.id);
@@ -363,10 +363,20 @@ const Students = () => {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
       
-      // Verificar si el correo ya existe
-      const emailExists = await StudentService.checkEmailExists(newStudentData.email);
-      if (emailExists) {
-        return Swal.fire('Error', 'El correo ya existe.', 'error');
+      // Verificar que selectedStudentId no sea null
+      if (selectedStudentId === null) {
+        return Swal.fire('Error', 'No se ha seleccionado un usuario para actualizar.', 'error');
+      }
+  
+      // Obtener el usuario actual para comparar el correo
+      const currentStudentData = await StudentService.getUser(selectedStudentId);
+  
+      // Solo verificar la existencia del correo si ha sido modificado
+      if (newStudentData.email !== currentStudentData.email) {
+        const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+        if (emailExists) {
+          return Swal.fire('Error', 'El correo ya existe.', 'error');
+        }
       }
 
       // Actualizar el padre
@@ -403,7 +413,7 @@ const Students = () => {
       // Mostrar la alerta de confirmación
       const result = await Swal.fire({
         title: '¿Estás seguro?',
-        text: 'Esta acción eliminará el padre asociado.',
+        text: 'Esta acción eliminará el usuario asociado.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
