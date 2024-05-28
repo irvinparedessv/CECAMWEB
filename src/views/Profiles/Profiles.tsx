@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import defaultUserPhoto from './user.jpg'; // Importa la imagen predeterminada
 import { UserInformation } from '../../types/Login'; // Asegúrate de importar la interfaz correcta
 
 const Profiles = () => {
-  const [userInfo, setUserInfo] = useState<UserInformation | null>(null); // Asegúrate de especificar el tipo de estado
-  const [photo, setPhoto] = useState<File | null>(null); // Asegúrate de especificar el tipo de estado para la foto
+  const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
+  const [photo, setPhoto] = useState<File | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +14,6 @@ const Profiles = () => {
     if (storedUserInfo) {
       setUserInfo(JSON.parse(storedUserInfo));
     } else {
-      // Redirigir a otra página si no hay información del usuario
       navigate('/login');
     }
   }, [navigate]);
@@ -46,7 +44,7 @@ const Profiles = () => {
         const data = await response.json();
         setUserInfo(prevUserInfo => {
           if (prevUserInfo === null) {
-            return null; // Retorna null si userInfo es null
+            return null;
           }
           return { ...prevUserInfo, userPhoto: data.path };
         });
@@ -60,10 +58,10 @@ const Profiles = () => {
   };
 
   if (userInfo === null) {
-    return null; // O mostrar un mensaje de carga, dependiendo de la implementación
+    return null;
   }
 
-  const { firstName, lastName, userName, role } = userInfo;
+  const { firstName, lastName, userName, roleName, userPhoto, id, email } = userInfo;
 
   return (
     <Container fluid className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -72,7 +70,7 @@ const Profiles = () => {
           <Card style={{ width: '18rem', textAlign: 'center' }}>
             <Card.Img
               variant="top"
-              // src={userPhoto ? userPhoto : defaultUserPhoto} // Si userPhoto es null, muestra la imagen predeterminada
+              src={`/userPhoto/${userPhoto}`} // Utiliza la ruta de la imagen del usuario desde tu API
               alt={`${firstName} ${lastName}`}
               style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '50%', margin: 'auto', marginTop: '20px' }}
             />
@@ -88,7 +86,13 @@ const Profiles = () => {
                 <strong>Username:</strong> {userName}
               </Card.Text>
               <Card.Text>
-                <strong>Role:</strong> {role}
+                <strong>Role:</strong> {roleName}
+              </Card.Text>
+              <Card.Text>
+                <strong>Role:</strong> {email}
+              </Card.Text>
+              <Card.Text>
+                <strong>direccion foto:</strong> {userPhoto}
               </Card.Text>
               <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formPhoto">
