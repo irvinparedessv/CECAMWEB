@@ -101,6 +101,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Modal, Table } from 'react-bootstrap';
+import Swal from 'sweetalert2';
 import SubjectService from '../../services/SubjectService';
 import { Subject } from '../../types'; // Importa la interfaz Subject
 
@@ -110,7 +111,7 @@ const SubjectForm = () => {
   const [subjectId, setSubjectId] = useState<number | null>(null);
   const [subjectName, setSubjectName] = useState('');
   const [code, setCode] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); // Nuevo estado para el término de búsqueda
   const [errorMessage, setErrorMessage] = useState('');
 
   const fetchSubjects = async () => {
@@ -139,17 +140,18 @@ const SubjectForm = () => {
     try {
       if (subjectId !== null) {
         await SubjectService.updateSubject(subjectId, subjectName, code);
+        Swal.fire('Actualizado', 'Materia actualizada correctamente.', 'success');
       } else {
         await SubjectService.createSubject(subjectName, code);
+        Swal.fire('Guardado', 'Materia creada correctamente.', 'success');
       }
       fetchSubjects();
       setShowModal(false);
       setSubjectId(null);
       setSubjectName('');
       setCode('');
-      setSuccessMessage(subjectId !== null ? 'Materia actualizada correctamente.' : 'Materia creada correctamente.');
     } catch (error) {
-      console.error('Error creating/updating subject:', error);
+      console.error('Error creando/actualizando materia:', error);
       setErrorMessage('Error al crear/actualizar la materia. Por favor, inténtalo de nuevo más tarde.');
     }
   };
@@ -158,18 +160,54 @@ const SubjectForm = () => {
     try {
       await SubjectService.deleteSubject(subjectId);
       fetchSubjects();
-      setSuccessMessage('Materia eliminada correctamente.');
+      Swal.fire('Eliminado', 'Materia eliminada correctamente.', 'success');
     } catch (error) {
-      console.error('Error deleting subject:', error);
+      console.error('Error eliminando materia:', error);
       setErrorMessage('Error al eliminar la materia. Por favor, inténtalo de nuevo más tarde.');
     }
   };
 
+  const confirmDelete = (subjectId: number) => {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¡No podrás revertir esto!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleDelete(subjectId);
+      }
+    });
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredSubjects = subjects.filter(
+    subject =>
+      subject.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.code.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="container">
-      <Button variant="primary" onClick={() => setShowModal(true)}>
-        Registrar Materia
-      </Button>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <Form.Control
+          type="text"
+          placeholder="Buscar por nombre o código"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          style={{ width: '300px' }} // Ajusta el tamaño del campo de búsqueda
+        />
+        <Button variant="primary" onClick={() => setShowModal(true)}>
+          Registrar Materia
+        </Button>
+      </div>
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
@@ -204,7 +242,6 @@ const SubjectForm = () => {
         </Modal.Body>
       </Modal>
 
-      {successMessage && <div className="alert alert-success">{successMessage}</div>}
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
       <Table striped bordered hover>
@@ -216,15 +253,15 @@ const SubjectForm = () => {
           </tr>
         </thead>
         <tbody>
-          {subjects.map((subject) => (
+          {filteredSubjects.map((subject) => (
             <tr key={subject.subjectId}>
               <td>{subject.subjectName}</td>
               <td>{subject.code}</td>
               <td>
-                <Button variant="warning" onClick={() => handleEdit(subject)}>
+                <Button variant="primary" onClick={() => handleEdit(subject)}>
                   Editar
                 </Button>{' '}
-                <Button variant="danger" onClick={() => handleDelete(subject.subjectId)}>
+                <Button variant="danger" onClick={() => confirmDelete(subject.subjectId)}>
                   Eliminar
                 </Button>
               </td>
@@ -237,3 +274,5 @@ const SubjectForm = () => {
 };
 
 export default SubjectForm;
+
+
