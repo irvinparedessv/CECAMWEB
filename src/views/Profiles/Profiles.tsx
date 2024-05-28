@@ -186,26 +186,22 @@ const Profiles = () => {
   }
 
   const { firstName, lastName, userName, rolId, userPhoto, id, email } = userInfo;
-  let roleNameDisplay = '';
-
-  // Ajustar el roleNameDisplay según el valor de rolId
-  if (rolId === 5) {
-    roleNameDisplay = 'Administrador';
-  } else if (rolId === 3) {
-    roleNameDisplay = 'Profesor';
-  }
+  // https://p.vitalmtb.com/styles/profile_thumb/s3/default_images/avatar.png?VersionId=BF2de8UFkyLe.DxkSs2vUex__FMw9em_&itok=5oR2c92z
+  // URL de la imagen por defecto
+  const DEFAULT_USER_PHOTO_URL = '/default-user-photo';
 
   return (
     <Container fluid className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
       <Row>
         <Col>
           <Card style={{ width: '18rem', textAlign: 'center' }}>
-            <Card.Img
-              variant="top"
-              src={`/userPhoto/${userPhoto}`} // Utiliza la ruta de la imagen del usuario desde tu API
-              alt={`${firstName} ${lastName}`}
-              style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '50%', margin: 'auto', marginTop: '20px' }}
-            />
+          <Card.Img
+            variant="top"
+            src={userPhoto ? `/userPhoto/${userPhoto}` : 'http://localhost:8000/storage/userPhoto/default-user-photo.jpg'}
+            alt={`${firstName} ${lastName}`}
+            style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '50%', margin: 'auto', marginTop: '20px' }}
+          />
+
             <Card.Body>
               <Card.Title>{`${firstName} ${lastName}`}</Card.Title>
               <Card.Text>
@@ -218,7 +214,7 @@ const Profiles = () => {
                 <strong>Username:</strong> {userName}
               </Card.Text>
               <Card.Text>
-                <strong>Role:</strong> {roleNameDisplay}
+                <strong>Role:</strong> {rolId}
               </Card.Text>
               <Card.Text>
                 <strong>Email:</strong> {email}
@@ -244,4 +240,5 @@ const Profiles = () => {
 };
 
 export default Profiles;
+
 
