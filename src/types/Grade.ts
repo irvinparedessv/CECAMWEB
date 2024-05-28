@@ -32,6 +32,7 @@ export interface MiGradeData {
 }
 
 export interface GradeFormAdd {
+  gradeId: number;
   name: string;
   section: string;
   description: string;

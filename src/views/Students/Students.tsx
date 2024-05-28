@@ -337,6 +337,12 @@ const Students = () => {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
+      // Verificar si el correo ya existe
+      const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+      if (emailExists) {
+        return Swal.fire('Error', 'El correo ya existe.', 'error');
+      }
+  
       // Guardar el estudiante
       await StudentService.insertUser(newStudentData);
       setShowAddModal(false);
@@ -349,31 +355,44 @@ const Students = () => {
       Swal.fire('Error', 'Se produjo un error al intentar agregar el estudiante.', 'error');
     }
   };
-
+  
+  
   const handleUpdateStudent = async () => {
     try {
       // Verificar campos obligatorios
-      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email ) {
+      if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
-      // Actualizar el padre
-      if (selectedStudentId !== null) {
-        await StudentService.updateUser(selectedStudentId, newStudentData);
-        setShowAddModal(false);
-        fetchStudents();
-
-        // Mostrar una alerta de éxito
-        Swal.fire('Éxito', 'Los cambios han sido guardados correctamente.', 'success');
+      // Verificar que selectedStudentId no sea null
+      if (selectedStudentId === null) {
+        return Swal.fire('Error', 'No se ha seleccionado un estudiante para actualizar.', 'error');
       }
-        
-      
+  
+      // Obtener el usuario actual para comparar el correo
+      const currentStudentData = await StudentService.getUser(selectedStudentId);
+  
+      // Solo verificar la existencia del correo si ha sido modificado
+      if (newStudentData.email !== currentStudentData.email) {
+        const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+        if (emailExists) {
+          return Swal.fire('Error', 'El correo ya existe.', 'error');
+        }
+      }
+  
+      // Actualizar el estudiante
+      await StudentService.updateUser(selectedStudentId, newStudentData);
+      setShowAddModal(false);
+      fetchStudents();
+  
+      // Mostrar una alerta de éxito
+      Swal.fire('Éxito', 'Los cambios han sido guardados correctamente.', 'success');
     } catch (error) {
       console.error('Error al actualizar estudiante:', error);
       Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
     }
   };
-
+  
   // const handleDeleteStudent = async (studentId: number) => {
   //   try {
       
@@ -557,7 +576,9 @@ const Students = () => {
               <Form.Group controlId="formEmail">
                 <Form.Label>Email</Form.Label>
                 <Form.Control type="email" name="email" value={newStudentData.email} onChange={handleInputChange} />
+                {errors.email && <Form.Text className="text-danger">{errors.email}</Form.Text>}
               </Form.Group>
+
               {/* <Form.Group controlId="formPassword">
                 <Form.Label>Password</Form.Label>
                 <Form.Control type="password" name="password" value={newStudentData.password} onChange={handleInputChange} />

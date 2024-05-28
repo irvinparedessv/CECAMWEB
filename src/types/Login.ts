@@ -3,12 +3,12 @@ export interface Login {
   password: string;
 }
 
-export interface LoginResponse {
-  success: boolean;
-  data: UserInformation;
-  token: string;
-  message?: string;
-}
+// export interface LoginResponse {
+//   success: boolean;
+//   data: UserInformation;
+//   token: string;
+//   message?: string;
+// }
 
 // export interface UserInformation {
 //   id: number;
@@ -26,4 +26,17 @@ export interface UserInformation {
   role: string;
 }
 
+export interface LoginResponse {
+  success: boolean;
+  data?: {
+    id: string;
+    email: string;
+    userName: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+  };
+  token?: string;
+  message?: string;
+}
 

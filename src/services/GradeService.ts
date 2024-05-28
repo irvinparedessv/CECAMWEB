@@ -5,9 +5,11 @@ import API_BASE_URL from "./apiConfig"; // Importa la URL base de la API
 import {
   Grade,
   GradeFormAdd,
+  GradeProfessors,
   GradeResponse,
   GradeResponseOne,
   MiGradeResponse,
+  Professor,
 } from "../types";
 import { StudentsGradeResponse } from "../types/Student";
 import { itemsPerPage } from "../const/Pagination";
@@ -36,17 +38,26 @@ const GradeService = {
       throw error;
     }
   },
-  getMyGrades: async () => {
+  getMyGrades: async (professorId: string) => {
     try {
-      const response = await axiosInstance.get<MiGradeResponse>(
-        `${API_BASE_URL}/migrades`
-      );
+      const response = await axiosInstance.get<MiGradeResponse>(`/migrades/${professorId}`);
       return response.data;
     } catch (error) {
-      console.error("Error al obtener usuarios:", error);
+      console.error("Error al obtener grados:", error);
       throw error;
     }
   },
+
+  //SE BUGUEA POR ESO LO PASE A ID DE UN SOLO YA QUE CON COUNTID ME LO TOMA PERO TENGO QUE RECARGAR LA PAGINA
+  // getMyGrades: async (professorId: string) => {
+  //   try {
+  //     const response = await axiosInstance.get<MiGradeResponse>(`/migrades`);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error al obtener grados:", error);
+  //     throw error;
+  //   }
+  // },
   getStudents: async (id: number,page:number) => {
     try {
       const response = await axiosInstance.get<StudentsGradeResponse>(
@@ -95,10 +106,10 @@ const GradeService = {
     }
   },
 
-  updateGrade: async (grade: Grade) => {
+  updateGrade: async (gradeId: number, grade: Grade) => {
     try {
       const response = await axiosInstance.put(
-        `${API_BASE_URL}/grades/${grade.gradeId}`,
+        `${API_BASE_URL}/grades/${gradeId}`,
         grade
       );
       return response.data;
@@ -108,6 +119,59 @@ const GradeService = {
     }
   },
   // Otros métodos para otras operaciones CRUD si es necesario
+
+  getAllGradeProfessors: async () => {
+    try {
+      const response = await axios.get<GradeProfessors[]>(`${API_BASE_URL}/gradeProfessors`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error);
+      throw error;
+    }
+  },
+
+  getGradesWithProfessorAssociations: async (gradeId: number): Promise<Professor[]> => {
+    try {
+      const response = await axios.get<Professor[]>(`${API_BASE_URL}/grades/professors/${gradeId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener usuarios con asociaciones de padres:', error);
+      throw error;
+    }
+  },
+
+  getUnassociatedProfessors: async (gradeId: number): Promise<Professor[]> => {
+    try {
+      const response = await axios.get<Professor[]>(`${API_BASE_URL}/grades/professorsUnassociated/${gradeId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener padres no asociados:', error);
+      throw error;
+    }
+  },
+
+  saveGradeProfessors: async (gradeId: number, professorId: number) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/gradeProfessors`, {
+        gradeId,
+        professorId
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error al guardar la asociación de profesores:', error);
+      throw error;
+    }
+  },
+
+  deleteGradeProfessor: async (gradeId:number) => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/gradeProfessors/${gradeId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al eliminar la asociación de padres:', error);
+      throw error;
+    }
+  },
 };
 
 export default GradeService;

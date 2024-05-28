@@ -6,3 +6,5 @@ export * from './ParentAssociation';
 export * from "./Grade";
 export * from "./General";
 export * from "./Paginations";
+export * from "./Professor";
+export * from "./Subject";
