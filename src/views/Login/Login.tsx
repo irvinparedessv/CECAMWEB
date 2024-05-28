@@ -144,7 +144,8 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
           roleName: response.data.role,
           firstName: response.data.firstName,
           lastName: response.data.lastName,
-          id: response.data.id,
+          id: response.data.id
+          //userPhoto: response.data.userPhoto
         };
 
         localStorage.setItem("token", response.token ?? "");

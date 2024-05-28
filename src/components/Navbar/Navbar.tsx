@@ -25,7 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
   // Acceder al roleName del objeto userInfo
 
   // Extraer el nombre de usuario y el rol del objeto userInfo
-  const { userName, roleName, firstName, lastName, id } = userInfo;
+  const { firstName, lastName, roleName } = userInfo;
 
   return (
     <div className="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
@@ -44,19 +44,19 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                 </Link>
               </li>
               <li>
-                <Link to={"/parents"} className="nav-link px-0 align-middle" >
+                <Link to="/parents" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faChalkboard} className="me-2" />
                   Padres
                 </Link>
               </li>
               <li>
-                <Link to={"/parentAssociations"} className="nav-link px-0 align-middle" >
+                <Link to="/parentAssociations" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faChalkboard} className="me-2" />
-                  Asociacion de padres
+                  Asociación de padres
                 </Link>
               </li>
               <li>
-                <Link to={"/migrades"} className="nav-link px-0 align-middle" >
+                <Link to="/migrades" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faUserGraduate} className="me-2" />
                   Mis Grados
                 </Link>
@@ -66,50 +66,49 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
           ) : (
             <>
               {/* <li>
-                <Link to={"/students"} className="nav-link px-0 align-middle" >
+                <Link to="/students" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faChalkboard} className="me-2" />
                   Estudiantes
                 </Link>
               </li>
               <li>
-                <Link to={"/parents"} className="nav-link px-0 align-middle" >
+                <Link to="/parents" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faChalkboard} className="me-2" />
                   Padres
                 </Link>
               </li> */}
               <li>
-                <Link to={"/parentAssociations"} className="nav-link px-0 align-middle" >
+                <Link to="/parentAssociations" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faChalkboard} className="me-2" />
-                  Asociacion de padres
+                  Asociación de padres
                 </Link>
               </li>
               <li>
-                <Link to={"/attendances"} className="nav-link px-0 align-middle" >
+                <Link to="/attendances" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faClipboardList} className="me-2" />
                   Asistencias
                 </Link>
               </li>
-                <li>
-                <Link to={"/grades"} className="nav-link px-0 align-middle" >
+              <li>
+                <Link to="/grades" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faUserGraduate} className="me-2" />
                   Grados
                 </Link>
               </li>
-              
               <li>
-                <Link to={"/notes"} className="nav-link px-0 align-middle" >
+                <Link to="/notes" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faStickyNote} className="me-2" />
                   Notas
                 </Link>
               </li>
               <li>
-                <Link to={"/rols"} className="nav-link px-0 align-middle" >
+                <Link to="/rols" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faUser} className="me-2" />
                   Gestión de usuarios
                 </Link>
               </li>
               <li>
-                <Link to={"/observations"} className="nav-link px-0 align-middle" >
+                <Link to="/observations" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faCommentAlt} className="me-2" />
                   Observaciones
                 </Link>
@@ -131,7 +130,9 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
           <ul className="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
             <li><a className="dropdown-item" href="#">New project...</a></li>
             <li><a className="dropdown-item" href="#">Settings</a></li>
-            <li><a className="dropdown-item" href="#">Profile</a></li>
+            <li>
+              <Link to="/profiles" className="dropdown-item">Perfil</Link>
+            </li>
             <li><hr className="dropdown-divider" /></li>
             <li><a className="dropdown-item" href="#" onClick={logout}>Sign out</a></li>
           </ul>
