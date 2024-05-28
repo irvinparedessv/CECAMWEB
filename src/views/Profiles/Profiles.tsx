@@ -114,15 +114,13 @@
 // export default Profiles;
 
 
-
-
-
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { UserInformation } from '../../types/Login'; // Asegúrate de importar la interfaz correcta
 import AuthService from '../../services/AuthService'; // Importa tu servicio AuthService
+import UserService from '../../services/UserService';
 
 const Profiles = () => {
   const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
@@ -160,22 +158,8 @@ const Profiles = () => {
     formData.append('photo', photo);
 
     try {
-      const response = await fetch('/uploadPhoto', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUserInfo(prevUserInfo => {
-          if (prevUserInfo === null) {
-            return null;
-          }
-          return { ...prevUserInfo, userPhoto: data.path };
-        });
-      } else {
-        console.error('Error al cargar la foto');
-      }
+      const updatedUserInfo = await UserService.uploadPhoto(formData);
+      setUserInfo(updatedUserInfo);
     } catch (error) {
       console.error('Error al cargar la foto:', error);
     }
@@ -186,21 +170,19 @@ const Profiles = () => {
   }
 
   const { firstName, lastName, userName, rolId, userPhoto, id, email } = userInfo;
-  // https://p.vitalmtb.com/styles/profile_thumb/s3/default_images/avatar.png?VersionId=BF2de8UFkyLe.DxkSs2vUex__FMw9em_&itok=5oR2c92z
-  // URL de la imagen por defecto
-  const DEFAULT_USER_PHOTO_URL = '/default-user-photo';
+  const DEFAULT_USER_PHOTO_URL = 'http://localhost:8000/storage/userPhoto/default-user-photo.jpg';
 
   return (
     <Container fluid className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
       <Row>
         <Col>
           <Card style={{ width: '18rem', textAlign: 'center' }}>
-          <Card.Img
-            variant="top"
-            src={userPhoto ? `/userPhoto/${userPhoto}` : 'http://localhost:8000/storage/userPhoto/default-user-photo.jpg'}
-            alt={`${firstName} ${lastName}`}
-            style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '50%', margin: 'auto', marginTop: '20px' }}
-          />
+            <Card.Img
+              variant="top"
+              src={userPhoto ? `/storage/${userPhoto}` : DEFAULT_USER_PHOTO_URL}
+              alt={`${firstName} ${lastName}`}
+              style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '50%', margin: 'auto', marginTop: '20px' }}
+            />
 
             <Card.Body>
               <Card.Title>{`${firstName} ${lastName}`}</Card.Title>
@@ -214,7 +196,7 @@ const Profiles = () => {
                 <strong>Username:</strong> {userName}
               </Card.Text>
               <Card.Text>
-                <strong>Role:</strong> {rolId}
+                <strong>Rol:</strong> {rolId === 5 ? 'Administrador' : (rolId === 3 ? 'Profesor' : 'Otro')}
               </Card.Text>
               <Card.Text>
                 <strong>Email:</strong> {email}
@@ -240,5 +222,3 @@ const Profiles = () => {
 };
 
 export default Profiles;
-
-
