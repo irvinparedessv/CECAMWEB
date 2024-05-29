@@ -118,14 +118,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { UserInformation } from '../../types/Login';
 import AuthService from '../../services/AuthService';
 import UserService from '../../services/UserService';
-import './profiles.css'; // Importa el archivo de estilos
-import axios, { AxiosError } from 'axios'; // Importa axios y AxiosError
+import './profiles.css';
+import axios, { AxiosError } from 'axios';
 
 const Profiles = () => {
   const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Estado para controlar la visibilidad del swal2
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -134,7 +134,6 @@ const Profiles = () => {
         const response = await AuthService.getUserDetails();
         setUserInfo(response);
       } catch (error) {
-        console.error('Error al obtener los detalles del usuario:', error);
         navigate('/login');
       }
     };
@@ -145,13 +144,38 @@ const Profiles = () => {
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedPhoto = e.target.files[0];
+
+      // Validación previa en el cliente
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      const maxSize = 2048 * 1024; // 2 MB
+
+      if (!allowedTypes.includes(selectedPhoto.type)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al subir la foto',
+          text: 'Formato de archivo no válido. Por favor, sube una imagen en formato jpeg, png o jpg.',
+          allowOutsideClick: true,
+        });
+        return;
+      }
+
+      if (selectedPhoto.size > maxSize) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al subir la foto',
+          text: 'El archivo excede el tamaño máximo permitido de 2 MB.',
+          allowOutsideClick: true,
+        });
+        return;
+      }
+
       setPhoto(selectedPhoto);
 
       const formData = new FormData();
       formData.append('photo', selectedPhoto);
 
       try {
-        setIsLoading(true); // Mostrar swal2
+        setIsLoading(true);
         Swal.fire({
           title: 'Cargando...',
           allowOutsideClick: false,
@@ -161,33 +185,32 @@ const Profiles = () => {
           },
         });
 
-        await UserService.uploadPhoto(formData); // Guardar la foto
+        await UserService.uploadPhoto(formData);
 
-        // Actualizar los detalles del usuario después de guardar la imagen
         const updatedUserInfo = await AuthService.getUserDetails();
         setUserInfo(updatedUserInfo);
-        Swal.close(); // Cerrar swal2 de carga
+        Swal.close();
       } catch (error) {
-        Swal.close(); // Cerrar swal2 de carga antes de mostrar el error
-        if (axios.isAxiosError(error) && error.response && error.response.status === 422) {
-          // Error de validación
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al subir la foto',
-            text: 'Formato de archivo no válido. Por favor, sube una imagen en formato jpeg, png, jpg y que no exceda los 2 MB.',
-            allowOutsideClick: true, // Permitir que el usuario cierre la alerta haciendo clic fuera
-          });
-        } else {
-          console.error('Error al cargar la foto:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al subir la foto',
-            text: 'Ocurrió un error al intentar subir la foto. Por favor, intenta de nuevo más tarde.',
-            allowOutsideClick: true, // Permitir que el usuario cierre la alerta haciendo clic fuera
-          });
+        Swal.close();
+        if (axios.isAxiosError(error) && error.response) {
+          if (error.response.status === 422) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error al subir la foto',
+              text: error.response.data.error || 'Formato de archivo no válido. Por favor, sube una imagen en formato jpeg, png o jpg.',
+              allowOutsideClick: true,
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error al subir la foto',
+              text: 'Ocurrió un error al intentar subir la foto. Por favor, intenta de nuevo más tarde.',
+              allowOutsideClick: true,
+            });
+          }
         }
       } finally {
-        setIsLoading(false); // Ocultar swal2
+        setIsLoading(false);
       }
     }
   };
