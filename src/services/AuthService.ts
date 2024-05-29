@@ -127,6 +127,13 @@ const AuthService = {
       throw error;
     }
   },
+
+  getToken: (): string | null => {
+    return localStorage.getItem('token');
+  }
+
+
+
 };
 
 export default AuthService;

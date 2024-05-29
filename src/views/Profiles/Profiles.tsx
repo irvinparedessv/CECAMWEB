@@ -113,7 +113,6 @@
 
 // export default Profiles;
 
-
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -171,6 +170,7 @@ const Profiles = () => {
 
   const { firstName, lastName, userName, rolId, userPhoto, id, email } = userInfo;
   const DEFAULT_USER_PHOTO_URL = 'http://localhost:8000/storage/userPhoto/default-user-photo.jpg';
+  const userPhotoUrl = userPhoto ? `http://localhost:8000/storage/${userPhoto}` : DEFAULT_USER_PHOTO_URL;
 
   return (
     <Container fluid className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -179,7 +179,7 @@ const Profiles = () => {
           <Card style={{ width: '18rem', textAlign: 'center' }}>
             <Card.Img
               variant="top"
-              src={userPhoto ? `/storage/${userPhoto}` : DEFAULT_USER_PHOTO_URL}
+              src={userPhotoUrl}
               alt={`${firstName} ${lastName}`}
               style={{ width: '200px', height: '200px', objectFit: 'cover', borderRadius: '50%', margin: 'auto', marginTop: '20px' }}
             />
