@@ -117,8 +117,8 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { UserInformation } from '../../types/Login'; // Asegúrate de importar la interfaz correcta
-import AuthService from '../../services/AuthService'; // Importa tu servicio AuthService
+import { UserInformation } from '../../types/Login';
+import AuthService from '../../services/AuthService';
 import UserService from '../../services/UserService';
 
 const Profiles = () => {
@@ -157,7 +157,10 @@ const Profiles = () => {
     formData.append('photo', photo);
 
     try {
-      const updatedUserInfo = await UserService.uploadPhoto(formData);
+      await UserService.uploadPhoto(formData); // Guardar la foto
+
+      // Actualizar los detalles del usuario después de guardar la imagen
+      const updatedUserInfo = await AuthService.getUserDetails();
       setUserInfo(updatedUserInfo);
     } catch (error) {
       console.error('Error al cargar la foto:', error);
