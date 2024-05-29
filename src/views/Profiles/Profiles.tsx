@@ -110,18 +110,16 @@
 //     </Container>
 //   );
 // };
-
-// export default Profiles;
-
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
-import { Container, Row, Col, Card, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { UserInformation } from '../../types/Login';
 import AuthService from '../../services/AuthService';
 import UserService from '../../services/UserService';
 import './profiles.css'; // Importa el archivo de estilos
+import axios, { AxiosError } from 'axios'; // Importa axios y AxiosError
 
 const Profiles = () => {
   const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
@@ -154,13 +152,40 @@ const Profiles = () => {
 
       try {
         setIsLoading(true); // Mostrar swal2
+        Swal.fire({
+          title: 'Cargando...',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          willOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
         await UserService.uploadPhoto(formData); // Guardar la foto
 
         // Actualizar los detalles del usuario después de guardar la imagen
         const updatedUserInfo = await AuthService.getUserDetails();
         setUserInfo(updatedUserInfo);
+        Swal.close(); // Cerrar swal2 de carga
       } catch (error) {
-        console.error('Error al cargar la foto:', error);
+        Swal.close(); // Cerrar swal2 de carga antes de mostrar el error
+        if (axios.isAxiosError(error) && error.response && error.response.status === 422) {
+          // Error de validación
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al subir la foto',
+            text: 'Formato de archivo no válido. Por favor, sube una imagen en formato jpeg, png, jpg y que no exceda los 2 MB.',
+            allowOutsideClick: true, // Permitir que el usuario cierre la alerta haciendo clic fuera
+          });
+        } else {
+          console.error('Error al cargar la foto:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al subir la foto',
+            text: 'Ocurrió un error al intentar subir la foto. Por favor, intenta de nuevo más tarde.',
+            allowOutsideClick: true, // Permitir que el usuario cierre la alerta haciendo clic fuera
+          });
+        }
       } finally {
         setIsLoading(false); // Ocultar swal2
       }
@@ -188,12 +213,12 @@ const Profiles = () => {
                 <label htmlFor="photoInput">
                   <img src={userPhotoUrl} alt={`${firstName} ${lastName}`} className={`rounded-circle img-fluid ${isHovered ? 'blur' : ''}`} />
                   {isHovered && <p className="change-photo-message">Cambiar Foto</p>}
-                  <input type="file" id="photoInput" onChange={handlePhotoChange} style={{ display: 'none' }} />
+                  <input type="file" id="photoInput" accept=".jpeg,.jpg,.png" onChange={handlePhotoChange} style={{ display: 'none' }} />
                 </label>
               </div>
               <hr />
               <div className="text-center">
-                <h4 className="user-name">{`${firstName} ${lastName}`}</h4>
+                <h3 className="user-name">{`${firstName} ${lastName}`}</h3>
                 <p><strong>Nombre de Usuario:</strong> {userName}</p>
                 <p><strong>Email:</strong> {email}</p>
                 <p><strong>Rol:</strong> {rolId === 5 ? 'Administrador' : (rolId === 3 ? 'Profesor' : 'Otro')}</p>
@@ -202,8 +227,6 @@ const Profiles = () => {
           </Card>
         </Col>
       </Row>
-      {/* SweetAlert2 para mostrar el estado de carga */}
-      <SwalLoading isLoading={isLoading} />
     </Container>
   );
 };
@@ -228,4 +251,3 @@ const SwalLoading = ({ isLoading }: { isLoading: boolean }) => {
 };
 
 export default Profiles;
-
