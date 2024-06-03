@@ -112,6 +112,7 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import "./login.css";
 import AuthService from "../../services/AuthService";
 import { useNavigate } from "react-router-dom";
+import { LoginResponse } from "../../types"; // Asegúrate de importar tus tipos
 
 interface LoginProps {
   login: () => void;
@@ -135,28 +136,27 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
     e.preventDefault();
 
     try {
-      const response = await AuthService.loginUser(emailOrUsername, password);
+      const response: LoginResponse = await AuthService.loginUser(emailOrUsername, password);
 
       if (response.success && response.data) {
         const userInfo = {
           token: response.token,
-          username: response.data.userName,
-          roleName: response.data.role,
+          userName: response.data.userName,
+          email: response.data.email,
+          roleName: response.data.roleName,
           firstName: response.data.firstName,
           lastName: response.data.lastName,
           id: response.data.id,
+          userPhoto: response.data.userPhoto // Añadir el campo userPhoto aquí
         };
 
         localStorage.setItem("token", response.token ?? "");
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
 
-        //AHI OBTENGO EL ID, PARA PROBARLO CON EL SERVICE DE MIGRADE
-        //localStorage.setItem("userId", response.data.id);
-
         // Redirigir según el rol del usuario
-        if (response.data.role === "Administrador") {
+        if (response.data.roleName === "Administrador") {
           navigate("/adminDashboard");
-        } else if (response.data.role === "Profesor") {
+        } else if (response.data.roleName === "Profesor") {
           navigate("/professorDashboard");
         } else {
           navigate("/students"); // Por defecto o para otros roles
@@ -164,7 +164,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 
         // Llama a la función de login para actualizar el estado global/contexto de la app
         login();
-        
+
         // Limpiar los campos de entrada
         setEmailOrUsername("");
         setPassword("");
@@ -229,4 +229,5 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 };
 
 export default LoginForm;
+
 

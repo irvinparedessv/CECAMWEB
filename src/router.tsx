@@ -319,6 +319,7 @@ import { Toaster } from "react-hot-toast";
 import { GradeList} from "./views/Grade";
 import { StudentsGrade } from "./views/StudentsGrade";
 import { AdminDashboard, ProfessorDashboard } from "./views/Dashboard";
+import { Profiles } from "./views/Profiles";
 
 interface PublicRouteProps {
   element: ReactElement;
@@ -436,6 +437,7 @@ const App = () => {
             <Route path="/attendances" element={<Attendance />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
             <Route path="/professorDashboard" element={<ProfessorDashboard />} />
+            <Route path="/profiles" element={<Profiles />} />
             <Route
               path="/notes"
               element={
