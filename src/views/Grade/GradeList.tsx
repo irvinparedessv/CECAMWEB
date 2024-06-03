@@ -56,6 +56,8 @@ const GradeList = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   // const handleCancel = () => {
   //   navigate("/grades");
   // };
@@ -310,6 +312,7 @@ const GradeList = () => {
 
   //ERROR EN EL HANDLEADDGRADE, AQUI ESTA CORREGIDO, TENIA QUE CARGAR LOS METODOS DEL useEffect(())
   const handleAddGrade = async () => {
+    setIsSaving(true);
     try {
       // Verificar campos obligatorios
       if (!formData.name || !formData.section || !formData.description) {
@@ -337,12 +340,15 @@ const GradeList = () => {
     } catch (error) {
       console.error('Error al insertar grado:', error);
       Swal.fire('Error', 'Se produjo un error al intentar agregar el grado.', 'error');
+    }finally {
+      setIsSaving(false);
     }
   };
   
 
 
   const handleUpdateGrade = async () => {
+    setIsSaving(true);
     try {
       // Verificar campos obligatorios
       if (!formData.name || !formData.section || !formData.description) {
@@ -373,6 +379,8 @@ const GradeList = () => {
     } catch (error) {
       console.error('Error al actualizar padre:', error);
       Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
+    }finally {
+      setIsSaving(false);
     }
   };
   
@@ -819,9 +827,16 @@ const isDeleteButtonDisabled = (professorId:number) => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleAddModalClose}>Cancelar</Button>
-            <Button variant="primary" onClick={selectedGradeId !== null ? handleUpdateGrade : handleAddGrade}>
+            {/* <Button variant="primary" onClick={selectedGradeId !== null ? handleUpdateGrade : handleAddGrade}>
               {selectedGradeId !== null ? 'Guardar Cambios' : 'Agregar'}
-            </Button>
+            </Button> */}
+            <Button 
+              variant="primary" 
+              onClick={selectedGradeId !== null ? handleUpdateGrade : handleAddGrade}
+              disabled={isSaving}
+            >
+            {isSaving ? 'Guardando...' : (selectedGradeId !== null ? 'Guardar' : 'Agregar')}
+          </Button>
           </Modal.Footer>
         </Modal>
     </div>

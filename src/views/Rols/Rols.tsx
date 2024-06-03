@@ -36,7 +36,7 @@ const Students = () => {
     email: ''
   });
 
-
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -331,6 +331,7 @@ const Students = () => {
   };
 
   const handleAddStudent = async () => {
+    setIsSaving(true);
     try {
       // Verificar campos obligatorios
       if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
@@ -353,10 +354,13 @@ const Students = () => {
     } catch (error) {
       console.error('Error al insertar usuario:', error);
       Swal.fire('Error', 'Se produjo un error al intentar agregar el usuario.', 'error');
+    }finally {
+      setIsSaving(false);
     }
   };
 
   const handleUpdateStudent = async () => {
+    setIsSaving(true);
     try {
       // Verificar campos obligatorios
       if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
@@ -393,6 +397,8 @@ const Students = () => {
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
       Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
+    }finally {
+      setIsSaving(false);
     }
   };
 
@@ -637,8 +643,15 @@ const Students = () => {
           </Modal.Body>
           <Modal.Footer>
           <Button variant="secondary" onClick={handleAddModalClose}>Cancelar</Button>
-            <Button variant="primary" onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}>
+            {/* <Button variant="primary" onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}>
               {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
+            </Button> */}
+            <Button 
+              variant="primary" 
+              onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Guardando...' : (selectedStudentId !== null ? 'Guardar' : 'Agregar')}
             </Button>
           </Modal.Footer>
         </Modal>

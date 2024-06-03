@@ -28,6 +28,7 @@ const Students = () => {
   const [updatingStudentId, setUpdatingStudentId] = useState<number | null>(null);
   const [updatingStudent, setUpdatingStudent] = useState(false);
 
+  const [isSaving, setIsSaving] = useState(false);
 
   const [parentsData, setParentsData] = useState<ParentsData[]>([]);
   const [errors, setErrors] = useState({
@@ -330,16 +331,45 @@ const Students = () => {
     }));
   };
 
+  // const handleAddStudent = async () => {
+  //   try {
+  //     // Verificar campos obligatorios
+  //     if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
+  //       return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+  //     }
+  
+  //     // Verificar si el correo ya existe
+  //     const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+  //     if (emailExists) {
+  //       return Swal.fire('Error', 'El correo ya existe.', 'error');
+  //     }
+  
+  //     // Guardar el estudiante
+  //     await StudentService.insertUser(newStudentData);
+  //     setShowAddModal(false);
+  //     fetchStudents();
+  
+  //     // Mostrar una alerta de éxito
+  //     Swal.fire('Éxito', 'El estudiante ha sido agregado correctamente.', 'success');
+  //   } catch (error) {
+  //     console.error('Error al insertar estudiante:', error);
+  //     Swal.fire('Error', 'Se produjo un error al intentar agregar el estudiante.', 'error');
+  //   }
+  // };
+
   const handleAddStudent = async () => {
+    setIsSaving(true);
     try {
       // Verificar campos obligatorios
       if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
+        setIsSaving(false);
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
       // Verificar si el correo ya existe
       const emailExists = await StudentService.checkEmailExists(newStudentData.email);
       if (emailExists) {
+        setIsSaving(false);
         return Swal.fire('Error', 'El correo ya existe.', 'error');
       }
   
@@ -353,19 +383,61 @@ const Students = () => {
     } catch (error) {
       console.error('Error al insertar estudiante:', error);
       Swal.fire('Error', 'Se produjo un error al intentar agregar el estudiante.', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
   
   
+  
+  // const handleUpdateStudent = async () => {
+  //   try {
+  //     // Verificar campos obligatorios
+  //     if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
+  //       return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
+  //     }
+  
+  //     // Verificar que selectedStudentId no sea null
+  //     if (selectedStudentId === null) {
+  //       return Swal.fire('Error', 'No se ha seleccionado un estudiante para actualizar.', 'error');
+  //     }
+  
+  //     // Obtener el usuario actual para comparar el correo
+  //     const currentStudentData = await StudentService.getUser(selectedStudentId);
+  
+  //     // Solo verificar la existencia del correo si ha sido modificado
+  //     if (newStudentData.email !== currentStudentData.email) {
+  //       const emailExists = await StudentService.checkEmailExists(newStudentData.email);
+  //       if (emailExists) {
+  //         return Swal.fire('Error', 'El correo ya existe.', 'error');
+  //       }
+  //     }
+  
+  //     // Actualizar el estudiante
+  //     await StudentService.updateUser(selectedStudentId, newStudentData);
+  //     setShowAddModal(false);
+  //     fetchStudents();
+  
+  //     // Mostrar una alerta de éxito
+  //     Swal.fire('Éxito', 'Los cambios han sido guardados correctamente.', 'success');
+  //   } catch (error) {
+  //     console.error('Error al actualizar estudiante:', error);
+  //     Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
+  //   }
+  // };
+
   const handleUpdateStudent = async () => {
+    setIsSaving(true);
     try {
       // Verificar campos obligatorios
       if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
+        setIsSaving(false);
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
       }
   
       // Verificar que selectedStudentId no sea null
       if (selectedStudentId === null) {
+        setIsSaving(false);
         return Swal.fire('Error', 'No se ha seleccionado un estudiante para actualizar.', 'error');
       }
   
@@ -376,6 +448,7 @@ const Students = () => {
       if (newStudentData.email !== currentStudentData.email) {
         const emailExists = await StudentService.checkEmailExists(newStudentData.email);
         if (emailExists) {
+          setIsSaving(false);
           return Swal.fire('Error', 'El correo ya existe.', 'error');
         }
       }
@@ -390,8 +463,11 @@ const Students = () => {
     } catch (error) {
       console.error('Error al actualizar estudiante:', error);
       Swal.fire('Error', 'Se produjo un error al intentar guardar los cambios.', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
+  
   
   // const handleDeleteStudent = async (studentId: number) => {
   //   try {
@@ -624,10 +700,18 @@ const Students = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-          <Button variant="secondary" onClick={handleAddModalClose}>Cancelar</Button>
+          {/* <Button variant="secondary" onClick={handleAddModalClose}>Cancelar</Button>
             <Button variant="primary" onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}>
               {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
+            </Button> */}
+            <Button 
+              variant="primary" 
+              onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent} 
+              disabled={isSaving}
+            >
+              {isSaving ? 'Guardando...' : (selectedStudentId !== null ? 'Guardar' : 'Agregar')}
             </Button>
+
           </Modal.Footer>
         </Modal>
       </div>

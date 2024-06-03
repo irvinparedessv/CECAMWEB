@@ -114,6 +114,8 @@ const SubjectForm = () => {
   const [searchTerm, setSearchTerm] = useState(''); // Nuevo estado para el término de búsqueda
   const [errorMessage, setErrorMessage] = useState('');
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const fetchSubjects = async () => {
     try {
       const subjectsData = await SubjectService.getAllSubjects();
@@ -137,6 +139,7 @@ const SubjectForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       if (subjectId !== null) {
         await SubjectService.updateSubject(subjectId, subjectName, code);
@@ -153,6 +156,8 @@ const SubjectForm = () => {
     } catch (error) {
       console.error('Error creando/actualizando materia:', error);
       setErrorMessage('Error al crear/actualizar la materia. Por favor, inténtalo de nuevo más tarde.');
+    }finally {
+      setIsSaving(false); // Establece isSaving en false después de completar la operación
     }
   };
 
@@ -235,7 +240,10 @@ const SubjectForm = () => {
                 required
               />
             </Form.Group>
-            <Button variant="primary" type="submit">
+            {/* <Button variant="primary" type="submit">
+              {subjectId !== null ? 'Actualizar' : 'Guardar'}
+            </Button> */}
+            <Button variant="primary" type="submit" disabled={isSaving}>
               {subjectId !== null ? 'Actualizar' : 'Guardar'}
             </Button>
           </Form>
