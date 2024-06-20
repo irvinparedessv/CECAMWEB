@@ -166,17 +166,22 @@
 
 // export default Navbar;
 
-
-
-
 // ESTE CODIGO OBTIENE LOS DATOS POR MEDIO DEL LOCALSTORAGE
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserGraduate, faClipboardList, faChalkboard, faStickyNote, faCommentAlt, faUser } from '@fortawesome/free-solid-svg-icons';
+import React from "react";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUserGraduate,
+  faClipboardList,
+  faChalkboard,
+  faStickyNote,
+  faCommentAlt,
+  faUser,
+  faBookBookmark,
+} from "@fortawesome/free-solid-svg-icons";
 
-import './navbar.scss';
+import "./navbar.scss";
 
 interface NavbarProps {
   logout: () => void; // Definimos el tipo de la función logout como una función que no toma argumentos y no devuelve nada
@@ -184,12 +189,12 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ logout }) => {
   // Obtener el nombre de usuario y el rol del localStorage
-  const userInfoString = localStorage.getItem('userInfo');
+  const userInfoString = localStorage.getItem("userInfo");
   //console.log(userInfoString)
 
   // Verificar si la información existe en localStorage
   if (!userInfoString) {
-    console.log('No se encontró información del usuario en localStorage');
+    console.log("No se encontró información del usuario en localStorage");
     return null; // O puedes renderizar un mensaje o componente de error
   }
 
@@ -203,12 +208,18 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
   return (
     <div className="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
       <div className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-        <a href="/" className="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <a
+          href="/"
+          className="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none"
+        >
           <span className="fs-5 d-none d-sm-inline">Menu</span>
         </a>
-        <ul className="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+        <ul
+          className="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
+          id="menu"
+        >
           {/* Opciones del menú según el rol */}
-          {roleName === 'Profesor' ? (
+          {roleName === "Profesor" ? (
             <>
               <li>
                 <Link to="/students" className="nav-link px-0 align-middle">
@@ -223,7 +234,10 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                 </Link>
               </li>
               <li>
-                <Link to="/parentAssociations" className="nav-link px-0 align-middle">
+                <Link
+                  to="/parentAssociations"
+                  className="nav-link px-0 align-middle"
+                >
                   <FontAwesomeIcon icon={faChalkboard} className="me-2" />
                   Asociación de padres
                 </Link>
@@ -251,7 +265,10 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                 </Link>
               </li> */}
               <li>
-                <Link to="/parentAssociations" className="nav-link px-0 align-middle">
+                <Link
+                  to="/parentAssociations"
+                  className="nav-link px-0 align-middle"
+                >
                   <FontAwesomeIcon icon={faChalkboard} className="me-2" />
                   Asociación de padres
                 </Link>
@@ -272,6 +289,12 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                 <Link to="/notes" className="nav-link px-0 align-middle">
                   <FontAwesomeIcon icon={faStickyNote} className="me-2" />
                   Notas
+                </Link>
+              </li>
+              <li>
+                <Link to="/plans" className="nav-link px-0 align-middle">
+                  <FontAwesomeIcon icon={faBookBookmark} className="me-2" />
+                  Planes Estudiantiles
                 </Link>
               </li>
               <li>
@@ -297,17 +320,44 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
           )}
         </ul>
         <div className="dropdown pb-4">
-          <a href="#" className="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            <span className="d-none d-sm-inline mx-1">{firstName} {lastName}</span>
+          <a
+            href="#"
+            className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+            id="dropdownUser1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <span className="d-none d-sm-inline mx-1">
+              {firstName} {lastName}
+            </span>
           </a>
-          <ul className="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-            <li><a className="dropdown-item" href="#">New project...</a></li>
-            <li><a className="dropdown-item" href="#">Settings</a></li>
+          <ul
+            className="dropdown-menu dropdown-menu-dark text-small shadow"
+            aria-labelledby="dropdownUser1"
+          >
             <li>
-              <Link to="/profiles" className="dropdown-item">Perfil</Link>
+              <a className="dropdown-item" href="#">
+                New project...
+              </a>
             </li>
-            <li><hr className="dropdown-divider" /></li>
-            <li><a className="dropdown-item" href="#" onClick={logout}>Sign out</a></li>
+            <li>
+              <a className="dropdown-item" href="#">
+                Settings
+              </a>
+            </li>
+            <li>
+              <Link to="/profiles" className="dropdown-item">
+                Perfil
+              </Link>
+            </li>
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
+            <li>
+              <a className="dropdown-item" href="#" onClick={logout}>
+                Sign out
+              </a>
+            </li>
           </ul>
         </div>
       </div>
@@ -316,4 +366,3 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
 };
 
 export default Navbar;
-

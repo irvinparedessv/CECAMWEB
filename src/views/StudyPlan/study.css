@@ -1,0 +1,18 @@
+.containerPlan {
+  .materias-list {
+    margin: 1rem;
+  }
+  .row {
+    padding: 0.5rem;
+  }
+  .card-shadow {
+    box-shadow: 6px 6px #cfe2ff;
+    margin-bottom: 0.5rem;
+  }
+  .card h4 {
+    margin: 1rem;
+  }
+  .c_itemsubject {
+    margin-bottom: 1rem;
+  }
+}
