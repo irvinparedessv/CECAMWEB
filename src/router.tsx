@@ -81,10 +81,10 @@
 //         />
 //         <Routes>
 //           {/* Public routes */}
-          
+
 //           <Route path="/" element={<LoginForm login={login} />} />
 //           <Route path="/login" element={<LoginForm login={login} />} />
-          
+
 //           {/* Protected routes */}
 //           <Route element={<AuthGuard />}>
 //             <Route path="/students" element={<Students />} />
@@ -173,12 +173,10 @@
 //     element: ReactElement;
 //   }
 
-
 //   //SI QUIERE INGRESAR AL LOGIN ALGUIEN CON SESION ABIERTA REDIRECCIONA A LA PAGINA DE NAVIGATE
 //   const PublicRoute: React.FC<PublicRouteProps> = ({ element }) => {
 //     return isAuthenticated ? <Navigate to="/students" replace /> : element;
 //   };
-
 
 //   // const PublicRoute: React.FC<PublicRouteProps> = ({ element }) => {
 //   //   const userInfo = localStorage.getItem("userInfo");
@@ -190,10 +188,9 @@
 //   //       return <Navigate to="/professorDashboard" replace />;
 //   //     }
 //   //   }
-    
+
 //   //   return isAuthenticated ? <Navigate to="/students" replace /> : element;
 //   // };
-  
 
 //   const logout = () => {
 //     localStorage.removeItem("token");
@@ -218,8 +215,7 @@
 //       }
 //     }
 //   };
-  
-  
+
 //   const notasEjemplo = [
 //     { materia: "Matemáticas", nota: 9.0 },
 //     { materia: "Ciencias", nota: 8.5 },
@@ -252,7 +248,7 @@
 //             path="/"
 //             element={<PublicRoute element={<LoginForm login={login} />} />}
 //           />
-          
+
 //           {/* Protected routes */}
 //           <Route element={<AuthGuard />}>
 //             <Route path="/students" element={<Students />} />
@@ -292,7 +288,6 @@
 
 // export default App;
 
-
 import React, { useEffect, useState, ReactElement } from "react";
 import {
   BrowserRouter as Router,
@@ -316,17 +311,22 @@ import LoginForm from "./views/Login/Login";
 import { Parents } from "./views/Parents";
 import { ParentAssociations } from "./views/ParentAssociations";
 import { Toaster } from "react-hot-toast";
-import { GradeList} from "./views/Grade";
+import { GradeList } from "./views/Grade";
 import { StudentsGrade } from "./views/StudentsGrade";
 import { AdminDashboard, ProfessorDashboard } from "./views/Dashboard";
 import { Profiles } from "./views/Profiles";
+import StudyPlan from "./views/StudyPlan/StudyPlan";
+import ListPlan from "./views/StudyPlan/ListPlan";
+import PlanEdit from "./views/StudyPlan/PlanEdit";
 
 interface PublicRouteProps {
   element: ReactElement;
 }
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("token")
+  );
   const [roleName, setRoleName] = useState("");
 
   useEffect(() => {
@@ -350,7 +350,6 @@ const App = () => {
     }
     return <Outlet />;
   };
-
 
   //se verifica si es admin o profesor y redirige a la pagina adecuadada, si no es ninguno envia al login
   const PublicRoute: React.FC<PublicRouteProps> = ({ element }) => {
@@ -398,7 +397,7 @@ const App = () => {
   return (
     <Router>
       {isAuthenticated && <Navbar logout={logout} />}
-      <div className="col py-3">
+      <div className="col py-3 maincontainer">
         <Toaster
           toastOptions={{
             duration: 3000,
@@ -419,13 +418,16 @@ const App = () => {
             path="/"
             element={<PublicRoute element={<LoginForm login={login} />} />}
           />
-          
+
           {/* Protected routes */}
           <Route element={<AuthGuard />}>
             <Route path="/students" element={<Students />} />
             <Route path="/rols" element={<Rols />} />
             <Route path="/parents" element={<Parents />} />
-            <Route path="/parentAssociations" element={<ParentAssociations />} />
+            <Route
+              path="/parentAssociations"
+              element={<ParentAssociations />}
+            />
             <Route path="/register-student" element={<Register />} />
             <Route path="/grades" element={<GradeList />} />
             {/* <Route path="/grades/add" element={<GradeForm />} /> */}
@@ -433,10 +435,17 @@ const App = () => {
             <Route path="/register-subjects" element={<Subject />} />
             <Route path="/register-teachers" element={<Teacher />} />
             <Route path="/subjects" element={<Subject />} />
+            <Route path="/plans" element={<ListPlan />} />
+            <Route path="/plans/add" element={<StudyPlan />} />
+            <Route path="/plans/edit/:id" element={<PlanEdit />} />
+
             {/* <Route path="/grades/edit/:id" element={<GradeEdit />} /> */}
             <Route path="/attendances" element={<Attendance />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
-            <Route path="/professorDashboard" element={<ProfessorDashboard />} />
+            <Route
+              path="/professorDashboard"
+              element={<ProfessorDashboard />}
+            />
             <Route path="/profiles" element={<Profiles />} />
             <Route
               path="/notes"

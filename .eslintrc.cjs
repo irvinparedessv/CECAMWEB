@@ -20,7 +20,6 @@
 //   },
 // };
 
-
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
@@ -41,6 +40,8 @@ module.exports = {
     "no-unused-vars": "off", // Desactiva la regla no-unused-vars para JS
     "no-useless-catch": "off",
     "@typescript-eslint/no-unused-vars": "off", // Desactiva la regla no-unused-vars específica para TypeScript
-    "prefer-const": "off" // Desactiva la regla prefer-const si también quieres desactivar esta advertencia
+
+    "@typescript-eslint/no-explicit-any": "off", // Permite el uso explícito del tipo 'any'
+    "prefer-const": "off", // Desactiva la regla prefer-const si también quieres desactivar esta advertencia
   },
 };
