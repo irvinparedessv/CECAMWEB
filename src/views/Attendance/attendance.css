@@ -1,68 +1,60 @@
 .asistencia-container {
-  margin-top: 20rem;
-  display: flex;
-  align-items: flex-start;
-  font-family: Arial, sans-serif;
-}
-
-.nombres-column {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  margin-right: 10px;
-  margin-top: -11.5rem;
+  align-items: center;
+  background-color: white !important;
 }
 
-.dias-row {
-  margin-top: 1rem;
+.dias-header {
   display: flex;
-  align-items: flex-start; /* Alineación modificada */
+  margin-bottom: 10px;
+}
+
+.nombre-header {
+  width: 100px;
+}
+
+.dia-header {
+  width: 30px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.student-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
 }
 
 .nombre {
-  margin: 6px;
+  width: 100px;
+  padding: 5px;
+  font-weight: bold;
+}
+
+.dias-row {
+  display: flex;
 }
 
 .dia {
   width: 30px;
   height: 30px;
-  margin-top: 10px;
-  border: 1px solid #ccc;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.dia-numero {
-  width: 30px;
-  height: 60px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
+  border: 1px solid #ddd;
 }
 
 .falta {
-  background-color: #ffcccc;
+  background-color: #f8d7da;
+  color: red;
 }
-
-@media (max-width: 768px) {
-  .asistencia-container {
-    flex-direction: column;
-  }
-
-  .nombres-column {
-    align-items: flex-start;
-    margin-right: 0;
-  }
-
-  .dias-row {
-    flex-wrap: wrap;
-  }
-
-  .dia-numero {
-    margin-right: 0;
-    margin-bottom: 10px;
-  }
+.permiso {
+  background-color: #f2f8d7;
+  color: #b4ce08;
+}
+.dia.fin-de-semana {
+  background-color: #e0e0e0;
+  pointer-events: none;
+  cursor: not-allowed;
 }

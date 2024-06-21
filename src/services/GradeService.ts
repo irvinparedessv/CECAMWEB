@@ -11,7 +11,11 @@ import {
   MiGradeResponse,
   Professor,
 } from "../types";
-import { StudentsGradeResponse } from "../types/Student";
+import {
+  StudentsGradeResponse,
+  StudentsAbsences,
+  StudentsAbsencesResponse,
+} from "../types/Student";
 import { itemsPerPage } from "../const/Pagination";
 const TOKEN_HEADER = "X-AUTH-TOKEN";
 const ACCOUNT_ID = "X-ACCOUNT-ID";
@@ -40,7 +44,9 @@ const GradeService = {
   },
   getMyGrades: async (professorId: string) => {
     try {
-      const response = await axiosInstance.get<MiGradeResponse>(`/migrades/${professorId}`);
+      const response = await axiosInstance.get<MiGradeResponse>(
+        `/migrades/${professorId}`
+      );
       return response.data;
     } catch (error) {
       console.error("Error al obtener grados:", error);
@@ -58,7 +64,7 @@ const GradeService = {
   //     throw error;
   //   }
   // },
-  getStudents: async (id: number,page:number) => {
+  getStudents: async (id: number, page: number) => {
     try {
       const response = await axiosInstance.get<StudentsGradeResponse>(
         `${API_BASE_URL}/students/grade/${id}?page=${page}&itemsperpage=${itemsPerPage}`
@@ -122,31 +128,52 @@ const GradeService = {
 
   getAllGradeProfessors: async () => {
     try {
-      const response = await axios.get<GradeProfessors[]>(`${API_BASE_URL}/gradeProfessors`);
+      const response = await axios.get<GradeProfessors[]>(
+        `${API_BASE_URL}/gradeProfessors`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al obtener usuarios:', error);
+      console.error("Error al obtener usuarios:", error);
       throw error;
     }
   },
 
-  getGradesWithProfessorAssociations: async (gradeId: number): Promise<Professor[]> => {
+  getGradesWithProfessorAssociations: async (
+    gradeId: number
+  ): Promise<Professor[]> => {
     try {
-      const response = await axios.get<Professor[]>(`${API_BASE_URL}/grades/professors/${gradeId}`);
+      const response = await axios.get<Professor[]>(
+        `${API_BASE_URL}/grades/professors/${gradeId}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al obtener usuarios con asociaciones de padres:', error);
+      console.error(
+        "Error al obtener usuarios con asociaciones de padres:",
+        error
+      );
       throw error;
     }
   },
 
   getUnassociatedProfessors: async (gradeId: number): Promise<Professor[]> => {
     try {
-      const response = await axios.get<Professor[]>(`${API_BASE_URL}/grades/professorsUnassociated/${gradeId}`);
+      const response = await axios.get<Professor[]>(
+        `${API_BASE_URL}/grades/professorsUnassociated/${gradeId}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al obtener padres no asociados:', error);
+      console.error("Error al obtener padres no asociados:", error);
       throw error;
+    }
+  },
+  getAbsences: async (gradeId: number) => {
+    try {
+      const response = await axios.get<StudentsAbsencesResponse>(
+        `${API_BASE_URL}/absences/${gradeId}`
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error("Failed to fetch absences");
     }
   },
 
@@ -154,21 +181,23 @@ const GradeService = {
     try {
       const response = await axios.post(`${API_BASE_URL}/gradeProfessors`, {
         gradeId,
-        professorId
+        professorId,
       });
       return response.data;
     } catch (error) {
-      console.error('Error al guardar la asociación de profesores:', error);
+      console.error("Error al guardar la asociación de profesores:", error);
       throw error;
     }
   },
 
-  deleteGradeProfessor: async (gradeId:number) => {
+  deleteGradeProfessor: async (gradeId: number) => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/gradeProfessors/${gradeId}`);
+      const response = await axios.delete(
+        `${API_BASE_URL}/gradeProfessors/${gradeId}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al eliminar la asociación de padres:', error);
+      console.error("Error al eliminar la asociación de padres:", error);
       throw error;
     }
   },

@@ -106,7 +106,6 @@
 
 // export default LoginForm;
 
-
 import React, { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import "./login.css";
@@ -124,7 +123,9 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleEmailOrUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailOrUsernameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setEmailOrUsername(e.target.value);
   };
 
@@ -136,7 +137,10 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
     e.preventDefault();
 
     try {
-      const response: LoginResponse = await AuthService.loginUser(emailOrUsername, password);
+      const response: LoginResponse = await AuthService.loginUser(
+        emailOrUsername,
+        password
+      );
 
       if (response.success && response.data) {
         const userInfo = {
@@ -147,11 +151,12 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
           firstName: response.data.firstName,
           lastName: response.data.lastName,
           id: response.data.id,
-          userPhoto: response.data.userPhoto // Añadir el campo userPhoto aquí
+          userPhoto: response.data.userPhoto, // Añadir el campo userPhoto aquí
         };
 
         localStorage.setItem("token", response.token ?? "");
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        localStorage.setItem("userId", response.data.id.toString());
 
         // Redirigir según el rol del usuario
         if (response.data.roleName === "Administrador") {
@@ -189,7 +194,10 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
                   <h4 className="mb-4">Ingresa tus credenciales.</h4>
                   {error && <div className="text-danger mb-3">{error}</div>}
                   <Form onSubmit={handleSubmit}>
-                    <Form.Group controlId="formBasicEmailOrUsername" className="mb-3">
+                    <Form.Group
+                      controlId="formBasicEmailOrUsername"
+                      className="mb-3"
+                    >
                       <Form.Label>Correo o Nombre de Usuario</Form.Label>
                       <Form.Control
                         type="text"
@@ -229,5 +237,3 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 };
 
 export default LoginForm;
-
-

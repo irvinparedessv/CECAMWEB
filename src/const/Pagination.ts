@@ -1,1 +1,1 @@
-export const itemsPerPage: number =2;
+export const itemsPerPage: number = 3;
