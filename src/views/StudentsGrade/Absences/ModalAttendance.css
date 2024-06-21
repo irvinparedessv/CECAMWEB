@@ -1,0 +1,41 @@
+/* src/components/ModalAttendance.css */
+
+.color-indications {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.color-box {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.absence {
+  background-color: red !important;
+  color: white;
+}
+
+.absence-permission {
+  background-color: yellow !important;
+  color: black;
+}
+
+.current-day {
+  background-color: #00667f !important;
+}
+
+.react-calendar {
+  width: 100% !important;
+}
+
+.react-calendar__tile--now:enabled:hover,
+.react-calendar__tile--now:enabled:focus {
+  background-color: #00667f !important;
+}
+
+.react-calendar__tile--now {
+  background: #00667f !important;
+}

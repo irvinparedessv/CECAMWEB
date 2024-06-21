@@ -302,7 +302,7 @@ import { Grade } from "./views/Grade";
 import { Subject } from "./views/Subject";
 import { Students } from "./views/Students";
 import { Attendance } from "./views/Attendance";
-import { Teacher } from "./views/Teacher";
+import { Teacher } from "./views/Professor";
 import { Observation } from "./views/Observations";
 import { MiGrade } from "./views/MiGrade";
 import { ReportGrade } from "./views/ReportGrade";
@@ -318,6 +318,7 @@ import { Profiles } from "./views/Profiles";
 import StudyPlan from "./views/StudyPlan/StudyPlan";
 import ListPlan from "./views/StudyPlan/ListPlan";
 import PlanEdit from "./views/StudyPlan/PlanEdit";
+import ProfessorSubjects from "./views/Professor/subjects/ProfessorSubjects";
 
 interface PublicRouteProps {
   element: ReactElement;
@@ -438,14 +439,15 @@ const App = () => {
             <Route path="/plans" element={<ListPlan />} />
             <Route path="/plans/add" element={<StudyPlan />} />
             <Route path="/plans/edit/:id" element={<PlanEdit />} />
-
             {/* <Route path="/grades/edit/:id" element={<GradeEdit />} /> */}
-            <Route path="/attendances" element={<Attendance />} />
+            <Route path="/attendance/grade/:id" element={<Attendance />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
             <Route
               path="/professorDashboard"
               element={<ProfessorDashboard />}
             />
+            <Route path="/mysubjects" element={<ProfessorSubjects />} />
+
             <Route path="/profiles" element={<Profiles />} />
             <Route
               path="/notes"

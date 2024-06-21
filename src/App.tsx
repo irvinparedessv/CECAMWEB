@@ -18,12 +18,13 @@
 
 // export default App;
 
-
 import React from "react";
 import AppRoutes from "./router";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 import "./App.css";
 //import AuthProvider from "./components/AuthProvider"; // Importa tu AuthProvider
@@ -38,6 +39,7 @@ const App: React.FC = () => {
           <AppRoutes />
         </div>
       </div>
+      <ToastContainer />
     </AuthProvider>
   );
 };
