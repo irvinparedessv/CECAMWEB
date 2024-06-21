@@ -28,15 +28,13 @@ const ProfessorSubjects = () => {
     fetchSubjects();
   }, []);
 
-  const handleShowModal = async (subjectId, planId) => {
+  const handleShowModal = async (subjectId, gradeId) => {
     try {
-      const response = await ProfessorService.getActivities(subjectId, planId);
-      console.log(subjectId, planId);
+      const response = await ProfessorService.getActivities(subjectId, gradeId);
 
-      console.log(response);
       setActivities(response);
       setCurrentSubjectId(subjectId);
-      setCurrentPlanId(planId);
+      setCurrentPlanId(gradeId);
       setShowModal(true);
     } catch (error) {
       console.error("There was an error fetching the activities!", error);
@@ -64,7 +62,7 @@ const ProfessorSubjects = () => {
                 <Button
                   variant="primary"
                   onClick={() =>
-                    handleShowModal(subject.subjectId, subject.planId)
+                    handleShowModal(subject.subjectId, subject.grade.gradeId)
                   }
                 >
                   Ver Actividades
@@ -79,8 +77,9 @@ const ProfessorSubjects = () => {
       </Row>
       <ActivitiesModal
         show={showModal}
-        handleClose={handleCloseModal}
         activities={activities}
+        handleClose={handleCloseModal}
+        setShowModal={setShowModal}
       />
     </div>
   );
