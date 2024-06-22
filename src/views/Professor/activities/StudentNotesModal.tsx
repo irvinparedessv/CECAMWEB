@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Modal, Button, Table, Form, Pagination } from "react-bootstrap";
+import {
+  Modal,
+  Button,
+  Table,
+  Form,
+  Pagination,
+  Spinner,
+} from "react-bootstrap";
 import ProfessorService from "../../../services/ProfessorService";
 import { Student } from "../../../types/Student";
 import { itemsPerPage } from "../../../const/Pagination";
@@ -32,13 +39,21 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
   const [editedNotes, setEditedNotes] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setLoading] = useState(false);
 
   React.useEffect(() => {
     const fetchStudentsNotes = async () => {
-      const response = await ProfessorService.studentsNoteByActivities(
-        activity.activityId
-      );
-      setStudentsAct(response);
+      setLoading(true);
+      try {
+        const response = await ProfessorService.studentsNoteByActivities(
+          activity.activityId
+        );
+        setStudentsAct(response);
+      } catch (error) {
+        console.error("Error al obtener las notas de los estudiantes:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     if (activity) {
       fetchStudentsNotes();
@@ -82,7 +97,6 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-
   const removeAccents = (str) => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
@@ -101,6 +115,33 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
   );
 
   const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+
+  if (isLoading) {
+    return (
+      <Modal size="xl" show={show} onHide={handleClose}>
+        <Modal.Body className="text-center">
+          <Spinner animation="border" role="status">
+            <span className="sr-only">Cargando...</span>
+          </Spinner>
+        </Modal.Body>
+      </Modal>
+    );
+  }
+
+  if (studentsAct.length === 0) {
+    return (
+      <Modal size="xl" show={show} onHide={handleClose}>
+        <Modal.Body>
+          <p>No existen notas para esta actividad.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
 
   return (
     <Modal size="xl" show={show} onHide={handleClose}>

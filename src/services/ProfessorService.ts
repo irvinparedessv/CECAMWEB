@@ -40,6 +40,17 @@ const ProfessorService = {
       throw error;
     }
   },
+  getNotes: async (subjectId: string, gradeId: string) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/notes/${subjectId}/${gradeId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener el usuario:", error);
+      throw error;
+    }
+  },
   studentsNoteByActivities: async (activityId: string) => {
     try {
       const response = await axios.get(

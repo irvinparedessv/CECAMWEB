@@ -41,7 +41,7 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
   return (
     <Modal show={show} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Student Grades</Modal.Title>
+        <Modal.Title>Notas</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {isLoading ? (
