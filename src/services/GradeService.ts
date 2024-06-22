@@ -92,11 +92,8 @@ const GradeService = {
       const response = await axiosInstance.delete(
         `${API_BASE_URL}/grades/${id}`
       );
-      console.log(response);
       return response.data;
     } catch (error) {
-      console.log(error);
-      // Manejar errores aquí si es necesario
       throw error;
     }
   },

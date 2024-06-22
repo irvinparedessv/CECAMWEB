@@ -5,9 +5,9 @@ import StudentNotesModal from "./StudentNotesModal";
 const ActivitiesModal = ({ show, handleClose, setShowModal, activities }) => {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [showNotesModal, setShowNotesModal] = useState(false); // State para controlar la visibilidad del modal de notas
-
   const handleOpenNotesModal = (activity) => {
     setSelectedActivity(activity);
+
     setShowNotesModal(true);
     setShowModal(false); // Mostrar el modal de notas cuando se selecciona una actividad
   };

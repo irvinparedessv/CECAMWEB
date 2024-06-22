@@ -5,7 +5,7 @@ import { Card, Row, Col, Button } from "react-bootstrap";
 import "./style.css";
 import ProfessorService from "../../../services/ProfessorService";
 import ActivitiesModal from "../activities/ActivitiesModal";
-import NotesModal from "../notes/NotesModal";
+import NotesModal from "../notes/NotesSubjectStudentsModal";
 
 const ProfessorSubjects = () => {
   const [subjects, setSubjects] = useState([]);

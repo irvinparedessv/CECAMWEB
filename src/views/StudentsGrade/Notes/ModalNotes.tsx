@@ -17,7 +17,6 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
           const response = await ParentService.getNotes(studentId);
           setStudentGrades(response.student_grades);
           setPeriods(response.periods);
-          console.log(response.periods);
           setIsLoading(false);
         } catch (error) {
           console.error("Error fetching data:", error);
@@ -30,9 +29,7 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
   }, [show, studentId]);
 
   const getPeriodInfo = (periodId) => {
-    console.log(periodId);
     const period = periods.find((p) => p.periodId == periodId);
-    console.log(period);
     return period
       ? { name: period.name, percentage: period.percentage, type: period.type }
       : null;

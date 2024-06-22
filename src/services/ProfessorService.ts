@@ -51,10 +51,10 @@ const ProfessorService = {
       throw error;
     }
   },
-  studentsNoteByActivities: async (activityId: string) => {
+  studentsNoteByActivities: async (activityId: string, gradeId: string) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/activitiesstudents/${activityId}`
+        `${API_BASE_URL}/activitiesstudents/${activityId}/${gradeId}`
       );
       return response.data;
     } catch (error) {

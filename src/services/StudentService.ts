@@ -18,6 +18,24 @@ const axiosInstance: AxiosInstance = axios.create({
 });
 
 const StudentService = {
+  addObservation: async (
+    studentId: string,
+    observationData: {
+      description: string;
+      professorId: string;
+    }
+  ) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/students/${studentId}/observations`,
+        observationData
+      );
+      return response.data; // Aquí podrías retornar cualquier respuesta necesaria
+    } catch (error) {
+      throw new Error(`Error al agregar la inasistencia: ${error.message}`);
+      // Aquí puedes manejar el error según tus necesidades
+    }
+  },
   addAbsence: async (
     studentId: number,
     absenceData: {
@@ -166,10 +184,6 @@ const StudentService = {
     newEnabledValue: boolean
   ) => {
     try {
-      // Agregar console.log para verificar los datos antes de enviar la solicitud
-      //console.log('parentIds:', parentIds);
-      //console.log('newEnabledValue:', newEnabledValue);
-
       const response = await axios.put(
         `${API_BASE_URL}/users/${studentId}/parentsEnabled`,
         {

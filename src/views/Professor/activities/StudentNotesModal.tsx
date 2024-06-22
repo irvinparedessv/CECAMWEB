@@ -10,18 +10,21 @@ import {
 import ProfessorService from "../../../services/ProfessorService";
 import { Student } from "../../../types/Student";
 import { itemsPerPage } from "../../../const/Pagination";
+import { removeAccents } from "../../../utils/text";
 
 interface ActivityStudent {
-  id: number;
-  activityId: number;
-  studentId: number;
-  note: string;
-  notePercentage: string;
-  notePeriod: string;
-  dateInsert: string;
-  created_at: string;
-  updated_at: string;
   student: Student;
+  activityStudent: {
+    id: number;
+    activityId: number;
+    studentId: number;
+    note: string;
+    notePercentage: string;
+    notePeriod: string;
+    dateInsert: string;
+    created_at: string;
+    updated_at: string;
+  };
 }
 
 interface StudentNotesModalProps {
@@ -46,7 +49,8 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
       setLoading(true);
       try {
         const response = await ProfessorService.studentsNoteByActivities(
-          activity.activityId
+          activity.activityId,
+          activity.gradeId
         );
         setStudentsAct(response);
       } catch (error) {
@@ -70,11 +74,11 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
   const handleSaveNotes = async () => {
     try {
       const updatePromises = studentsAct.map((student) => {
-        const newNote = editedNotes[student.studentId];
+        const newNote = editedNotes[student.activityStudent.studentId];
         if (newNote !== undefined) {
           return ProfessorService.updateStudentNote(
-            student.activityId,
-            student.studentId,
+            student.activityStudent.activityId,
+            student.activityStudent.studentId,
             { note: newNote }
           );
         }
@@ -96,9 +100,6 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-  };
-  const removeAccents = (str) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
 
   const filteredStudents = studentsAct.filter((stud) =>
@@ -166,7 +167,7 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
           </thead>
           <tbody>
             {paginatedStudents.map((stud) => (
-              <tr key={stud.studentId}>
+              <tr key={stud.activityStudent.activityId}>
                 <td>
                   {stud.student.firstName} {stud.student.lastName}
                 </td>
@@ -174,13 +175,16 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
                   <Form.Control
                     type="text"
                     value={
-                      editedNotes[stud.studentId] ||
-                      editedNotes[stud.studentId] === ""
-                        ? editedNotes[stud.studentId]
-                        : stud.note
+                      editedNotes[stud.activityStudent.studentId] ||
+                      editedNotes[stud.activityStudent.studentId] === ""
+                        ? editedNotes[stud.activityStudent.studentId]
+                        : stud.activityStudent.note
                     }
                     onChange={(e) =>
-                      handleNoteChange(stud.studentId, e.target.value)
+                      handleNoteChange(
+                        stud.activityStudent.studentId,
+                        e.target.value
+                      )
                     }
                   />
                 </td>
