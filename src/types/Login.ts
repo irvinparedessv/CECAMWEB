@@ -56,6 +56,7 @@ export interface UserInformation {
   roleName: string;
   userPhoto: string; // Añadir el campo userPhoto
   rolId: number;
+  changePassword?: boolean;
 }
 
 export interface LoginResponse {
