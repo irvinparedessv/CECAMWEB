@@ -116,7 +116,7 @@ import Swal from "sweetalert2";
 import "./login.css";
 import AuthService from "../../services/AuthService";
 import { useNavigate } from "react-router-dom";
-import { LoginResponse } from "../../types";
+import { LoginResponse } from "../../types"; // Asegúrate de importar tus tipos
 
 interface LoginProps {
   login: () => void;
@@ -129,38 +129,21 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Verificar el token al cargar la página
     const checkToken = async () => {
       const token = localStorage.getItem("token");
+      const changePasswordValue = localStorage.getItem("changePassword");
 
-      if (token) {
+      if (token && changePasswordValue === "false") {
         try {
-          // Obtener detalles del usuario para verificar el estado changePassword si es necesario
           const user = await AuthService.getUserDetails();
 
           if (user.changePassword === false) {
-            // Mostrar SweetAlert2 para cambiar la contraseña si es necesario
-            await Swal.fire({
-              title: "Cambia tu contraseña",
-              html:
-                '<input id="newPassword" class="swal2-input" type="password" placeholder="Nueva Contraseña">' +
-                '<input id="confirmPassword" class="swal2-input" type="password" placeholder="Confirma tu Nueva Contraseña">',
-              focusConfirm: false,
-              allowOutsideClick: false,
-              showCancelButton: false,
-              preConfirm: async () => {
-                // Lógica para cambiar la contraseña
-              },
-            });
-          } else {
-            // Redirigir según el rol del usuario si no se requiere cambio de contraseña
-            if (user.roleName === "Administrador" && user.changePassword === true) {
-              navigate("/adminDashboard");
-            } else if (user.roleName === "Profesor" && user.changePassword === true) {
-              navigate("/professorDashboard");
-            } else {
-              navigate("/login");
-            }
+            // Eliminar el token si no se requiere cambio de contraseña
+            sessionStorage.removeItem("token");
+            localStorage.removeItem("token");
+            localStorage.removeItem("userInfo");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("changePassword");
           }
         } catch (error) {
           console.error("Error al verificar token:", error);
@@ -169,7 +152,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
     };
 
     checkToken();
-  }, [navigate]);
+  }, []);
 
   const handleEmailOrUsernameChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -203,13 +186,13 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
           changePassword: response.data.changePassword,
         };
 
-        localStorage.setItem("token", response.token ?? "");
+        sessionStorage.setItem("token", response.token ?? "");
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
         localStorage.setItem("userId", response.data.id.toString());
         localStorage.setItem("changePassword", response.data.changePassword.toString());
-        
 
         if (response.data.changePassword === false) {
+          // Mostrar SweetAlert2 para cambiar la contraseña
           const { value: newPassword } = await Swal.fire({
             title: "Cambia tu contraseña",
             html:
@@ -232,24 +215,19 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
               }
 
               try {
+                // Cambiar la contraseña
                 const changePasswordSuccess = await AuthService.changeTemporalPassword(response.data.id, newPassword);
-
+                
                 if (changePasswordSuccess) {
                   await Swal.fire("Contraseña cambiada correctamente", "", "success");
 
-                  // Redirigir según el rol del usuario
-                  if (response.data.roleName === "Administrador") {
-                    navigate("/adminDashboard");
-                  } else if (response.data.roleName === "Profesor") {
-                    navigate("/professorDashboard");
-                  } else {
-                    navigate("/students");
+                  // Mueve el token de sessionStorage a localStorage después de cambiar la contraseña
+                  const tokenFromSession = sessionStorage.getItem('token');
+                  if (tokenFromSession) {
+                    localStorage.setItem('token', tokenFromSession);
+                    sessionStorage.removeItem('token');
+                    localStorage.setItem('changePassword', "false");
                   }
-
-                  login();
-
-                  setEmailOrUsername("");
-                  setPassword("");
                 } else {
                   await Swal.fire("Error al cambiar la contraseña", "", "error");
                 }
@@ -262,20 +240,42 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
               return true;
             },
           });
+
+          if (newPassword) {
+            // Llama a la función de login para actualizar el estado global/contexto de la app
+            login();
+
+            // Redirigir según el rol del usuario
+            if (response.data.roleName === "Administrador") {
+              navigate("/adminDashboard");
+            } else if (response.data.roleName === "Profesor") {
+              navigate("/professorDashboard");
+            } else {
+              navigate("/students"); // Por defecto o para otros roles
+            }
+
+            // Limpiar los campos de entrada
+            setEmailOrUsername("");
+            setPassword("");
+          }
         } else {
-          // Redirigir según el rol del usuario si no se requiere cambio de contraseña
+          localStorage.setItem("token", response.token ?? "");
+
+          // Llama a la función de login para actualizar el estado global/contexto de la app
+          login();
+
+          // Redirigir según el rol del usuario
           if (response.data.roleName === "Administrador") {
             navigate("/adminDashboard");
           } else if (response.data.roleName === "Profesor") {
             navigate("/professorDashboard");
           } else {
-            navigate("/students");
+            navigate("/students"); // Por defecto o para otros roles
+
+            // Limpiar los campos de entrada
+            setEmailOrUsername("");
+            setPassword("");
           }
-
-          login();
-
-          setEmailOrUsername("");
-          setPassword("");
         }
       } else {
         setError(response.message || "Ocurrió un error.");
@@ -344,6 +344,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 };
 
 export default LoginForm;
+
 
 
 

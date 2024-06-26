@@ -130,9 +130,9 @@ const AuthService = {
 
   changeTemporalPassword: async (userId: number, newPassword: string): Promise<boolean> => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
       if (!token) throw new Error('No hay token de autenticación');
-  
+
       const response = await axios.post<{ success: boolean }>(
         `${API_BASE_URL}/change-temporal-password/${userId}`,
         { newPassword },
@@ -142,11 +142,11 @@ const AuthService = {
           },
         }
       );
-  
-      return response.data.success; // Devuelve un booleano aquí
+
+      return response.data.success;
     } catch (error) {
       console.error('Error al cambiar la contraseña temporal:', error);
-      throw error; // Lanza el error o maneja de otra forma según tu lógica
+      throw error;
     }
   },
   
