@@ -56,7 +56,6 @@ const StudentsGrade = () => {
     try {
       const response = await GradeService.getStudents(Number(id), currentPage);
       if (response.success) {
-        console.log(response.data);
         setGradeStudent(response.data);
       } else {
         setError("Failed to fetch grades");
@@ -84,14 +83,23 @@ const StudentsGrade = () => {
           <tr>
             <th>Nombre</th>
             <th>Apellido</th>
+            <th>Padres</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {gradeStudent?.students.map((student) => (
             <tr key={student.id + "grade"}>
-              <td className="c_padding2">{student.firstName}</td>
-              <td className="c_padding2">{student.lastName}</td>
+              <td className="c_padding1">{student.firstName}</td>
+              <td className="c_padding1">{student.lastName}</td>
+              <td className="c_padding1">
+                {student.parents
+                  .map(
+                    (parent) =>
+                      `${parent.firstName} ${parent.lastName} - (${parent.email})`
+                  )
+                  .join(", ")}
+              </td>
               <td>
                 <button
                   className="btn btn-primary c_margin1"

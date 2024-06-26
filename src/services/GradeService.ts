@@ -5,6 +5,7 @@ import API_BASE_URL from "./apiConfig"; // Importa la URL base de la API
 import {
   Grade,
   GradeFormAdd,
+  GradeProfessor,
   GradeProfessors,
   GradeResponse,
   GradeResponseOne,
@@ -31,11 +32,14 @@ const axiosInstance: AxiosInstance = axios.create({
 // Interceptar las solicitudes antes de enviarlas
 
 const GradeService = {
-  getAllGrades: async () => {
+  getAllGrades: async (params) => {
     try {
-      const response = await axiosInstance.get<GradeResponse>(
-        `${API_BASE_URL}/grades`
-      );
+      const response = await axiosInstance.get<{
+        success: boolean;
+        data: { last_page: number; data: GradeProfessor[] };
+      }>(`${API_BASE_URL}/grades`, {
+        params,
+      });
       return response.data;
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
@@ -92,11 +96,8 @@ const GradeService = {
       const response = await axiosInstance.delete(
         `${API_BASE_URL}/grades/${id}`
       );
-      console.log(response);
       return response.data;
     } catch (error) {
-      console.log(error);
-      // Manejar errores aquí si es necesario
       throw error;
     }
   },
@@ -128,9 +129,7 @@ const GradeService = {
 
   getAllGradeProfessors: async () => {
     try {
-      const response = await axios.get<GradeProfessors[]>(
-        `${API_BASE_URL}/gradeProfessors`
-      );
+      const response = await axios.get(`${API_BASE_URL}/gradeProfessors`);
       return response.data;
     } catch (error) {
       console.error("Error al obtener usuarios:", error);

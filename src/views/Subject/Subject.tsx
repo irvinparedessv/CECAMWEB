@@ -1,132 +1,42 @@
-// import React, { useState } from 'react';
-// import { Form, Button, Modal } from 'react-bootstrap';
-// import './subject.css';
-
-// const CombinedForm = () => {
-//   const [año, setAño] = useState('');
-//   const [seccion, setSeccion] = useState('');
-//   const [nombre, setNombre] = useState('');
-//   const [codigo, setCodigo] = useState('');
-//   const [showModal, setShowModal] = useState(false);
-
-//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//     // Aquí puedes manejar la lógica para enviar los datos a tu backend
-//     console.log('Año:', año);
-//     console.log('Sección:', seccion);
-//     console.log('Nombre:', nombre);
-//     console.log('Código:', codigo);
-//     // Reinicia los campos del formulario después de enviar los datos
-//     setAño('');
-//     setSeccion('');
-//     setNombre('');
-//     setCodigo('');
-//     setShowModal(false);
-//   };
-
-//   const handleClose = () => setShowModal(false);
-//   const handleShow = () => setShowModal(true);
-
-//   return (
-//     <div className="container">
-//       <Button variant="primary" onClick={handleShow}>
-//         Registrar Materia
-//       </Button>
-
-//       <Modal show={showModal} onHide={handleClose} size="lg">
-//         <Modal.Header closeButton>
-//           <Modal.Title>Registro de Materias</Modal.Title>
-//         </Modal.Header>
-//         <Modal.Body>
-//           <div className="row">
-//             <div className="col-lg-5 d-none d-lg-block">
-//             <img src="../../assets/book.jpg" alt="Book" className="img-fluid" />
-//             </div>
-//             <div className="col-lg-7">
-//               <Form className="requires-validation" noValidate onSubmit={handleSubmit}>
-//                 <Form.Group controlId="formNombre">
-//                   <Form.Label>Nombre</Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     placeholder="Nombre"
-//                     value={nombre}
-//                     onChange={(e) => setNombre(e.target.value)}
-//                     required
-//                   />
-//                 </Form.Group>
-//                 <Form.Group controlId="formCodigo">
-//                   <Form.Label>Código</Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     placeholder="Código"
-//                     value={codigo}
-//                     onChange={(e) => setCodigo(e.target.value)}
-//                     required
-//                   />
-//                 </Form.Group>
-//                 <Form.Group controlId="formSeccion">
-//                   <Form.Label>Grado</Form.Label>
-//                   <Form.Select
-//                     className="mt-3"
-//                     value={seccion}
-//                     onChange={(e) => setSeccion(e.target.value)}
-//                     required
-//                   >
-//                     <option selected disabled value="">
-//                       Encargado
-//                     </option>
-//                     <option value="jweb">Junior Web Developer</option>
-//                     <option value="sweb">Senior Web Developer</option>
-//                     <option value="pmanager">Project Manager</option>
-//                   </Form.Select>
-//                   <Form.Control.Feedback type="valid">You selected a position!</Form.Control.Feedback>
-//                   <Form.Control.Feedback type="invalid">Please select a position!</Form.Control.Feedback>
-//                 </Form.Group>
-//                 <div className="form-button mt-3">
-//                   <Button className="button-register" id="submit" type="submit" variant="primary">
-//                     Guardar
-//                   </Button>
-//                 </div>
-//               </Form>
-//             </div>
-//           </div>
-//         </Modal.Body>
-//       </Modal>
-//     </div>
-//   );
-// };
-
-// export default CombinedForm;
-
-
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Modal, Table } from 'react-bootstrap';
-import Swal from 'sweetalert2';
-import SubjectService from '../../services/SubjectService';
-import { Subject } from '../../types'; // Importa la interfaz Subject
+import React, { useState, useEffect } from "react";
+import { Form, Button, Modal, Table, Pagination } from "react-bootstrap";
+import Swal from "sweetalert2";
+import SubjectService from "../../services/SubjectService";
+import { Subject } from "../../types"; // Importa la interfaz Subject
+import { itemsPerPage } from "../../const/Pagination";
 
 const SubjectForm = () => {
   const [showModal, setShowModal] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subjectId, setSubjectId] = useState<number | null>(null);
-  const [subjectName, setSubjectName] = useState('');
-  const [code, setCode] = useState('');
-  const [searchTerm, setSearchTerm] = useState(''); // Nuevo estado para el término de búsqueda
-  const [errorMessage, setErrorMessage] = useState('');
+  const [subjectName, setSubjectName] = useState("");
+  const [code, setCode] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState(""); // Nuevo estado para el término de búsqueda
+  const [errorMessage, setErrorMessage] = useState("");
 
   const fetchSubjects = async () => {
     try {
-      const subjectsData = await SubjectService.getAllSubjects();
-      setSubjects(subjectsData);
+      const params = {
+        page: currentPage,
+        size: itemsPerPage,
+        filter: searchTerm,
+      };
+      const response = await SubjectService.getAllSubjectsFilter(params);
+      setSubjects(response.data);
+      setTotalPages(response.last_page);
     } catch (error) {
-      console.error('Error fetching subjects:', error);
-      setErrorMessage('Error al cargar las materias. Por favor, inténtalo de nuevo más tarde.');
+      console.error("Error fetching subjects:", error);
+      setErrorMessage(
+        "Error al cargar las materias. Por favor, inténtalo de nuevo más tarde."
+      );
     }
   };
 
   useEffect(() => {
     fetchSubjects();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   const handleEdit = (subject: Subject) => {
     setSubjectId(subject.subjectId);
@@ -134,25 +44,34 @@ const SubjectForm = () => {
     setCode(subject.code);
     setShowModal(true);
   };
+  const handlePageChange = async (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       if (subjectId !== null) {
         await SubjectService.updateSubject(subjectId, subjectName, code);
-        Swal.fire('Actualizado', 'Materia actualizada correctamente.', 'success');
+        Swal.fire(
+          "Actualizado",
+          "Materia actualizada correctamente.",
+          "success"
+        );
       } else {
         await SubjectService.createSubject(subjectName, code);
-        Swal.fire('Guardado', 'Materia creada correctamente.', 'success');
+        Swal.fire("Guardado", "Materia creada correctamente.", "success");
       }
       fetchSubjects();
       setShowModal(false);
       setSubjectId(null);
-      setSubjectName('');
-      setCode('');
+      setSubjectName("");
+      setCode("");
     } catch (error) {
-      console.error('Error creando/actualizando materia:', error);
-      setErrorMessage('Error al crear/actualizar la materia. Por favor, inténtalo de nuevo más tarde.');
+      console.error("Error creando/actualizando materia:", error);
+      setErrorMessage(
+        "Error al crear/actualizar la materia. Por favor, inténtalo de nuevo más tarde."
+      );
     }
   };
 
@@ -160,23 +79,25 @@ const SubjectForm = () => {
     try {
       await SubjectService.deleteSubject(subjectId);
       fetchSubjects();
-      Swal.fire('Eliminado', 'Materia eliminada correctamente.', 'success');
+      Swal.fire("Eliminado", "Materia eliminada correctamente.", "success");
     } catch (error) {
-      console.error('Error eliminando materia:', error);
-      setErrorMessage('Error al eliminar la materia. Por favor, inténtalo de nuevo más tarde.');
+      console.error("Error eliminando materia:", error);
+      setErrorMessage(
+        "Error al eliminar la materia. Por favor, inténtalo de nuevo más tarde."
+      );
     }
   };
 
   const confirmDelete = (subjectId: number) => {
     Swal.fire({
-      title: '¿Estás seguro?',
+      title: "¿Estás seguro?",
       text: "¡No podrás revertir esto!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
         handleDelete(subjectId);
@@ -188,12 +109,6 @@ const SubjectForm = () => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredSubjects = subjects.filter(
-    subject =>
-      subject.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subject.code.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <div className="container">
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -202,7 +117,7 @@ const SubjectForm = () => {
           placeholder="Buscar por nombre o código"
           value={searchTerm}
           onChange={handleSearchChange}
-          style={{ width: '300px' }} // Ajusta el tamaño del campo de búsqueda
+          style={{ width: "300px" }} // Ajusta el tamaño del campo de búsqueda
         />
         <Button variant="primary" onClick={() => setShowModal(true)}>
           Registrar Materia
@@ -211,7 +126,9 @@ const SubjectForm = () => {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{subjectId !== null ? 'Editar Materia' : 'Registrar Materia'}</Modal.Title>
+          <Modal.Title>
+            {subjectId !== null ? "Editar Materia" : "Registrar Materia"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
@@ -236,7 +153,7 @@ const SubjectForm = () => {
               />
             </Form.Group>
             <Button variant="primary" type="submit">
-              {subjectId !== null ? 'Actualizar' : 'Guardar'}
+              {subjectId !== null ? "Actualizar" : "Guardar"}
             </Button>
           </Form>
         </Modal.Body>
@@ -253,15 +170,18 @@ const SubjectForm = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredSubjects.map((subject) => (
+          {subjects.map((subject) => (
             <tr key={subject.subjectId}>
               <td>{subject.subjectName}</td>
               <td>{subject.code}</td>
               <td>
                 <Button variant="primary" onClick={() => handleEdit(subject)}>
                   Editar
-                </Button>{' '}
-                <Button variant="danger" onClick={() => confirmDelete(subject.subjectId)}>
+                </Button>{" "}
+                <Button
+                  variant="danger"
+                  onClick={() => confirmDelete(subject.subjectId)}
+                >
                   Eliminar
                 </Button>
               </td>
@@ -269,10 +189,19 @@ const SubjectForm = () => {
           ))}
         </tbody>
       </Table>
+      <Pagination>
+        {[...Array(totalPages)].map((_, pageIndex) => (
+          <Pagination.Item
+            key={pageIndex + 1}
+            active={pageIndex + 1 === currentPage}
+            onClick={() => handlePageChange(pageIndex + 1)}
+          >
+            {pageIndex + 1}
+          </Pagination.Item>
+        ))}
+      </Pagination>
     </div>
   );
 };
 
 export default SubjectForm;
-
-

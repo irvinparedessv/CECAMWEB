@@ -10,16 +10,72 @@ import { Button, Form, Modal, Spinner } from "react-bootstrap";
 
 interface RouteParams {
   id: string;
-  [key: string]: string | undefined; // Añadir firma de índice
+  [key: string]: string | undefined;
 }
 
 const Attendance: React.FC = () => {
   const { id } = useParams<RouteParams>();
   const [loading, setLoading] = useState(true);
+  const [loadingSubmit, setLoadingSubmit] = useState(false); // Nuevo estado para el spinner y deshabilitar botón
   const [selectedAttendance, setSelectedAttendance] = useState<Absence | null>(
     null
   );
+  const [currentYear, setCurrentYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [currentMonth, setCurrentMonth] = useState<number>(
+    new Date().getMonth() + 1
+  );
+  const [students, setStudents] = useState<StudentsAbsences[]>([]);
+  const [grade, setGrade] = useState<Grade>();
+  const [comment, setComment] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedStudent, setSelectedStudent] =
+    useState<StudentsAbsences | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [permissionChecked, setPermissionChecked] = useState(false);
 
+  const fetchData = async () => {
+    try {
+      const response = await GradeService.getAbsences(Number(id));
+      const data = response.data;
+      setStudents(data.students);
+      setGrade(data.grade);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error al obtener datos:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [id]);
+  const isWeekend = (day: number): boolean => {
+    const date = new Date(currentYear, currentMonth - 1, day);
+    const dayOfWeek = date.getDay();
+    return dayOfWeek === 0 || dayOfWeek === 6;
+  };
+
+  const formatDate = (date: Date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString();
+    return `${year}-${month}-${day}`;
+  };
+
+  const parseDate = (dateString: string): Date => {
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+  const getDaysInMonth = (month: number, year: number): number[] => {
+    const date: Date = new Date(year, month, 0);
+    const daysInMonth: number = date.getDate();
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  };
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPermissionChecked(e.target.checked);
+  };
   const getMonthName = (month: number): string => {
     const monthNames = [
       "Enero",
@@ -37,74 +93,13 @@ const Attendance: React.FC = () => {
     ];
     return monthNames[month - 1];
   };
-
-  const [currentYear, setCurrentYear] = useState<number>(
-    new Date().getFullYear()
-  );
-  const [currentMonth, setCurrentMonth] = useState<number>(
-    new Date().getMonth() + 1
-  );
-  const [students, setStudents] = useState<StudentsAbsences[]>([]);
-  const [grade, setGrade] = useState<Grade>();
-  const [comment, setComment] = useState<string>("");
-
-  const fetchData = async () => {
-    try {
-      const response = await GradeService.getAbsences(Number(id));
-      const data = response.data;
-      setStudents(data.students);
-      setGrade(data.grade);
-      setLoading(false); // Marcar carga como completa
-    } catch (error) {
-      console.error("Error al obtener datos:", error);
-      setLoading(false); // En caso de error, también detenemos la carga
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [id]);
-
-  const getDaysInMonth = (month: number, year: number): number[] => {
-    const date: Date = new Date(year, month, 0);
-    const daysInMonth: number = date.getDate();
-    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  };
-
-  const formatDate = (date: Date) => {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString();
-    return `${year}-${month}-${day}`;
-  };
-
-  const parseDate = (dateString: string): Date => {
-    const [year, month, day] = dateString.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  };
-
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedStudent, setSelectedStudent] =
-    useState<StudentsAbsences | null>(null);
-
-  const [showModal, setShowModal] = useState(false);
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPermissionChecked(e.target.checked);
-  };
-
-  const [permissionChecked, setPermissionChecked] = useState(false);
-
   const handleOpenModal = (day: number, student: StudentsAbsences) => {
     const selectedDate = new Date(currentYear, currentMonth - 1, day);
     setSelectedDate(selectedDate);
-
-    // Encuentra la falta o permiso correspondiente para el día seleccionado
     const selected = student.absences.find(
       (absence) => absence.date === formatDate(selectedDate)
     );
     if (selected) {
-      // Establece el attendance seleccionado para edición
       setSelectedAttendance(selected || null);
       setComment(selected.comment);
       setPermissionChecked(selected.hasPermission);
@@ -116,18 +111,18 @@ const Attendance: React.FC = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedDate(null);
-    setPermissionChecked(false); // Reiniciar el estado del checkbox
+    setPermissionChecked(false);
   };
 
   const handleSubmitAbsence = async () => {
     if (selectedDate && selectedStudent) {
+      setLoadingSubmit(true); // Activar spinner y deshabilitar botón
       try {
         let response;
         if (selectedAttendance) {
-          // Si hay una falta/permiso seleccionado, actualiza en lugar de agregar
           response = await StudentService.updateAbsence(
             Number(selectedStudent.id),
-            Number(selectedAttendance.id), // Asegúrate de tener un ID para la falta o permiso
+            Number(selectedAttendance.id),
             {
               professorId: localStorage.getItem("userId"),
               date: selectedDate,
@@ -135,11 +130,7 @@ const Attendance: React.FC = () => {
               hasPermission: permissionChecked,
             }
           );
-          setSelectedAttendance(null);
-          setComment("");
-          setPermissionChecked(false);
         } else {
-          // De lo contrario, agrega como una nueva falta/permiso
           response = await StudentService.addAbsence(
             Number(selectedStudent.id),
             {
@@ -149,17 +140,18 @@ const Attendance: React.FC = () => {
               hasPermission: permissionChecked,
             }
           );
-          setSelectedAttendance(null);
-          setComment("");
-          setPermissionChecked(false);
         }
-
+        setSelectedAttendance(null);
+        setComment("");
+        setPermissionChecked(false);
         handleCloseModal();
-        toast.success("Inasistencia agregada o actualizada correctamente");
-        fetchData(); // Recargar datos después de agregar o actualizar la inasistencia
+        toast.success(response.message);
+        fetchData();
       } catch (error) {
         console.error("Error al agregar o actualizar la inasistencia:", error);
         toast.error("Error al agregar o actualizar la inasistencia");
+      } finally {
+        setLoadingSubmit(false); // Desactivar spinner y habilitar botón
       }
     }
   };
@@ -201,12 +193,6 @@ const Attendance: React.FC = () => {
     },
     { withPermission: 0, withoutPermission: 0 }
   );
-
-  const isWeekend = (day: number): boolean => {
-    const date = new Date(currentYear, currentMonth - 1, day);
-    const dayOfWeek = date.getDay();
-    return dayOfWeek === 0 || dayOfWeek === 6; // Sunday (0) or Saturday (6)
-  };
 
   return loading ? (
     <Spinner
@@ -267,9 +253,7 @@ const Attendance: React.FC = () => {
                       )
                         ? "permiso"
                         : ""
-                    }
-                        
-                    ${
+                    } ${
                       student.absences.some(
                         (absence) =>
                           absence.date === formatDate(currentDate) &&
@@ -277,8 +261,7 @@ const Attendance: React.FC = () => {
                       )
                         ? "falta"
                         : ""
-                    }
-                        `}
+                    }`}
                     onClick={() =>
                       !isWeekend(day) && handleOpenModal(day, student)
                     }
@@ -295,7 +278,6 @@ const Attendance: React.FC = () => {
           </div>
         ))}
       </div>
-
       {showModal && (
         <Modal show={showModal} onHide={handleCloseModal}>
           <Modal.Header closeButton>
@@ -323,8 +305,27 @@ const Attendance: React.FC = () => {
             <Button variant="secondary" onClick={handleCloseModal}>
               Cerrar
             </Button>
-            <Button variant="primary" onClick={handleSubmitAbsence}>
-              {selectedAttendance ? "Actualizar" : "Agregar"} Inasistencia
+            <Button
+              variant="primary"
+              onClick={handleSubmitAbsence}
+              disabled={loadingSubmit}
+            >
+              {loadingSubmit ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />
+                  <span className="ml-2">Procesando...</span>
+                </>
+              ) : (
+                <>
+                  {selectedAttendance ? "Actualizar" : "Agregar"} Inasistencia
+                </>
+              )}
             </Button>
           </Modal.Footer>
         </Modal>
