@@ -109,9 +109,9 @@ const StudentService = {
       throw error;
     }
   },
-  getAllUsers: async () => {
+  getAllUsers: async (params) => {
     try {
-      const response = await axios.get<Student[]>(`${API_BASE_URL}/users`);
+      const response = await axios.get(`${API_BASE_URL}/users`, { params });
       return response.data;
     } catch (error) {
       console.error("Error al obtener usuarios:", error);

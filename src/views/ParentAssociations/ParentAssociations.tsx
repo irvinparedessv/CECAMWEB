@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Modal, Form } from "react-bootstrap";
+import { Table, Button, Modal, Form, Pagination } from "react-bootstrap";
 import StudentService from "../../services/StudentService";
 import ParentService from "../../services/ParentService";
 import { ParentsAssociationNames } from "../../types";
@@ -55,11 +55,14 @@ const ParentAssociations = () => {
     null
   );
   const [selectingParent, setSelectingParent] = useState(false);
+  const [totalPagesMain, setTotalPagesMain] = useState(0);
 
   const [allItems, setAllItems] = useState([]);
 
   // Define el estado para el número de página actual
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageMain, setCurrentPageMain] = useState(1);
+
   // Define la cantidad de elementos por página
 
   // Calcula el índice del primer elemento en la página actual
@@ -95,7 +98,9 @@ const ParentAssociations = () => {
   const goToPage = (page: number) => {
     setCurrentPage(page);
   };
-
+  const handlePageChange = async (pageNumber: number) => {
+    setCurrentPageMain(pageNumber);
+  };
   // Renderiza los números de página como botones
   const renderPageNumbers = pageNumbers.map((number) => (
     <Button
@@ -223,37 +228,21 @@ const ParentAssociations = () => {
     fetchRoles();
     fetchParents();
     // fetchUnassociatedParents();
-  }, []);
+  }, [filterValue, currentPageMain]);
 
-  // useEffect(() => {
-  //   if (selectedParentStudent) {
-  //     fetchUnassociatedParents(selectedParentStudent.id);
-  //   }
-  // }, [selectedParentStudent]);
-
-  // const fetchUnassociatedParents = async (studentId: number) => {
-  //   try {
-  //     const unassociatedParents = await ParentAssociationService.getUnassociatedParents(studentId);
-  //     setUnassociatedParents(unassociatedParents);
-  //   } catch (error) {
-  //     console.error('Error al obtener padres no asociados:', error);
-  //   }
-  // };
-  // const fetchUnassociatedParents = async () => {
-  //   try {
-  //     const studentId = 5; // Aquí debes proporcionar el ID del estudiante deseado
-  //     const unassociatedParents = await ParentAssociationService.getUnassociatedParents(studentId);
-  //     // Actualiza el estado con los padres no asociados
-  //     setUnassociatedParents(unassociatedParents);
-  //   } catch (error) {
-  //     console.error('Error al obtener padres no asociados:', error);
-  //   }
-  // };
   const fetchStudents = async () => {
     try {
+      const params = {
+        page: currentPageMain,
+        size: itemsPerPage,
+        filter: filterValue, // Ajusta según cómo se manejen los filtros en tu API
+      };
       //const studentList = await ParentAssociationService.getAllUsers();
-      const studentList = await ParentAssociationService.getAllUsers();
-      setParentsAssociationNames(studentList);
+      const response = await ParentAssociationService.getAllUsers(params);
+      console.log(response);
+      setParentsAssociationNames(response.data);
+      setTotalPagesMain(response.last_page);
+
       //const filteredStudents = studentList.filter(student => student.rolId === 1);
       //setStudents();
     } catch (error) {
@@ -299,200 +288,6 @@ const ParentAssociations = () => {
     setSelectedParents([]);
   };
 
-  // const handleParentAssociationModalClose = () => {
-  //   setShowParentAssociationModal(false);
-  //   setSelectedParentStudent(null);
-  //   setSelectedParents([]);
-  // };
-
-  // const handleManageParents = async (studentId: number) => {
-  //   try {
-  //     const student = counts.find(student => student.id === studentId);
-  //     if (student) {
-  //       setSelectedParentStudent(student);
-  //       setLoading(true);
-  //       const parentAssociations = await ParentAssociationService.getUsersWithParentAssociations(student.id);
-  //       setParentsAssociations(parentAssociations);
-  //       setLoading(false);
-  //       setShowParentAssociationModal(true);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error al obtener asociaciones de padres:', error);
-  //   }
-  // };
-
-  // const handleSelectParent = (parent: ParentAssociation) => {
-  //   const isSelected = selectedParents.some(p => p.id === parent.id);
-  //   if (isSelected) {
-  //     setSelectedParents(selectedParents.filter(p => p.id !== parent.id));
-  //   } else {
-  //     setSelectedParents([...selectedParents, parent]);
-  //   }
-  // };
-
-  // const handleAddParent = async () => {
-  //   try {
-  //     if (selectedParentStudent && selectedParents.length > 0) {
-  //       await ParentAssociationService.saveParentAssociations(selectedParentStudent.id, selectedParents.map(parent => parent.id));
-  //       console.log('Asociaciones de padres guardadas correctamente');
-  //       handleAddParentModalClose();
-  //     } else {
-  //       console.error('Por favor, seleccione al menos un padre');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error al guardar las asociaciones de padres:', error);
-  //   }
-  // };
-
-  // const handleDeleteSelectedParent = (parentId: number) => {
-  //   setSelectedParents(selectedParents.filter(parent => parent.id !== parentId));
-  // };
-
-  // const handleDeleteParent = async (parentId: number) => {
-  //   try {
-  //     // setDeletingParentId(parentId);
-  //     setDeletingParent(true);
-
-  //     const result = await Swal.fire({
-  //       title: '¿Estás seguro?',
-  //       text: 'Esta acción eliminará el registro del padre asociado. ¿Estás seguro de continuar?',
-  //       icon: 'warning',
-  //       showCancelButton: true,
-  //       confirmButtonColor: '#3085d6',
-  //       cancelButtonColor: '#d33',
-  //       confirmButtonText: 'Sí, eliminar'
-  //     });
-
-  //     if (result.isConfirmed) {
-  //       // Realizar la eliminación del padre asociado
-  //       await ParentAssociationService.deleteParentAssociation(parentId);
-
-  //       // Actualizar la lista de asociaciones de padres después de eliminar
-  //       const updatedParentAssociations = parentAssociations.filter(parent => parent.id !== parentId);
-  //       setParentsAssociations(updatedParentAssociations);
-  //       console.log('Registro eliminado exitosamente');
-
-  //       // Actualizar la lista de padres no asociados después de eliminar
-  //       await fetchUnassociatedParents(parentId);
-  //       await fetchStudents();
-
-  //       console.log(parentId);
-  //       //console.log(fetchUnassociatedParents(parentId));
-  //       //console.log(fetchStudents());
-
-  //       // Mostrar un mensaje de éxito
-  //       Swal.fire(
-  //         '¡Eliminado!',
-  //         'El registro del padre asociado ha sido eliminado correctamente.',
-  //         'success'
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error('Error al eliminar el registro:', error);
-  //   } finally {
-  //     // setDeletingParentId(null);
-  //     setDeletingParent(false);
-  //   }
-  // };
-
-  // const handleDeleteParent = async (parentId: number) => {
-  //   try {
-  //     // Realizar la solicitud para eliminar el registro utilizando el servicio
-  //     await ParentAssociationService.deleteParentAssociation(parentId);
-  //     // Actualizar la lista de asociaciones de padres después de eliminar
-  //     const updatedParentAssociations = parentAssociations.filter(parent => parent.id !== parentId);
-  //     setParentsAssociations(updatedParentAssociations);
-  //     console.log('Registro eliminado exitosamente');
-  //     // Actualizar la lista de padres no asociados después de eliminar
-  //     await fetchUnassociatedParents();
-  //     await fetchStudents();
-  //   } catch (error) {
-  //     console.error('Error al eliminar el registro:', error);
-  //   }
-  // };
-
-  // const handleDeleteParent = async (parent: ParentAssociation) => {
-  //   // Verifica si selectedParentStudent es null
-  //   if (!selectedParentStudent) {
-  //     console.error('No se ha seleccionado ningún estudiante.');
-  //     return;
-  //   }
-
-  //   try {
-  //     // Guardar el padre seleccionado
-  //     //await saveSelectedParent(selectedParentStudent.id, parent.id);
-  //     await ParentAssociationService.deleteParentAssociation(parent.id);
-
-  //     // Actualizar la lista de padres asociados
-  //     // const updatedParentAssociations = await ParentAssociationService.getUsersWithParentAssociations(selectedParentStudent.id);
-  //     // setParentsAssociations(updatedParentAssociations);
-  //     const updatedParentAssociations = parentAssociations.filter(p => p.id !== parent.id);
-  //     setParentsAssociations(updatedParentAssociations);
-  //     console.log('Registro eliminado exitosamente');
-  //     // Actualizar la lista de padres no asociados
-  //     await fetchUnassociatedParents(selectedParentStudent.id);
-  //     await fetchStudents();
-
-  //   } catch (error) {
-  //     console.error('Error al seleccionar el padre:', error);
-  //   }
-  // };
-
-  // const handleDeleteParent = async (parent: ParentAssociation) => {
-  //   if (!selectedParentStudent) {
-  //     console.error('No se ha seleccionado ningún estudiante.');
-  //     return;
-  //   }
-  //   try {
-  //     setDeletingParentId(parent.id);
-  //     setDeletingParent(true);
-
-  //     // Mostrar el diálogo de confirmación de eliminación
-  //     const result = await Swal.fire({
-  //       title: '¿Estás seguro?',
-  //       text: 'Esta acción eliminará el padre asociado.',
-  //       icon: 'warning',
-  //       showCancelButton: true,
-  //       confirmButtonColor: '#3085d6',
-  //       cancelButtonColor: '#d33',
-  //       confirmButtonText: 'Sí, eliminarlo'
-  //     });
-
-  //     // Si el usuario confirma la eliminación
-  //     if (result.isConfirmed) {
-  //       // Realizar la solicitud para eliminar el registro utilizando el servicio
-  //       await ParentAssociationService.deleteParentAssociation(parent.id);
-
-  //       // Actualizar la lista de padres asociados
-  //       const updatedParentAssociations = parentAssociations.filter(p => p.id !== parent.id);
-  //       setParentsAssociations(updatedParentAssociations);
-  //       console.log('Registro eliminado exitosamente');
-
-  //       // Actualizar la lista de padres no asociados
-  //       await fetchUnassociatedParents(selectedParentStudent.id);
-  //       await fetchStudents();
-
-  //       // Mostrar una alerta de éxito después de que se complete la eliminación
-  //       Swal.fire(
-  //         'Eliminado',
-  //         'El padre asociado ha sido eliminado correctamente.',
-  //         'success'
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error('Error al eliminar el registro:', error);
-  //     // Mostrar una alerta de error si ocurre algún problema durante la eliminación
-  //     Swal.fire(
-  //       'Error',
-  //       'Se produjo un error al eliminar el padre asociado.',
-  //       'error'
-  //     );
-  //   } finally {
-  //     // Restablecer el estado de eliminación
-  //     setDeletingParentId(null);
-  //     setDeletingParent(false);
-  //   }
-  // };
   // Define una función para determinar si un botón de asignar debe estar deshabilitado
   const isSelectButtonDisabled = (parentId: number) => {
     return selectingParentId !== null && selectingParentId !== parentId;
@@ -568,6 +363,7 @@ const ParentAssociations = () => {
   const fetchParents = async () => {
     try {
       const parentList = await ParentService.getAllUsers();
+      console.log(parentList);
       const filteredParents = parentList.filter((parent) => parent.rolId === 2);
       setParents(filteredParents);
     } catch (error) {
@@ -638,7 +434,17 @@ const ParentAssociations = () => {
               ))}
           </tbody>
         </Table>
-
+        <Pagination>
+          {[...Array(totalPagesMain)].map((_, pageIndex) => (
+            <Pagination.Item
+              key={pageIndex + 1}
+              active={pageIndex + 1 === currentPageMain}
+              onClick={() => handlePageChange(pageIndex + 1)}
+            >
+              {pageIndex + 1}
+            </Pagination.Item>
+          ))}
+        </Pagination>
         <Modal
           show={showAddParentModal}
           onHide={handleAddParentModalClose}
@@ -723,43 +529,6 @@ const ParentAssociations = () => {
                   </div>
                 )}
               </div>
-
-              {/* <Table striped bordered hover>
-                <thead>
-                  <tr>
-                    <th>Usuario</th>
-                    <th>Nombre del padre</th>
-                    <th>Rol</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-
-                {parents
-                    .filter((parent) =>
-                      parent.userName.toLowerCase().includes(filterValueParent.toLowerCase())
-                    )
-                    .map((parent, index) => (
-                      <tr key={index}>
-                        <td>{parent.userName}</td>
-                        <td>{parent.firstName} {parent.lastName}</td>
-                        <td>{roles.length > 0 ? roles.find(role => role.rolId === parent.rolId)?.roleName : ''}</td>
-                        <td>
-                        <Button
-                          variant="primary"
-                          onClick={() => handleSelectParent(parent)}
-                          style={{
-                            backgroundColor: selectedParents.some(p => p.id === parent.id) ? 'red' : null
-                          }}
-                        >
-                          {selectedParents.some(p => p.id === parent.id) ? 'Eliminar' : 'Seleccionar'}
-                        </Button>
-
-                        </td>
-                      </tr>
-                    ))}
-              </tbody>
-              </Table> */}
 
               {loading ? (
                 <p>Cargando padres no asociados...</p>

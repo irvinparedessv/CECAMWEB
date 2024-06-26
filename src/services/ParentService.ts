@@ -6,7 +6,7 @@ import { Rol } from "../types/Rol";
 const ParentService = {
   getAllUsers: async () => {
     try {
-      const response = await axios.get<Parent[]>(`${API_BASE_URL}/users`);
+      const response = await axios.get<Parent[]>(`${API_BASE_URL}/usersall`);
       return response.data;
     } catch (error) {
       console.error("Error al obtener usuarios:", error);

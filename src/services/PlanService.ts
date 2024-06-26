@@ -42,9 +42,16 @@ const PlanService = {
       throw error;
     }
   },
-  getPlans: async () => {
+  getPlans: async (params) => {
     try {
-      const response = await axios.get<Plan[]>(`${API_BASE_URL}/plans/all`);
+      const response = await axios.get<{
+        data: {
+          last_page: number;
+          data: Plan[];
+        };
+      }>(`${API_BASE_URL}/plans/all`, {
+        params,
+      });
       return response.data;
     } catch (error) {
       console.error("Error al obtener usuarios:", error);

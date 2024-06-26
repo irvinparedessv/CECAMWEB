@@ -1,19 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Modal, Form, Spinner } from "react-bootstrap";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Spinner,
+  Pagination,
+} from "react-bootstrap";
 import { Link } from "react-router-dom"; // Importa Link desde react-router-dom
 import GradeService from "../../services/GradeService";
-import { Grade, Professor, GradeProfessors, GradeFormAdd } from "../../types";
+import {
+  Grade,
+  Professor,
+  GradeProfessors,
+  GradeFormAdd,
+  GradeProfessor,
+} from "../../types";
 import { confirmAlert } from "react-confirm-alert";
 import toast from "react-hot-toast";
 import StudentService from "../../services/StudentService";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { itemsPerPage } from "../../const/Pagination";
 
 const GradeList = () => {
   const navigate = useNavigate();
-  const [grades, setGrades] = useState<Grade[]>([]);
+  const [grades, setGrades] = useState<GradeProfessor[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [error, setError] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showAddParentModal, setShowAddParentModal] = useState(false);
   const [unassociatedProfessors, setUnassociatedProfessors] = useState<
@@ -39,9 +55,6 @@ const GradeList = () => {
   // Estado para almacenar los padres seleccionados
   const [selectedProfessors, setSelectedProfessors] = useState<Professor[]>([]);
   // Define el estado para el número de página actual
-  const [currentPage, setCurrentPage] = useState(1);
-  // Define la cantidad de elementos por página
-  const itemsPerPage = 5;
 
   const indexOfFirstItem = (currentPage - 1) * itemsPerPage;
   // Calcula el índice del último elemento en la página actual
@@ -65,40 +78,9 @@ const GradeList = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
-  // const handleCancel = () => {
-  //   navigate("/grades");
-  // };
-  // const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-
-  //   // Validar campos requeridos
-  //   const newErrors: { [key: string]: string } = {};
-  //   Object.entries(formData).forEach(([key, value]) => {
-  //     if (value.trim() === "") {
-  //       newErrors[key] =
-  //         `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
-  //     }
-  //   });
-  //   if (Object.keys(newErrors).length > 0) {
-  //     setErrors(newErrors);
-  //     return;
-  //   }
-
-  //   try {
-  //     setIsLoading(true);
-  //     toast.promise(GradeService.addGrade(formData), {
-  //       loading: "Guardando...",
-  //       success: <b>Grado guardado!</b>,
-  //       error: <b>Error en guardado.</b>,
-  //     });
-  //     setTimeout(() => {
-  //       navigate("/grades");
-  //     }, 1000);
-  //   } catch (error) {
-  //     console.error("Error creating grade:", error);
-  //   }
-  // };
+  const handlePageChange = async (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleAddModalShow = (gradeId: number | null) => {
     setSelectedGradeId(gradeId);
@@ -134,12 +116,19 @@ const GradeList = () => {
       description: "",
     });
   };
-
   const fetchData = async () => {
     try {
-      const response = await GradeService.getAllGrades();
+      const params = {
+        page: currentPage,
+        size: itemsPerPage,
+        filter: filterValue,
+      };
+      const response = await GradeService.getAllGrades(params);
+      console.log(response);
       if (response.success) {
-        setGrades(response.data);
+        setGrades(response.data.data);
+        console.log(response.data.data);
+        setTotalPages(response.data.last_page);
       } else {
         setError("Failed to fetch grades");
       }
@@ -150,9 +139,8 @@ const GradeList = () => {
 
   useEffect(() => {
     fetchData();
-    fetchProfessors();
     fetchGradeProfessors();
-  }, []);
+  }, [currentPage, filterValue]);
 
   // const handleAddClick = () => {
   //   navigate('/grades/add');
@@ -236,26 +224,13 @@ const GradeList = () => {
   const fetchGradeProfessors = async () => {
     try {
       //const studentList = await ParentAssociationService.getAllUsers();
-      const professorList = await GradeService.getAllGradeProfessors();
-      setGradeProfessors(professorList);
+      const response = await GradeService.getAllGradeProfessors();
+
+      setGradeProfessors(response);
       // const filteredProfessors = professorList.filter(professor => professor.rolId === 3);
       // setProfessors(filteredProfessors);
     } catch (error) {
       console.error("Error al obtener grados:", error);
-    }
-  };
-
-  const fetchProfessors = async () => {
-    try {
-      //const studentList = await ParentAssociationService.getAllUsers();
-      const professorList = await StudentService.getAllUsers();
-      //setProfessorsAssociationNames(professorList);
-      const filteredProfessors = professorList.filter(
-        (professor) => professor.rolId === 3
-      );
-      setProfessors(filteredProfessors);
-    } catch (error) {
-      console.error("Error al obtener usuarios:", error);
     }
   };
 
@@ -324,15 +299,9 @@ const GradeList = () => {
       // Actualizar manualmente selectedGrade con el nuevo grado agregado
       const newGrade = { ...formData };
       setSelectedGrade(newGrade);
-
       fetchData();
-      fetchProfessors();
-      //fetchGradeProfessors();
+      fetchGradeProfessors();
 
-      // Mostrar el modal y pasar el ID del nuevo grado agregado
-      //handleAddParentModalShow(newGrade.gradeId);
-
-      // Mostrar una alerta de éxito después de agregar el grado
       Swal.fire("Éxito", "El grado ha sido agregado correctamente.", "success");
     } catch (error) {
       console.error("Error al insertar grado:", error);
@@ -371,6 +340,7 @@ const GradeList = () => {
       if (selectedGradeId !== null) {
         await GradeService.updateGrade(selectedGradeId, formData);
         setShowAddModal(false);
+        fetchData();
         fetchGradeProfessors();
 
         // Mostrar una alerta de éxito
@@ -448,6 +418,7 @@ const GradeList = () => {
 
         // Actualizar la lista de padres no asociados
         await fetchUnassociatedProfessors(selectedProfessorGrade.gradeId);
+        await fetchData();
         await fetchGradeProfessors();
 
         // Mostrar una alerta de éxito después de seleccionar el padre
@@ -571,7 +542,7 @@ const GradeList = () => {
           </tr>
         </thead>
         <tbody>
-          {gradeProfessors
+          {grades
             .filter((grade) => {
               const gradeName = `${grade.name}`.toLowerCase();
               const searchValue = filterValue.toLowerCase();
@@ -583,8 +554,9 @@ const GradeList = () => {
                 <td>{grade.section}</td>
                 <td>{grade.description}</td>
                 <td>
-                  {grade.firstName && grade.lastName ? (
-                    `${grade.firstName} ${grade.lastName}`
+                  {grade.manager_professor?.firstName &&
+                  grade.manager_professor?.lastName ? (
+                    `${grade.manager_professor.firstName} ${grade.manager_professor.lastName}`
                   ) : (
                     <span style={{ fontStyle: "italic", color: "grey" }}>
                       Sin Profesor Asociado
@@ -615,6 +587,17 @@ const GradeList = () => {
             ))}
         </tbody>
       </table>
+      <Pagination>
+        {[...Array(totalPages)].map((_, pageIndex) => (
+          <Pagination.Item
+            key={pageIndex + 1}
+            active={pageIndex + 1 === currentPage}
+            onClick={() => handlePageChange(pageIndex + 1)}
+          >
+            {pageIndex + 1}
+          </Pagination.Item>
+        ))}
+      </Pagination>
       <Modal
         show={showAddParentModal}
         onHide={handleAddParentModalClose}
