@@ -110,22 +110,24 @@
 //     </Container>
 //   );
 // };
+// Profiles.tsx
+
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { UserInformation } from '../../types/Login';
-import AuthService from '../../services/AuthService';
 import UserService from '../../services/UserService';
+import AuthService from '../../services/AuthService';
 import './profiles.css';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 const Profiles = () => {
   const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [photo, setPhoto] = useState<File | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -215,6 +217,124 @@ const Profiles = () => {
     }
   };
 
+  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    try {
+      // Mostrar el primer SweetAlert para ingresar la contraseña actual
+      const { value: currentPassword } = await Swal.fire({
+        title: 'Ingresa tu Contraseña Actual',
+        input: 'password',
+        inputPlaceholder: 'Ingresa tu contraseña actual',
+        inputAttributes: {
+          required: 'true'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Siguiente',
+        cancelButtonText: 'Cancelar',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Debes ingresar tu contraseña actual';
+          }
+        }
+      });
+  
+      if (currentPassword) {
+        setIsLoading(true);
+  
+        // Obtener el userId desde localStorage
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          throw new Error('No se encontró el ID del usuario');
+        }
+  
+        // Verificar la contraseña actual antes de continuar
+        const isPasswordCorrect = await UserService.verifyPassword(parseInt(userId, 10), currentPassword);
+  
+        if (isPasswordCorrect) {
+          let newPassword: string | undefined;
+  
+          const { value: newPwd } = await Swal.fire({
+            title: 'Ingresa y Confirma tu Nueva Contraseña',
+            html: `
+              <input id="swal-input1" class="swal2-input" type="password" placeholder="Ingresa tu nueva contraseña" required>
+              <input id="swal-input2" class="swal2-input" type="password" placeholder="Confirma tu nueva contraseña" required>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Confirmar',
+            cancelButtonText: 'Cancelar',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            preConfirm: () => {
+              newPassword = (document.getElementById('swal-input1') as HTMLInputElement).value;
+              const confirmedPassword = (document.getElementById('swal-input2') as HTMLInputElement).value;
+  
+              if (newPassword !== confirmedPassword) {
+                Swal.showValidationMessage('Las contraseñas no coinciden');
+                return false;
+              }
+              if (newPassword.length < 3) {
+                Swal.showValidationMessage('La contraseña debe tener al menos 8 caracteres');
+                return false;
+              }
+              return newPassword;
+            }
+          });
+  
+          if (!newPwd) {
+            // Si el usuario cancela, salir de la función
+            setIsLoading(false);
+            return;
+          }
+  
+          // Llamar a UserService para cambiar la contraseña
+          const changeSuccess = await UserService.changePassword(parseInt(userId, 10), currentPassword, newPwd);
+  
+          if (changeSuccess) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Contraseña cambiada',
+              text: 'Tu contraseña ha sido cambiada exitosamente.',
+              allowOutsideClick: true,
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Hubo un problema al intentar cambiar la contraseña.',
+              allowOutsideClick: true,
+            });
+          }
+        } else {
+          // Si la contraseña actual no es correcta, mostrar mensaje de error
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'La contraseña actual es incorrecta.',
+            allowOutsideClick: true,
+          });
+        }
+      }
+    } catch (error) {
+      // Mostrar mensaje de error genérico en caso de fallos inesperados
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al intentar cambiar la contraseña.',
+        allowOutsideClick: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+};
+
+
+  
+  
+
   if (userInfo === null) {
     return null;
   }
@@ -232,7 +352,7 @@ const Profiles = () => {
               <h2>Perfil de Usuario</h2>
             </Card.Header>
             <Card.Body>
-              <div className="text-center mb-3 position-relative" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+            <div className="text-center mb-3 position-relative" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
                 <label htmlFor="photoInput">
                   <img src={userPhotoUrl} alt={`${firstName} ${lastName}`} className={`rounded-circle img-fluid ${isHovered ? 'blur' : ''}`} />
                   {isHovered && <p className="change-photo-message">Cambiar Foto</p>}
@@ -246,31 +366,18 @@ const Profiles = () => {
                 <p><strong>Email:</strong> {email}</p>
                 <p><strong>Rol:</strong> {rolId === 5 ? 'Administrador' : (rolId === 3 ? 'Profesor' : 'Otro')}</p>
               </div>
+              <hr />
+              <Form onSubmit={handleChangePassword}>
+                <Button variant="primary" type="submit" disabled={isLoading}>
+                  Cambiar Contraseña
+                </Button>
+              </Form>
             </Card.Body>
           </Card>
         </Col>
       </Row>
     </Container>
   );
-};
-
-const SwalLoading = ({ isLoading }: { isLoading: boolean }) => {
-  useEffect(() => {
-    if (isLoading) {
-      Swal.fire({
-        title: 'Cargando...',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => {
-          Swal.showLoading();
-        },
-      });
-    } else {
-      Swal.close();
-    }
-  }, [isLoading]);
-
-  return null;
 };
 
 export default Profiles;
