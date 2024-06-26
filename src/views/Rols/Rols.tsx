@@ -28,6 +28,8 @@ const Students = () => {
   const [updatingStudentId, setUpdatingStudentId] = useState<number | null>(null);
   const [updatingStudent, setUpdatingStudent] = useState(false);
   const [selectedRole, setSelectedRole] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Agregar estado isLoading
+
 
   const [parentsData, setParentsData] = useState<ParentsData[]>([]);
   const [errors, setErrors] = useState({
@@ -132,6 +134,62 @@ const Students = () => {
   //     );
   //   }
   // };
+
+
+
+
+  const handleAddPhoto = (studentId: number) => {
+    setSelectedStudentId(studentId);
+    setShowAddPhotoModal(true);
+  };
+  
+  const handleAddPhotoClose = () => {
+    setShowAddPhotoModal(false);
+    setPhoto(null);
+  };
+
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
+  
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPhoto(file);
+    }
+  };
+  
+  const handleUploadPhoto = async () => {
+    if (photo && selectedStudentId) {
+      const formData = new FormData();
+      formData.append('photo', photo);
+      try {
+        setIsLoading(true);
+        Swal.fire({
+          title: 'Cargando...',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          willOpen: () => {
+            Swal.showLoading();
+          },
+        });
+        await StudentService.uploadPhoto(selectedStudentId, formData);
+        fetchStudents();
+        Swal.fire('Éxito', 'Foto subida correctamente.', 'success');
+        setShowAddPhotoModal(false);
+      } catch (error) {
+        Swal.fire('Error', 'Error al subir la foto.', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+  
+
+
+
+
+
+  
   
 
 
@@ -564,6 +622,12 @@ const Students = () => {
         >
           Editar
         </Button>
+        <Button
+          variant="success"
+          onClick={() => handleAddPhoto(student.id)}
+        >
+          Agregar Foto
+        </Button>
       </td>
     </tr>
   )})}
@@ -640,6 +704,24 @@ const Students = () => {
             <Button variant="primary" onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}>
               {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
             </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={showAddPhotoModal} onHide={handleAddPhotoClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Agregar Foto</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="formPhoto">
+                <Form.Label>Seleccionar Foto</Form.Label>
+                <Form.Control type="file" onChange={handlePhotoChange} />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleAddPhotoClose}>Cancelar</Button>
+            <Button variant="primary" onClick={handleUploadPhoto}>Subir Foto</Button>
           </Modal.Footer>
         </Modal>
       </div>
