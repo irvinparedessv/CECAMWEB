@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Card } from 'react-bootstrap';
 import StudentService from '../../services/StudentService';
 import { ParentsData, Student } from '../../types';
 import { Rol } from '../../types/Rol';
 import Swal from 'sweetalert2';
 import { Spinner } from 'react-bootstrap';
+import { UserInformation } from '../../types/Login';
 
 const Students = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -19,6 +20,7 @@ const Students = () => {
     firstName: '',
     lastName: '',
     enabled: true,
+    userPhoto: '',
     rolId: 0,
     gradeId: 1,
   });
@@ -29,9 +31,11 @@ const Students = () => {
   const [updatingStudent, setUpdatingStudent] = useState(false);
   const [selectedRole, setSelectedRole] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Agregar estado isLoading
-
-
+  const [isHovered, setIsHovered] = useState(false);
+  const [userPhotoUrl, setUserPhotoUrl] = useState('');
   const [parentsData, setParentsData] = useState<ParentsData[]>([]);
+  const BASE_URL = 'http://localhost:8000/storage/';
+  
   const [errors, setErrors] = useState({
     firstName: '',
     lastName: '',
@@ -79,6 +83,7 @@ const Students = () => {
           firstName: selectedStudent.firstName,
           lastName: selectedStudent.lastName,
           enabled: selectedStudent.enabled,
+          userPhoto: selectedStudent.userPhoto,
           rolId: selectedStudent.rolId,
           gradeId: 1,
         });
@@ -92,6 +97,7 @@ const Students = () => {
         firstName: '',
         lastName: '',
         enabled: true,
+        userPhoto: '',
         rolId: 0,
         gradeId: 1,
       });
@@ -141,6 +147,29 @@ const Students = () => {
   const handleAddPhoto = (studentId: number) => {
     setSelectedStudentId(studentId);
     setShowAddPhotoModal(true);
+    if (studentId !== null) {
+      const selectedStudent = students.find(student => student.id === studentId);
+      if (selectedStudent) {
+        setNewStudentData({
+          id: selectedStudent.id,
+          userName: selectedStudent.userName,
+          email: selectedStudent.email,
+          password: '',
+          firstName: selectedStudent.firstName,
+          lastName: selectedStudent.lastName,
+          enabled: selectedStudent.enabled,
+          userPhoto: selectedStudent.userPhoto ? `${BASE_URL}${selectedStudent.userPhoto}` : DEFAULT_USER_PHOTO_URL,
+          rolId: selectedStudent.rolId,
+          gradeId: 1,
+        });
+      }
+    } 
+
+    // const getFullPhotoUrl = (photoPath) => {
+    //   return photoPath ? `${BASE_URL}${photoPath}` : DEFAULT_USER_PHOTO_URL;
+    // };
+
+    
   };
   
   const handleAddPhotoClose = () => {
@@ -151,45 +180,64 @@ const Students = () => {
   const [photo, setPhoto] = useState<File | null>(null);
   const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
   
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handlePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]; // Obtenemos el primer archivo seleccionado
     if (file) {
-      setPhoto(file);
+      const reader = new FileReader(); // Creamos un lector de archivos
+      reader.onloadend = async () => {
+        // Verificamos que reader.result sea un string
+        if (typeof reader.result === 'string') {
+          setUserPhotoUrl(reader.result); // Actualizamos userPhotoUrl con la URL base64 de la imagen
+        } else {
+          // Manejo de error o conversión si result es ArrayBuffer
+          const arrayBuffer: ArrayBuffer = reader.result as ArrayBuffer;
+          const converted = arrayBufferToBase64(arrayBuffer); // Función para convertir ArrayBuffer a base64
+          setUserPhotoUrl(converted);
+        }
+  
+        // Subir la foto al servidor
+        const formData = new FormData();
+        formData.append('photo', file);
+        try {
+          setIsLoading(true);
+          // Llama al servicio para subir la foto del usuario seleccionado
+          await StudentService.uploadPhoto(selectedStudentId, formData);
+          fetchStudents(); // Actualiza la lista de estudiantes después de subir la foto
+          // Actualiza la URL de la foto mostrada
+          setUserPhotoUrl(`URL de la foto subida`); // Deberías obtener la URL real desde la respuesta del servidor
+          setShowAddPhotoModal(false); // Cierra el modal después de subir la foto
+          Swal.fire('Éxito', 'Foto subida correctamente.', 'success');
+        } catch (error) {
+          Swal.fire('Error', 'Error al subir la foto.', 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      reader.readAsDataURL(file); // Leemos el archivo como URL base64
     }
   };
   
-  const handleUploadPhoto = async () => {
-    if (photo && selectedStudentId) {
-      const formData = new FormData();
-      formData.append('photo', photo);
-      try {
-        setIsLoading(true);
-        Swal.fire({
-          title: 'Cargando...',
-          allowOutsideClick: false,
-          showConfirmButton: false,
-          willOpen: () => {
-            Swal.showLoading();
-          },
-        });
-        await StudentService.uploadPhoto(selectedStudentId, formData);
-        fetchStudents();
-        Swal.fire('Éxito', 'Foto subida correctamente.', 'success');
-        setShowAddPhotoModal(false);
-      } catch (error) {
-        Swal.fire('Error', 'Error al subir la foto.', 'error');
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  // Función de utilidad para convertir ArrayBuffer a base64
+  const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer): string => {
+    const base64String = btoa(
+      new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
+    return `data:image/jpeg;base64,${base64String}`;
   };
   
-
-
-
-
-
   
+
+
+
+  // if (userInfo === null) {
+  //   return null;
+  // }
+
+  // const { firstName, lastName, userName, rolId, userPhoto, email } = userInfo;
+  const DEFAULT_USER_PHOTO_URL = 'http://localhost:8000/storage/userPhoto/default-user-photo.jpg';
+  //const userPhotoUrl =  DEFAULT_USER_PHOTO_URL;
+
+
   
 
 
@@ -326,6 +374,7 @@ const Students = () => {
       firstName: '',
       lastName: '',
       enabled: true,
+      userPhoto: '',
       rolId: 1,
       gradeId: 1,
     });
@@ -548,6 +597,7 @@ const Students = () => {
         <Table striped bordered hover>
           <thead>
             <tr>
+            <th>Foto</th>
               <th>Usuario</th>
               <th>Email</th>
               <th>Nombre</th>
@@ -570,6 +620,11 @@ const Students = () => {
     const roleName = studentRole ? studentRole.roleName : 'Unknown'; // Manejar caso donde no se encuentre el rol
     return (
       <tr key={index}>
+        <td>
+        <img src={student.userPhoto==null ? DEFAULT_USER_PHOTO_URL : `${BASE_URL}${student.userPhoto}` } alt={student.userPhoto} style={{ width: '50px', height: '50px' }} />
+
+        </td>
+
       <td>{student.userName}</td>
       <td>{student.email}</td>
       <td>{student.firstName} {student.lastName}</td>
@@ -654,38 +709,9 @@ const Students = () => {
                 <Form.Control type="email" name="email" value={newStudentData.email} onChange={handleInputChange} />
                 {errors.email && <Form.Text className="text-danger">{errors.email}</Form.Text>}
               </Form.Group>
-
-              {/* <Form.Group controlId="formPassword">
-                <Form.Label>Password</Form.Label>
-                <Form.Control type="password" name="password" value={newStudentData.password} onChange={handleInputChange} />
-              </Form.Group>
-              <Form.Group controlId="formUserName">
-                <Form.Label>Usuario</Form.Label>
-                <Form.Control type="text" name="userName" disabled={true} value={newStudentData.userName} onChange={handleInputChange} />
-              </Form.Group> */}
-              {/* <Form.Group controlId="formEnabled">
-                <Form.Label>Estado</Form.Label>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Activo"
-                    checked={newStudentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedStudentId}
-                    onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: true }))}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Inactivo"
-                    checked={!newStudentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedStudentId}
-                    onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: false }))}
-                  />
-                </div>
+              {/* <Form.Group controlId="formUserPhoto">
+                <Form.Label>photo</Form.Label>
+                <Form.Control type="userPhoto" name="email" value={newStudentData.userPhoto} onChange={handleInputChange} />
               </Form.Group> */}
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
@@ -708,22 +734,37 @@ const Students = () => {
         </Modal>
 
         <Modal show={showAddPhotoModal} onHide={handleAddPhotoClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Agregar Foto</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              <Form.Group controlId="formPhoto">
-                <Form.Label>Seleccionar Foto</Form.Label>
-                <Form.Control type="file" onChange={handlePhotoChange} />
-              </Form.Group>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleAddPhotoClose}>Cancelar</Button>
-            <Button variant="primary" onClick={handleUploadPhoto}>Subir Foto</Button>
-          </Modal.Footer>
-        </Modal>
+  <Modal.Header closeButton>
+    <Modal.Title>
+      Gestionar foto para el usuario: <span style={{ color: 'red', fontWeight: 'bold' }}>
+         {newStudentData.firstName} {newStudentData.lastName}
+      </span>
+  </Modal.Title>
+
+  </Modal.Header>
+  <Modal.Body>
+    <Form>
+      <Form.Group controlId="formPhoto">
+        <Card.Body>
+          <div className="text-center mb-3 position-relative" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+            <label htmlFor="photoInput">
+            {/* <img src={newStudentData.userPhoto==null ? DEFAULT_USER_PHOTO_URL :newStudentData.userPhoto} alt={newStudentData.userPhoto==null ? DEFAULT_USER_PHOTO_URL :newStudentData.userPhoto} style={{ width: '50px', height: 'auto' }} /> */}
+
+              <img src={newStudentData.userPhoto==null ? DEFAULT_USER_PHOTO_URL :newStudentData.userPhoto}  alt={newStudentData.userPhoto==null ? DEFAULT_USER_PHOTO_URL :newStudentData.userPhoto} className={`rounded-circle img-fluid ${isHovered ? 'blur' : ''}`} />
+              {isHovered && <p className="change-photo-message">Cambiar Foto</p>}
+              <input type="file" id="photoInput" accept=".jpeg,.jpg,.png" onChange={handlePhotoChange} style={{ display: 'none' }} />
+            </label>
+          </div>
+        </Card.Body>
+      </Form.Group>
+    </Form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleAddPhotoClose}>Cancelar</Button>
+    {/* <Button variant="primary" onClick={handleUploadPhoto}>Subir Foto</Button> */}
+  </Modal.Footer>
+</Modal>
+
       </div>
     </div>
   );

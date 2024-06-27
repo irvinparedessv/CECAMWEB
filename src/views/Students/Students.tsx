@@ -19,6 +19,7 @@ const Students = () => {
     firstName: '',
     lastName: '',
     enabled: true,
+    userPhoto: '',
     rolId: 1,
     gradeId: 1,
   });
@@ -77,6 +78,7 @@ const Students = () => {
           firstName: selectedStudent.firstName,
           lastName: selectedStudent.lastName,
           enabled: selectedStudent.enabled,
+          userPhoto: '',
           rolId: selectedStudent.rolId,
           gradeId: 1,
         });
@@ -90,6 +92,7 @@ const Students = () => {
         firstName: '',
         lastName: '',
         enabled: true,
+        userPhoto: '',
         rolId: 1,
         gradeId: 1,
       });
@@ -268,6 +271,7 @@ const Students = () => {
       firstName: '',
       lastName: '',
       enabled: true,
+      userPhoto: '',
       rolId: 1,
       gradeId: 1,
     });

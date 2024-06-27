@@ -10,6 +10,7 @@ export interface Student {
   firstName: string;
   lastName: string;
   enabled: boolean;
+  userPhoto: string;
   rolId: number;
   gradeId: number;
 }
