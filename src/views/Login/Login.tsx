@@ -109,7 +109,6 @@
 // LoginForm.tsx
 
 // LoginForm.tsx
-
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import Swal from "sweetalert2";
@@ -126,6 +125,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
   const navigate = useNavigate();
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -198,15 +198,9 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
             html: `
               <div style="position: relative;">
                 <input id="newPassword" class="swal2-input" type="password" placeholder="Nueva Contraseña">
-                <label>
-                  <input type="checkbox" id="show-new-password"> Mostrar Contraseña
-                </label>
               </div>
               <div style="position: relative; margin-top: 10px;">
                 <input id="confirmPassword" class="swal2-input" type="password" placeholder="Confirma tu Nueva Contraseña">
-                <label>
-                  <input type="checkbox" id="show-confirm-password"> Mostrar Contraseña
-                </label>
               </div>
             `,
             focusConfirm: false,
@@ -215,16 +209,6 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
             didOpen: () => {
               const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
               const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
-              const showNewPasswordCheckbox = document.getElementById('show-new-password') as HTMLInputElement;
-              const showConfirmPasswordCheckbox = document.getElementById('show-confirm-password') as HTMLInputElement;
-
-              showNewPasswordCheckbox.addEventListener('change', () => {
-                newPasswordInput.type = showNewPasswordCheckbox.checked ? 'text' : 'password';
-              });
-
-              showConfirmPasswordCheckbox.addEventListener('change', () => {
-                confirmPasswordInput.type = showConfirmPasswordCheckbox.checked ? 'text' : 'password';
-              });
             },
             preConfirm: async () => {
               const newPassword = (document.getElementById("newPassword") as HTMLInputElement).value;
@@ -336,21 +320,33 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
                         onChange={handleEmailOrUsernameChange}
                       />
                     </Form.Group>
-                    <Form.Group controlId="formBasicPassword" className="mb-3">
+                    <Form.Group controlId="formPassword" className="mb-3">
                       <Form.Label>Contraseña</Form.Label>
-                      <Form.Control
-                        type="password"
-                        placeholder="Contraseña"
-                        value={password}
-                        onChange={handlePasswordChange}
+                      <div className="d-flex align-items-center">
+                        <Form.Control
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Contraseña"
+                          value={password}
+                          onChange={handlePasswordChange}
+                        />
+                      </div>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicCheckbox" className="mb-2 d-flex justify-content-between">
+ 
+                      <Form.Check
+                        type="checkbox"
+                        label="Recuérdame"
+                        className="ml-auto"
+                      />
+                      <Form.Check
+                        type="checkbox"
+                        id="showPasswordCheckbox"
+                        label="Mostrar Contraseña"
+                        className="mr-auto"
+                        onChange={() => setShowPassword(!showPassword)}
                       />
                     </Form.Group>
-                    <Form.Group
-                      controlId="formBasicCheckbox"
-                      className="mb-3"
-                    >
-                      <Form.Check type="checkbox" label="Recuérdame" />
-                    </Form.Group>
+
                     <Button
                       variant="primary"
                       type="submit"
@@ -370,8 +366,3 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 };
 
 export default LoginForm;
-
-
-
-
-
