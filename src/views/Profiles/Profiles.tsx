@@ -513,7 +513,7 @@ const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
                 <p><strong>Rol:</strong> {rolId === 5 ? 'Administrador' : (rolId === 3 ? 'Profesor' : 'Otro')}</p>
               </div>
               <hr />
-              <Form onSubmit={handleChangePassword}>
+              <Form onSubmit={handleChangePassword} className="d-flex justify-content-center">
                 <Button variant="primary" type="submit" disabled={isLoading}>
                   Cambiar Contraseña
                 </Button>
