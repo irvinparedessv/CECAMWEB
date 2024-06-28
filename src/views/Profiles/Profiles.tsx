@@ -217,121 +217,267 @@ const Profiles = () => {
     }
   };
 
-  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+//   const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
   
-    try {
-      // Mostrar el primer SweetAlert para ingresar la contraseña actual
-      const { value: currentPassword } = await Swal.fire({
-        title: 'Ingresa tu Contraseña Actual',
-        input: 'password',
-        inputPlaceholder: 'Ingresa tu contraseña actual',
-        inputAttributes: {
-          required: 'true'
-        },
-        showCancelButton: true,
-        confirmButtonText: 'Siguiente',
-        cancelButtonText: 'Cancelar',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        inputValidator: (value) => {
-          if (!value) {
-            return 'Debes ingresar tu contraseña actual';
-          }
+//     try {
+//       // Mostrar el primer SweetAlert para ingresar la contraseña actual
+//       const { value: currentPassword } = await Swal.fire({
+//         title: 'Ingresa tu Contraseña Actual',
+//         input: 'password',
+//         inputPlaceholder: 'Ingresa tu contraseña actual',
+//         inputAttributes: {
+//           required: 'true'
+//         },
+//         showCancelButton: true,
+//         confirmButtonText: 'Siguiente',
+//         cancelButtonText: 'Cancelar',
+//         allowOutsideClick: false,
+//         allowEscapeKey: false,
+//         inputValidator: (value) => {
+//           if (!value) {
+//             return 'Debes ingresar tu contraseña actual';
+//           }
+//         }
+//       });
+  
+//       if (currentPassword) {
+//         setIsLoading(true);
+  
+//         // Obtener el userId desde localStorage
+//         const userId = localStorage.getItem('userId');
+//         if (!userId) {
+//           throw new Error('No se encontró el ID del usuario');
+//         }
+  
+//         // Verificar la contraseña actual antes de continuar
+//         const isPasswordCorrect = await UserService.verifyPassword(parseInt(userId, 10), currentPassword);
+  
+//         if (isPasswordCorrect) {
+//           let newPassword: string | undefined;
+  
+//           const { value: newPwd } = await Swal.fire({
+//             title: 'Ingresa y Confirma tu Nueva Contraseña',
+//             html: `
+//               <input id="swal-input1" class="swal2-input" type="password" placeholder="Ingresa tu nueva contraseña" required>
+//               <input id="swal-input2" class="swal2-input" type="password" placeholder="Confirma tu nueva contraseña" required>
+//             `,
+//             focusConfirm: false,
+//             showCancelButton: true,
+//             confirmButtonText: 'Confirmar',
+//             cancelButtonText: 'Cancelar',
+//             allowOutsideClick: false,
+//             allowEscapeKey: false,
+//             preConfirm: () => {
+//               newPassword = (document.getElementById('swal-input1') as HTMLInputElement).value;
+//               const confirmedPassword = (document.getElementById('swal-input2') as HTMLInputElement).value;
+  
+//               if (newPassword !== confirmedPassword) {
+//                 Swal.showValidationMessage('Las contraseñas no coinciden');
+//                 return false;
+//               }
+//               if (newPassword.length < 3) {
+//                 Swal.showValidationMessage('La contraseña debe tener al menos 8 caracteres');
+//                 return false;
+//               }
+//               return newPassword;
+//             }
+//           });
+  
+//           if (!newPwd) {
+//             // Si el usuario cancela, salir de la función
+//             setIsLoading(false);
+//             return;
+//           }
+  
+//           // Llamar a UserService para cambiar la contraseña
+//           const changeSuccess = await UserService.changePassword(parseInt(userId, 10), currentPassword, newPwd);
+  
+//           if (changeSuccess) {
+//             Swal.fire({
+//               icon: 'success',
+//               title: 'Contraseña cambiada',
+//               text: 'Tu contraseña ha sido cambiada exitosamente.',
+//               allowOutsideClick: true,
+//             });
+//           } else {
+//             Swal.fire({
+//               icon: 'error',
+//               title: 'Error',
+//               text: 'Hubo un problema al intentar cambiar la contraseña.',
+//               allowOutsideClick: true,
+//             });
+//           }
+//         } else {
+//           // Si la contraseña actual no es correcta, mostrar mensaje de error
+//           Swal.fire({
+//             icon: 'error',
+//             title: 'Error',
+//             text: 'La contraseña actual es incorrecta.',
+//             allowOutsideClick: true,
+//           });
+//         }
+//       }
+//     } catch (error) {
+//       // Mostrar mensaje de error genérico en caso de fallos inesperados
+//       Swal.fire({
+//         icon: 'error',
+//         title: 'Error',
+//         text: 'Ocurrió un error al intentar cambiar la contraseña.',
+//         allowOutsideClick: true,
+//       });
+//     } finally {
+//       setIsLoading(false);
+//     }
+// };
+const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  try {
+    const { value: currentPassword } = await Swal.fire({
+      title: 'Ingresa tu Contraseña Actual',
+      html: `
+        <div style="position: relative;">
+          <input id="swal-input-current-password" class="swal2-input" type="password" placeholder="Ingresa tu contraseña actual" required>
+          <label>
+            <input type="checkbox" id="show-current-password"> Mostrar Contraseña
+          </label>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Siguiente',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        const currentPasswordInput = document.getElementById('swal-input-current-password') as HTMLInputElement;
+        const showCurrentPasswordCheckbox = document.getElementById('show-current-password') as HTMLInputElement;
+
+        showCurrentPasswordCheckbox.addEventListener('change', () => {
+          currentPasswordInput.type = showCurrentPasswordCheckbox.checked ? 'text' : 'password';
+        });
+      },
+      preConfirm: () => {
+        const currentPasswordInput = document.getElementById('swal-input-current-password') as HTMLInputElement;
+        if (!currentPasswordInput.value) {
+          Swal.showValidationMessage('Debes ingresar tu contraseña actual');
+          return false;
         }
-      });
-  
-      if (currentPassword) {
-        setIsLoading(true);
-  
-        // Obtener el userId desde localStorage
-        const userId = localStorage.getItem('userId');
-        if (!userId) {
-          throw new Error('No se encontró el ID del usuario');
-        }
-  
-        // Verificar la contraseña actual antes de continuar
-        const isPasswordCorrect = await UserService.verifyPassword(parseInt(userId, 10), currentPassword);
-  
-        if (isPasswordCorrect) {
-          let newPassword: string | undefined;
-  
-          const { value: newPwd } = await Swal.fire({
-            title: 'Ingresa y Confirma tu Nueva Contraseña',
-            html: `
+        return currentPasswordInput.value;
+      }
+    });
+
+    if (currentPassword) {
+      setIsLoading(true);
+
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        throw new Error('No se encontró el ID del usuario');
+      }
+
+      const isPasswordCorrect = await UserService.verifyPassword(parseInt(userId, 10), currentPassword);
+
+      if (isPasswordCorrect) {
+        const { value: newPwd } = await Swal.fire({
+          title: 'Ingresa y Confirma tu Nueva Contraseña',
+          html: `
+            <div style="position: relative;">
               <input id="swal-input1" class="swal2-input" type="password" placeholder="Ingresa tu nueva contraseña" required>
+              <label>
+                <input type="checkbox" id="show-password1"> Mostrar Contraseña
+              </label>
+            </div>
+            <br>
+            <div style="position: relative;">
               <input id="swal-input2" class="swal2-input" type="password" placeholder="Confirma tu nueva contraseña" required>
-            `,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Confirmar',
-            cancelButtonText: 'Cancelar',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            preConfirm: () => {
-              newPassword = (document.getElementById('swal-input1') as HTMLInputElement).value;
-              const confirmedPassword = (document.getElementById('swal-input2') as HTMLInputElement).value;
-  
-              if (newPassword !== confirmedPassword) {
-                Swal.showValidationMessage('Las contraseñas no coinciden');
-                return false;
-              }
-              if (newPassword.length < 3) {
-                Swal.showValidationMessage('La contraseña debe tener al menos 8 caracteres');
-                return false;
-              }
-              return newPassword;
+              <label>
+                <input type="checkbox" id="show-password2"> Mostrar Contraseña
+              </label>
+            </div>
+          `,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: 'Confirmar',
+          cancelButtonText: 'Cancelar',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            const passwordInput1 = document.getElementById('swal-input1') as HTMLInputElement;
+            const passwordInput2 = document.getElementById('swal-input2') as HTMLInputElement;
+            const showPassword1Checkbox = document.getElementById('show-password1') as HTMLInputElement;
+            const showPassword2Checkbox = document.getElementById('show-password2') as HTMLInputElement;
+
+            showPassword1Checkbox.addEventListener('change', () => {
+              passwordInput1.type = showPassword1Checkbox.checked ? 'text' : 'password';
+            });
+
+            showPassword2Checkbox.addEventListener('change', () => {
+              passwordInput2.type = showPassword2Checkbox.checked ? 'text' : 'password';
+            });
+          },
+          preConfirm: () => {
+            const passwordInput1 = document.getElementById('swal-input1') as HTMLInputElement;
+            const passwordInput2 = document.getElementById('swal-input2') as HTMLInputElement;
+
+            const newPasswordValue = passwordInput1.value;
+            const confirmedPassword = passwordInput2.value;
+
+            if (newPasswordValue !== confirmedPassword) {
+              Swal.showValidationMessage('Las contraseñas no coinciden');
+              return false;
             }
+
+            if (newPasswordValue.length < 8 || !/[a-z]/.test(newPasswordValue) || !/[A-Z]/.test(newPasswordValue) || !/[0-9]/.test(newPasswordValue)) {
+              Swal.showValidationMessage('La contraseña debe tener al menos 8 caracteres, incluir minúsculas, mayúsculas y números.');
+              return false;
+            }
+
+            return newPasswordValue;
+          }
+        });
+
+        if (!newPwd) {
+          setIsLoading(false);
+          return;
+        }
+
+        const changeSuccess = await UserService.changePassword(parseInt(userId, 10), currentPassword, newPwd);
+
+        if (changeSuccess) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Contraseña cambiada',
+            text: 'Tu contraseña ha sido cambiada exitosamente.',
+            allowOutsideClick: true,
           });
-  
-          if (!newPwd) {
-            // Si el usuario cancela, salir de la función
-            setIsLoading(false);
-            return;
-          }
-  
-          // Llamar a UserService para cambiar la contraseña
-          const changeSuccess = await UserService.changePassword(parseInt(userId, 10), currentPassword, newPwd);
-  
-          if (changeSuccess) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Contraseña cambiada',
-              text: 'Tu contraseña ha sido cambiada exitosamente.',
-              allowOutsideClick: true,
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Hubo un problema al intentar cambiar la contraseña.',
-              allowOutsideClick: true,
-            });
-          }
         } else {
-          // Si la contraseña actual no es correcta, mostrar mensaje de error
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'La contraseña actual es incorrecta.',
+            text: 'Hubo un problema al intentar cambiar la contraseña.',
             allowOutsideClick: true,
           });
         }
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'La contraseña actual es incorrecta.',
+          allowOutsideClick: true,
+        });
       }
-    } catch (error) {
-      // Mostrar mensaje de error genérico en caso de fallos inesperados
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Ocurrió un error al intentar cambiar la contraseña.',
-        allowOutsideClick: true,
-      });
-    } finally {
-      setIsLoading(false);
     }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Ocurrió un error al intentar cambiar la contraseña.',
+      allowOutsideClick: true,
+    });
+  } finally {
+    setIsLoading(false);
+  }
 };
-
-
   
   
 

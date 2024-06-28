@@ -50,6 +50,9 @@ const GradeList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   //const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingGradeId, setDeletingGradeId] = useState<number | null>(null);
+  const [deletingGrade, setDeletingGrade] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -204,6 +207,9 @@ const GradeList = () => {
 
   const handleDelete = async (id: number) => {
     try {
+
+      setDeletingGradeId(id);
+      setDeletingGrade(true);
       const result = await Swal.fire({
         title: 'Eliminar',
         text: '¿Está seguro de eliminar este grado?',
@@ -238,6 +244,9 @@ const GradeList = () => {
         'Se produjo un error al intentar eliminar el grado.',
         'error'
       );
+    } finally {
+      setDeletingGradeId(null);
+      setDeletingGrade(false);
     }
   };
 
@@ -305,6 +314,16 @@ const GradeList = () => {
      setSelectedProfessorGrade(null);
      setSelectedProfessors([]);
      //fetchGradeProfessors();
+  };
+
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    if (selectedGradeId !== null) {
+      await handleUpdateGrade();
+    } else {
+      await handleAddGrade();
+    }
+    setIsSubmitting(false);
   };
 
 
@@ -533,7 +552,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
 
 
   return (
-    <div>
+    <div className="container">
       <h1>Grados</h1>
         <div className="d-flex justify-content-between align-items-center mb-3">
           <Form.Control
@@ -545,14 +564,14 @@ const isDeleteButtonDisabled = (professorId:number) => {
           />
           <Button variant="primary" onClick={() => handleAddModalShow(null)}>Agregar Grado</Button>
         </div>
-      <table className="table">
+      <Table striped bordered hover>
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Seccion</th>
-            <th>Descripcion</th>
+            <th>Sección</th>
+            <th>Descripción</th>
             <th>Coordinador</th>
-            <th>Actions</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -577,19 +596,30 @@ const isDeleteButtonDisabled = (professorId:number) => {
                 )}
               </td>
               <td>
+              <Button
+          variant="danger"
+          onClick={() => handleDelete(grade.gradeId)}
+          disabled={deletingGradeId === grade.gradeId}
+        >
+          {deletingGradeId === grade.gradeId && (
+            <Spinner
+              as="span"
+              animation="border"
+              size="sm"
+              role="status"
+              aria-hidden="true"
+              style={{ marginRight: '5px' }}
+            />
+          )}
+          {deletingGradeId === grade.gradeId ? 'Eliminando...' : 'Eliminar'}
+        </Button>
               <Button variant="primary" onClick={() => handleAddModalShow(grade.gradeId)}>Editar</Button>
-                <Button
-                  className="btn btn-danger"
-                  onClick={() => handleDelete(grade.gradeId)}
-                >
-                  Eliminar
-                </Button>
-                <Button variant="success" onClick={() => handleAddParentModalShow(grade.gradeId)}>Asignar coordinador</Button>
+              <Button variant="success" onClick={() => handleAddParentModalShow(grade.gradeId)}>Asignar coordinador</Button>
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
       <Modal show={showAddParentModal} onHide={handleAddParentModalClose} dialogClassName="modal-xl">
           <Modal.Header closeButton>
           
@@ -792,7 +822,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
                   {errors.name && <div className="error-message">{errors.name}</div>}
               </Form.Group>
               <Form.Group controlId="formSeccion">
-                <Form.Label>Seccion</Form.Label>
+                <Form.Label>Sección</Form.Label>
                 <Form.Control  className="form-control"
                   type="text"
                   name="section"
@@ -804,7 +834,7 @@ const isDeleteButtonDisabled = (professorId:number) => {
                   )}
               </Form.Group>
               <Form.Group controlId="formDescription">
-                <Form.Label>Descripcion</Form.Label>
+                <Form.Label>Descripción</Form.Label>
                 <Form.Control  className="form-control"
                   type="text"
                   name="description"
@@ -818,10 +848,17 @@ const isDeleteButtonDisabled = (professorId:number) => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleAddModalClose}>Cancelar</Button>
-            <Button variant="primary" onClick={selectedGradeId !== null ? handleUpdateGrade : handleAddGrade}>
+            <Button variant="secondary" onClick={handleAddModalClose} disabled={isSubmitting}>Cancelar</Button>
+            {/* <Button variant="primary" onClick={selectedGradeId !== null ? handleUpdateGrade : handleAddGrade}>
               {selectedGradeId !== null ? 'Guardar Cambios' : 'Agregar'}
-            </Button>
+            </Button> */}
+            <Button
+          variant="primary"
+          onClick={handleSave}
+          disabled={isSubmitting}
+        >
+          {selectedGradeId !== null ? 'Guardar Cambios' : 'Agregar'}
+        </Button>
           </Modal.Footer>
         </Modal>
     </div>

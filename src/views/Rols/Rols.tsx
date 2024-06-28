@@ -34,6 +34,7 @@ const Students = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [userPhotoUrl, setUserPhotoUrl] = useState('');
   const [parentsData, setParentsData] = useState<ParentsData[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const BASE_URL = 'http://localhost:8000/storage/';
   
   const [errors, setErrors] = useState({
@@ -394,9 +395,11 @@ const Students = () => {
       }
     }
 
-    if (name === 'email') {
-      const emailRegex = /^\S+@\S+\.\S+$/;
-      if (value !== "" && !emailRegex.test(value)) {
+     // Validación y conversión a minúsculas para el correo electrónico
+     if (name === 'email') {
+      newValue = value.toLowerCase(); // Convertir a minúsculas
+      const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+      if (newValue !== "" && !emailRegex.test(newValue)) {
         errorMessage = 'Ingrese un correo electrónico válido.';
       }
     }
@@ -408,19 +411,12 @@ const Students = () => {
       };
       
       // Generar nombre de usuario si se actualiza el nombre o apellido
-      if (name === 'firstName' || name === 'lastName') {
-        updatedData.userName = generateUserName(updatedData.firstName, updatedData.lastName);
-      }
+      // if (name === 'firstName' || name === 'lastName') {
+      //   updatedData.userName = generateUserName(updatedData.firstName, updatedData.lastName);
+      // }
   
       return updatedData;
     });
-
-     if (name === 'email') {
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (value !== "" && !emailRegex.test(value)) {
-      errorMessage = 'Ingrese un correo electrónico válido.';
-    }
-  }
   
     // Actualizar estado de errores
     setErrors(prevErrors => ({
@@ -435,6 +431,22 @@ const Students = () => {
       ...prevState,
       rolId: parseInt(value),
     }));
+  };
+
+
+  const handleSave = async () => {
+    if (Object.values(errors).some(error => error !== '')) {
+      alert("Por favor, corrija los errores antes de guardar.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    if (selectedStudentId !== null) {
+      await handleUpdateStudent();
+    } else {
+      await handleAddStudent();
+    }
+    setIsSubmitting(false);
   };
 
   const handleAddStudent = async () => {
@@ -563,14 +575,14 @@ const Students = () => {
 
 
 
-  const generateUserName = (firstName: string, lastName: string): string => {
-    if (!firstName || !lastName) {
-      return '';
-    }
-    const firstInitial = firstName;
-    const lastInitial = lastName.substring(0, 2);
-    return `${firstInitial.toLowerCase()}${lastInitial.toLowerCase()}24`;
-  };
+  // const generateUserName = (firstName: string, lastName: string): string => {
+  //   if (!firstName || !lastName) {
+  //     return '';
+  //   }
+  //   const firstInitial = firstName;
+  //   const lastInitial = lastName.substring(0, 2);
+  //   return `${firstInitial.toLowerCase()}${lastInitial.toLowerCase()}24`;
+  // };
 
 
   return (
@@ -726,10 +738,17 @@ const Students = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-          <Button variant="secondary" onClick={handleAddModalClose}>Cancelar</Button>
-            <Button variant="primary" onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}>
+          <Button variant="secondary" onClick={handleAddModalClose} disabled={isSubmitting}>Cancelar</Button>
+            {/* <Button variant="primary" onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}>
               {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
-            </Button>
+            </Button> */}
+            <Button
+          variant="primary"
+          onClick={handleSave}
+          disabled={isSubmitting || Object.values(errors).some(error => error !== '')}
+        >
+          {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
+        </Button>
           </Modal.Footer>
         </Modal>
 

@@ -195,22 +195,48 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
           // Mostrar SweetAlert2 para cambiar la contraseña
           const { value: newPassword } = await Swal.fire({
             title: "Cambia tu contraseña",
-            html:
-              '<input id="newPassword" class="swal2-input" type="password" placeholder="Nueva Contraseña">' +
-              '<input id="confirmPassword" class="swal2-input" type="password" placeholder="Confirma tu Nueva Contraseña">',
+            html: `
+              <div style="position: relative;">
+                <input id="newPassword" class="swal2-input" type="password" placeholder="Nueva Contraseña">
+                <label>
+                  <input type="checkbox" id="show-new-password"> Mostrar Contraseña
+                </label>
+              </div>
+              <div style="position: relative; margin-top: 10px;">
+                <input id="confirmPassword" class="swal2-input" type="password" placeholder="Confirma tu Nueva Contraseña">
+                <label>
+                  <input type="checkbox" id="show-confirm-password"> Mostrar Contraseña
+                </label>
+              </div>
+            `,
             focusConfirm: false,
             allowOutsideClick: false,
             showCancelButton: false,
+            didOpen: () => {
+              const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
+              const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+              const showNewPasswordCheckbox = document.getElementById('show-new-password') as HTMLInputElement;
+              const showConfirmPasswordCheckbox = document.getElementById('show-confirm-password') as HTMLInputElement;
+
+              showNewPasswordCheckbox.addEventListener('change', () => {
+                newPasswordInput.type = showNewPasswordCheckbox.checked ? 'text' : 'password';
+              });
+
+              showConfirmPasswordCheckbox.addEventListener('change', () => {
+                confirmPasswordInput.type = showConfirmPasswordCheckbox.checked ? 'text' : 'password';
+              });
+            },
             preConfirm: async () => {
-              const newPassword = (document.getElementById(
-                "newPassword"
-              ) as HTMLInputElement).value;
-              const confirmPassword = (document.getElementById(
-                "confirmPassword"
-              ) as HTMLInputElement).value;
+              const newPassword = (document.getElementById("newPassword") as HTMLInputElement).value;
+              const confirmPassword = (document.getElementById("confirmPassword") as HTMLInputElement).value;
 
               if (!newPassword || newPassword !== confirmPassword) {
                 await Swal.showValidationMessage("Las contraseñas no coinciden");
+                return false;
+              }
+
+              if (newPassword.length < 8 || !/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+                await Swal.showValidationMessage('La contraseña debe tener al menos 8 caracteres, incluir minúsculas, mayúsculas y números.');
                 return false;
               }
 
@@ -344,6 +370,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 };
 
 export default LoginForm;
+
 
 
 

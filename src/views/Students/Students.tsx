@@ -28,7 +28,7 @@ const Students = () => {
   const [filterValue, setFilterValue] = useState('');
   const [updatingStudentId, setUpdatingStudentId] = useState<number | null>(null);
   const [updatingStudent, setUpdatingStudent] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [parentsData, setParentsData] = useState<ParentsData[]>([]);
   const [errors, setErrors] = useState({
@@ -291,9 +291,11 @@ const Students = () => {
       }
     }
 
+    // Validación y conversión a minúsculas para el correo electrónico
     if (name === 'email') {
-      const emailRegex = /^\S+@\S+\.\S+$/;
-      if (value !== "" && !emailRegex.test(value)) {
+      newValue = value.toLowerCase(); // Convertir a minúsculas
+      const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+      if (newValue !== "" && !emailRegex.test(newValue)) {
         errorMessage = 'Ingrese un correo electrónico válido.';
       }
     }
@@ -304,20 +306,14 @@ const Students = () => {
         [name]: newValue,
       };
       
-      //Generar nombre de usuario si se actualiza el nombre o apellido
-      if (name === 'firstName' || name === 'lastName') {
-        updatedData.userName = generateUserName(updatedData.firstName, updatedData.lastName);
-      }
+      // //Generar nombre de usuario si se actualiza el nombre o apellido
+      // if (name === 'firstName' || name === 'lastName') {
+      //   updatedData.userName = generateUserName(updatedData.firstName, updatedData.lastName);
+      // }
   
       return updatedData;
     });
 
-     if (name === 'email') {
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (value !== "" && !emailRegex.test(value)) {
-      errorMessage = 'Ingrese un correo electrónico válido.';
-    }
-  }
   
     // Actualizar estado de errores
     setErrors(prevErrors => ({
@@ -334,8 +330,26 @@ const Students = () => {
     }));
   };
 
+
+  const handleSave = async () => {
+    if (Object.values(errors).some(error => error !== '')) {
+      alert("Por favor, corrija los errores antes de guardar.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    if (selectedStudentId !== null) {
+      await handleUpdateStudent();
+    } else {
+      await handleAddStudent();
+    }
+    setIsSubmitting(false);
+  };
+
+
   const handleAddStudent = async () => {
     try {
+      // setIsSubmitting(true);
       // Verificar campos obligatorios
       if (!newStudentData.firstName || !newStudentData.lastName || !newStudentData.email) {
         return Swal.fire('Error', 'Por favor, complete todos los campos obligatorios.', 'error');
@@ -354,10 +368,12 @@ const Students = () => {
   
       // Mostrar una alerta de éxito
       Swal.fire('Éxito', 'El estudiante ha sido agregado correctamente.', 'success');
+      // setIsSubmitting(false);
     } catch (error) {
       console.error('Error al insertar estudiante:', error);
       Swal.fire('Error', 'Se produjo un error al intentar agregar el estudiante.', 'error');
     }
+    
   };
   
   
@@ -455,19 +471,19 @@ const Students = () => {
 
 
 
-  const generateUserName = (firstName: string, lastName: string): string => {
-    if (!firstName || !lastName) {
-      return '';
-    }
-    const firstNames = firstName.split(' ');
-    const firstInitial = firstNames[0].toLowerCase();
-    const lastNames = lastName.split(' ');
-    let lastNamePart = '';
-    if (lastNames.length > 1) {
-        lastNamePart = lastNames.slice(1).join('');
-    }
-    return `${firstInitial}.${lastNames[0].toLowerCase()}${lastNamePart.toLowerCase()}24`;
-};
+//   const generateUserName = (firstName: string, lastName: string): string => {
+//     if (!firstName || !lastName) {
+//       return '';
+//     }
+//     const firstNames = firstName.split(' ');
+//     const firstInitial = firstNames[0].toLowerCase();
+//     const lastNames = lastName.split(' ');
+//     let lastNamePart = '';
+//     if (lastNames.length > 1) {
+//         lastNamePart = lastNames.slice(1).join('');
+//     }
+//     return `${firstInitial}.${lastNames[0].toLowerCase()}${lastNamePart.toLowerCase()}24`;
+// };
 
 
 
@@ -582,39 +598,6 @@ const Students = () => {
                 <Form.Control type="email" name="email" value={newStudentData.email} onChange={handleInputChange} />
                 {errors.email && <Form.Text className="text-danger">{errors.email}</Form.Text>}
               </Form.Group>
-
-              {/* <Form.Group controlId="formPassword">
-                <Form.Label>Password</Form.Label>
-                <Form.Control type="password" name="password" value={newStudentData.password} onChange={handleInputChange} />
-              </Form.Group> */}
-              {/* <Form.Group controlId="formUserName">
-                <Form.Label>Usuario</Form.Label>
-                <Form.Control type="text" name="userName" disabled={true} value={newStudentData.userName} onChange={handleInputChange} />
-              </Form.Group> */}
-              {/* <Form.Group controlId="formEnabled">
-                <Form.Label>Estado</Form.Label>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Activo"
-                    checked={newStudentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedStudentId}
-                    onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: true }))}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Inactivo"
-                    checked={!newStudentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedStudentId}
-                    onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: false }))}
-                  />
-                </div>
-              </Form.Group> */}
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
                 <Form.Control as="select" disabled={true} name="rolId" value={newStudentData.rolId} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>handleRoleChange}>
@@ -628,10 +611,14 @@ const Students = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-          <Button variant="secondary" onClick={handleAddModalClose}>Cancelar</Button>
-            <Button variant="primary" onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}>
-              {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
-            </Button>
+          <Button variant="secondary" onClick={handleAddModalClose} disabled={isSubmitting}>Cancelar</Button>
+            <Button
+          variant="primary"
+          onClick={handleSave}
+          disabled={isSubmitting || Object.values(errors).some(error => error !== '')}
+        >
+          {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
+        </Button>
           </Modal.Footer>
         </Modal>
       </div>
