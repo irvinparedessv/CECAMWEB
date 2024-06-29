@@ -1,14 +1,17 @@
-import axios from 'axios';
-import API_BASE_URL from './apiConfig';
-import { ParentAssociation, ParentsAssociationNames } from '../types';
+import axios from "axios";
+import API_BASE_URL from "./apiConfig";
+import { ParentAssociation, ParentsAssociationNames } from "../types";
 
 const ParentAssociationService = {
-  getAllUsers: async () => {
+  getAllUsers: async (params) => {
     try {
-      const response = await axios.get<ParentsAssociationNames[]>(`${API_BASE_URL}/parentAssociations`);
+      const response = await axios.get<{
+        data: ParentsAssociationNames[];
+        last_page: number;
+      }>(`${API_BASE_URL}/parentAssociations`, { params });
       return response.data;
     } catch (error) {
-      console.error('Error al obtener usuarios:', error);
+      console.error("Error al obtener usuarios:", error);
       throw error;
     }
   },
@@ -17,11 +20,11 @@ const ParentAssociationService = {
     try {
       const response = await axios.post(`${API_BASE_URL}/parentAssociations`, {
         studentId,
-        parentId
+        parentId,
       });
       return response.data;
     } catch (error) {
-      console.error('Error al guardar la asociación de padres:', error);
+      console.error("Error al guardar la asociación de padres:", error);
       throw error;
     }
   },
@@ -39,7 +42,6 @@ const ParentAssociationService = {
   //     throw error;
   //   }
   // },
-  
 
   // getUsersWithParentCount: async (): Promise<User[]> => {
   //   try {
@@ -51,44 +53,48 @@ const ParentAssociationService = {
   //   }
   // },
 
-
-
-
-
-
-
-  getUsersWithParentAssociations: async (studentId: number): Promise<ParentAssociation[]> => {
+  getUsersWithParentAssociations: async (
+    studentId: number
+  ): Promise<ParentAssociation[]> => {
     try {
-      const response = await axios.get<ParentAssociation[]>(`${API_BASE_URL}/parentAssociations/students/${studentId}`);
+      const response = await axios.get<ParentAssociation[]>(
+        `${API_BASE_URL}/parentAssociations/students/${studentId}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al obtener usuarios con asociaciones de padres:', error);
+      console.error(
+        "Error al obtener usuarios con asociaciones de padres:",
+        error
+      );
       throw error;
     }
   },
 
-  deleteParentAssociation: async (parentId:number) => {
+  deleteParentAssociation: async (parentId: number) => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/parentAssociations/${parentId}`);
+      const response = await axios.delete(
+        `${API_BASE_URL}/parentAssociations/${parentId}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al eliminar la asociación de padres:', error);
+      console.error("Error al eliminar la asociación de padres:", error);
       throw error;
     }
   },
-  
-  getUnassociatedParents: async (studentId: number): Promise<ParentAssociation[]> => {
+
+  getUnassociatedParents: async (
+    studentId: number
+  ): Promise<ParentAssociation[]> => {
     try {
-      const response = await axios.get<ParentAssociation[]>(`${API_BASE_URL}/parentAssociations/parentsUnassociated/${studentId}`);
+      const response = await axios.get<ParentAssociation[]>(
+        `${API_BASE_URL}/parentAssociations/parentsUnassociated/${studentId}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al obtener padres no asociados:', error);
+      console.error("Error al obtener padres no asociados:", error);
       throw error;
     }
-  }
-  
-
- 
+  },
 };
 
 export default ParentAssociationService;

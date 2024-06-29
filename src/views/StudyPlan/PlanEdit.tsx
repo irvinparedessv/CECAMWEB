@@ -74,7 +74,6 @@ const PlanEdit: React.FC = () => {
         setIsLoading(true); // Indicar inicio de carga
 
         const response = await PlanService.getPlan(id);
-        console.log(response);
         const plan: Plan = response.plan;
         setName(plan.name);
         setTypePeriod(String(plan.typePeriodId));
@@ -88,7 +87,6 @@ const PlanEdit: React.FC = () => {
             uniqueSubjects.push(activity.subject);
           }
         });
-        console.log(uniqueSubjects);
         const globalSubjects = response.subjects.map((subject) => ({
           ...subject,
         }));
@@ -156,7 +154,6 @@ const PlanEdit: React.FC = () => {
               (total, act) => Number(total) + Number(act.percentage),
               0
             );
-            console.log(total);
             return {
               ...p,
               activities: p.activities,
@@ -231,7 +228,6 @@ const PlanEdit: React.FC = () => {
       subjects: subjectsSave,
       subjectsGlobal: globalSubjects,
     };
-    console.log(dataSave);
     PlanService.editPlan(dataSave);
     alert("Guardado");
   };

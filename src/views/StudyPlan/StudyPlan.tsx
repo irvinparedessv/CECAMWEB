@@ -160,7 +160,6 @@ const StudyPlan: React.FC = () => {
       subjects: subjectsSave,
       subjectsGlobal: globalSubjects,
     };
-    console.log(dataSave);
     PlanService.savePlan(dataSave);
     alert("Guardado");
   };

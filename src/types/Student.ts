@@ -13,7 +13,9 @@ export interface Student {
   userPhoto: string;
   rolId: number;
   gradeId: number;
+  parents?: Parentx[];
 }
+export interface Parentx extends Student {}
 
 export interface ParentsData {
   id: number;

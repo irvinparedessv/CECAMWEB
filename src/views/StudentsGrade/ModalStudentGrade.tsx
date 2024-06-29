@@ -32,7 +32,6 @@ const ModalStudentGrade: React.FC<Props> = ({
     if (initialLoadComplete) {
       // Efecto para la búsqueda
       const delayDebounceFn = setTimeout(() => {
-        console.log(searchTerm);
         fetchStudents();
       }, 1000);
 
@@ -61,7 +60,6 @@ const ModalStudentGrade: React.FC<Props> = ({
       const response = await StudentService.getAll(currentPage, searchTerm);
       setIsLoading(false);
       if (response.success) {
-        console.log(response);
         setPagination(response.pagination);
         setAllStudents(response.data);
       } else {

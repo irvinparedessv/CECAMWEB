@@ -29,14 +29,54 @@ const ProfessorService = {
       throw error;
     }
   },
-  getActivities: async (subjectId: string, planId: string) => {
+  getActivities: async (subjectId: string, gradeId: string) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/activities/${subjectId}/${planId}`
+        `${API_BASE_URL}/activities/${subjectId}/${gradeId}`
       );
       return response.data;
     } catch (error) {
       console.error("Error al obtener el usuario:", error);
+      throw error;
+    }
+  },
+  getNotes: async (subjectId: string, gradeId: string) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/notes/${subjectId}/${gradeId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener el usuario:", error);
+      throw error;
+    }
+  },
+  studentsNoteByActivities: async (activityId: string, gradeId: string) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/activitiesstudents/${activityId}/${gradeId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener el usuario:", error);
+      throw error;
+    }
+  },
+  updateStudentNote: async (
+    activityId: number,
+    studentId: number,
+    data: { note: any }
+  ) => {
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/activities/${activityId}/students/${studentId}`,
+        {
+          data,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
       throw error;
     }
   },
