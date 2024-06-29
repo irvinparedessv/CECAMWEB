@@ -198,9 +198,15 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
             html: `
               <div style="position: relative;">
                 <input id="newPassword" class="swal2-input" type="password" placeholder="Nueva Contraseña">
+                <label>
+                  <input type="checkbox" id="show-new-password"> Mostrar Contraseña
+                </label>
               </div>
               <div style="position: relative; margin-top: 10px;">
                 <input id="confirmPassword" class="swal2-input" type="password" placeholder="Confirma tu Nueva Contraseña">
+                <label>
+                  <input type="checkbox" id="show-confirm-password"> Mostrar Contraseña
+                </label>
               </div>
             `,
             focusConfirm: false,
@@ -209,6 +215,16 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
             didOpen: () => {
               const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
               const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+              const showNewPasswordCheckbox = document.getElementById('show-new-password') as HTMLInputElement;
+              const showConfirmPasswordCheckbox = document.getElementById('show-confirm-password') as HTMLInputElement;
+
+              showNewPasswordCheckbox.addEventListener('change', () => {
+                newPasswordInput.type = showNewPasswordCheckbox.checked ? 'text' : 'password';
+              });
+
+              showConfirmPasswordCheckbox.addEventListener('change', () => {
+                confirmPasswordInput.type = showConfirmPasswordCheckbox.checked ? 'text' : 'password';
+              });
             },
             preConfirm: async () => {
               const newPassword = (document.getElementById("newPassword") as HTMLInputElement).value;
@@ -366,3 +382,5 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 };
 
 export default LoginForm;
+
+
