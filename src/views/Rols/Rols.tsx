@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Modal, Form, Pagination } from "react-bootstrap";
+import { Table, Button, Modal, Form, Pagination, Card } from "react-bootstrap";
 import StudentService from "../../services/StudentService";
 import { ParentsData, Student } from "../../types";
 import { Rol } from "../../types/Rol";
 import Swal from "sweetalert2";
 import { Spinner } from "react-bootstrap";
 import { itemsPerPage } from "../../const/Pagination";
+import { UserInformation } from '../../types/Login';
+import URL_STORAGE from '../../services/imageConfig';
 
 const Students = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -22,6 +24,7 @@ const Students = () => {
     firstName: "",
     lastName: "",
     enabled: true,
+    userPhoto: '',
     rolId: 0,
     gradeId: 1,
   });
@@ -33,6 +36,14 @@ const Students = () => {
   const [updatingStudentId, setUpdatingStudentId] = useState<number | null>(
     null
   );
+
+  const [isLoading, setIsLoading] = useState(false); // Agregar estado isLoading
+  const [isHovered, setIsHovered] = useState(false);
+  const [userPhotoUrl, setUserPhotoUrl] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const BASE_URL = URL_STORAGE;
+
+
   const [updatingStudent, setUpdatingStudent] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -96,6 +107,7 @@ const Students = () => {
           firstName: selectedStudent.firstName,
           lastName: selectedStudent.lastName,
           enabled: selectedStudent.enabled,
+          userPhoto: selectedStudent.userPhoto,
           rolId: selectedStudent.rolId,
           gradeId: 1,
         });
@@ -109,11 +121,108 @@ const Students = () => {
         firstName: "",
         lastName: "",
         enabled: true,
+        userPhoto: '',
         rolId: 0,
         gradeId: 1,
       });
     }
   };
+
+  
+  const handleAddPhoto = (studentId: number) => {
+    setSelectedStudentId(studentId);
+    setShowAddPhotoModal(true);
+    if (studentId !== null) {
+      const selectedStudent = students.find(student => student.id === studentId);
+      if (selectedStudent) {
+        setNewStudentData({
+          id: selectedStudent.id,
+          userName: selectedStudent.userName,
+          email: selectedStudent.email,
+          password: '',
+          firstName: selectedStudent.firstName,
+          lastName: selectedStudent.lastName,
+          enabled: selectedStudent.enabled,
+          userPhoto: selectedStudent.userPhoto ? `${BASE_URL}${selectedStudent.userPhoto}` : DEFAULT_USER_PHOTO_URL,
+          rolId: selectedStudent.rolId,
+          gradeId: 1,
+        });
+      }
+    } 
+
+    // const getFullPhotoUrl = (photoPath) => {
+    //   return photoPath ? `${BASE_URL}${photoPath}` : DEFAULT_USER_PHOTO_URL;
+    // };
+
+
+  };
+
+  const handleAddPhotoClose = () => {
+    setShowAddPhotoModal(false);
+    setPhoto(null);
+  };
+
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
+
+  const handlePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]; // Obtenemos el primer archivo seleccionado
+    if (file) {
+      const reader = new FileReader(); // Creamos un lector de archivos
+      reader.onloadend = async () => {
+        // Verificamos que reader.result sea un string
+        if (typeof reader.result === 'string') {
+          setUserPhotoUrl(reader.result); // Actualizamos userPhotoUrl con la URL base64 de la imagen
+        } else {
+          // Manejo de error o conversión si result es ArrayBuffer
+          const arrayBuffer: ArrayBuffer = reader.result as ArrayBuffer;
+          const converted = arrayBufferToBase64(arrayBuffer); // Función para convertir ArrayBuffer a base64
+          setUserPhotoUrl(converted);
+        }
+
+        // Subir la foto al servidor
+        const formData = new FormData();
+        formData.append('photo', file);
+        try {
+          setIsLoading(true);
+          // Llama al servicio para subir la foto del usuario seleccionado
+          await StudentService.uploadPhoto(selectedStudentId, formData);
+          fetchStudents(); // Actualiza la lista de estudiantes después de subir la foto
+          // Actualiza la URL de la foto mostrada
+          setUserPhotoUrl(`URL de la foto subida`); // Deberías obtener la URL real desde la respuesta del servidor
+          setShowAddPhotoModal(false); // Cierra el modal después de subir la foto
+          Swal.fire('Éxito', 'Foto subida correctamente.', 'success');
+        } catch (error) {
+          Swal.fire('Error', 'Error al subir la foto.', 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      reader.readAsDataURL(file); // Leemos el archivo como URL base64
+    }
+  };
+
+  // Función de utilidad para convertir ArrayBuffer a base64
+  const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer): string => {
+    const base64String = btoa(
+      new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
+    return `data:image/jpeg;base64,${base64String}`;
+  };
+
+
+
+
+
+  // if (userInfo === null) {
+  //   return null;
+  // }
+
+  // const { firstName, lastName, userName, rolId, userPhoto, email } = userInfo;
+  const DEFAULT_USER_PHOTO_URL = URL_STORAGE+'userPhoto/default-user-photo.jpg';
+  //const userPhotoUrl =  DEFAULT_USER_PHOTO_URL;
+
+
 
   // const handleUpdateEnabled = async (studentId: number, newEnabledValue: boolean) => {
   //   try {
@@ -268,6 +377,7 @@ const Students = () => {
       firstName: "",
       lastName: "",
       enabled: true,
+      userPhoto: '',
       rolId: 1,
       gradeId: 1,
     });
@@ -287,9 +397,10 @@ const Students = () => {
       }
     }
 
-    if (name === "email") {
-      const emailRegex = /^\S+@\S+\.\S+$/;
-      if (value !== "" && !emailRegex.test(value)) {
+    if (name === 'email') {
+      newValue = value.toLowerCase(); // Convertir a minúsculas
+      const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+      if (newValue !== "" && !emailRegex.test(newValue)) {
         errorMessage = "Ingrese un correo electrónico válido.";
       }
     }
@@ -301,28 +412,33 @@ const Students = () => {
       };
 
       // Generar nombre de usuario si se actualiza el nombre o apellido
-      if (name === "firstName" || name === "lastName") {
-        updatedData.userName = generateUserName(
-          updatedData.firstName,
-          updatedData.lastName
-        );
-      }
+      
 
       return updatedData;
     });
 
-    if (name === "email") {
-      const emailRegex = /^\S+@\S+\.\S+$/;
-      if (value !== "" && !emailRegex.test(value)) {
-        errorMessage = "Ingrese un correo electrónico válido.";
-      }
-    }
+    
 
     // Actualizar estado de errores
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: errorMessage,
     }));
+  };
+
+  const handleSave = async () => {
+    if (Object.values(errors).some(error => error !== '')) {
+      alert("Por favor, corrija los errores antes de guardar.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    if (selectedStudentId !== null) {
+      await handleUpdateStudent();
+    } else {
+      await handleAddStudent();
+    }
+    setIsSubmitting(false);
   };
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -493,14 +609,7 @@ const Students = () => {
     setSelectedRole(e.target.value);
   };
 
-  const generateUserName = (firstName: string, lastName: string): string => {
-    if (!firstName || !lastName) {
-      return "";
-    }
-    const firstInitial = firstName;
-    const lastInitial = lastName.substring(0, 2);
-    return `${firstInitial.toLowerCase()}${lastInitial.toLowerCase()}24`;
-  };
+  
 
   return (
     <div className="content">
@@ -530,6 +639,7 @@ const Students = () => {
         <Table striped bordered hover>
           <thead>
             <tr>
+              <th>Foto</th>
               <th>Usuario</th>
               <th>Email</th>
               <th>Nombre</th>
@@ -552,6 +662,9 @@ const Students = () => {
                 const roleName = studentRole ? studentRole.roleName : "Unknown"; // Manejar caso donde no se encuentre el rol
                 return (
                   <tr key={index}>
+                    <td>
+                      <img src={student.userPhoto==null ? DEFAULT_USER_PHOTO_URL : `${BASE_URL}${student.userPhoto}` } alt={student.userPhoto} style={{ width: '50px', height: '50px' }} />
+                    </td>
                     <td>{student.userName}</td>
                     <td>{student.email}</td>
                     <td>
@@ -614,6 +727,12 @@ const Students = () => {
                       >
                         Editar
                       </Button>
+                      <Button
+                        variant="success"
+                        onClick={() => handleAddPhoto(student.id)}
+                      >
+                        Agregar Foto
+                      </Button>
                     </td>
                   </tr>
                 );
@@ -672,38 +791,7 @@ const Students = () => {
                 )}
               </Form.Group>
 
-              {/* <Form.Group controlId="formPassword">
-                <Form.Label>Password</Form.Label>
-                <Form.Control type="password" name="password" value={newStudentData.password} onChange={handleInputChange} />
-              </Form.Group>
-              <Form.Group controlId="formUserName">
-                <Form.Label>Usuario</Form.Label>
-                <Form.Control type="text" name="userName" disabled={true} value={newStudentData.userName} onChange={handleInputChange} />
-              </Form.Group> */}
-              {/* <Form.Group controlId="formEnabled">
-                <Form.Label>Estado</Form.Label>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Activo"
-                    checked={newStudentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedStudentId}
-                    onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: true }))}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Inactivo"
-                    checked={!newStudentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedStudentId}
-                    onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: false }))}
-                  />
-                </div>
-              </Form.Group> */}
+              
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
                 <Form.Control
@@ -724,21 +812,51 @@ const Students = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleAddModalClose}>
-              Cancelar
-            </Button>
-            <Button
-              variant="primary"
-              onClick={
-                selectedStudentId !== null
-                  ? handleUpdateStudent
-                  : handleAddStudent
-              }
-            >
-              {selectedStudentId !== null ? "Guardar Cambios" : "Agregar"}
-            </Button>
+            <Button variant="secondary" onClick={handleAddModalClose} disabled={isSubmitting}>Cancelar</Button>
+              {/* <Button variant="primary" onClick={selectedStudentId !== null ? handleUpdateStudent : handleAddStudent}>
+                {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
+              </Button>
+              </Button> */}
+              <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={isSubmitting || Object.values(errors).some(error => error !== '')}
+          >
+            {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
+          </Button>
           </Modal.Footer>
         </Modal>
+        <Modal show={showAddPhotoModal} onHide={handleAddPhotoClose}>
+  <Modal.Header closeButton>
+    <Modal.Title>
+      Gestionar foto para el usuario: <span style={{ color: 'red', fontWeight: 'bold' }}>
+         {newStudentData.firstName} {newStudentData.lastName}
+      </span>
+  </Modal.Title>
+
+  </Modal.Header>
+  <Modal.Body>
+    <Form>
+      <Form.Group controlId="formPhoto">
+        <Card.Body>
+          <div className="text-center mb-3 position-relative" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+            <label htmlFor="photoInput">
+            {/* <img src={newStudentData.userPhoto==null ? DEFAULT_USER_PHOTO_URL :newStudentData.userPhoto} alt={newStudentData.userPhoto==null ? DEFAULT_USER_PHOTO_URL :newStudentData.userPhoto} style={{ width: '50px', height: 'auto' }} /> */}
+
+              <img src={newStudentData.userPhoto==null ? DEFAULT_USER_PHOTO_URL :newStudentData.userPhoto}  alt={newStudentData.userPhoto==null ? DEFAULT_USER_PHOTO_URL :newStudentData.userPhoto} className={`rounded-circle img-fluid ${isHovered ? 'blur' : ''}`} />
+              {isHovered && <p className="change-photo-message">Cambiar Foto</p>}
+              <input type="file" id="photoInput" accept=".jpeg,.jpg,.png" onChange={handlePhotoChange} style={{ display: 'none' }} />
+            </label>
+          </div>
+        </Card.Body>
+      </Form.Group>
+    </Form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleAddPhotoClose}>Cancelar</Button>
+    {/* <Button variant="primary" onClick={handleUploadPhoto}>Subir Foto</Button> */}
+  </Modal.Footer>
+</Modal>
       </div>
     </div>
   );

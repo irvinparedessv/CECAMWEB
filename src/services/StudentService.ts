@@ -252,6 +252,19 @@ const StudentService = {
       throw error;
     }
   },
+
+  uploadPhoto: async (studentId: number, formData: FormData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/users/${studentId}/uploadPhoto`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+},
 };
 
 export default StudentService;

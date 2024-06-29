@@ -52,6 +52,11 @@ const GradeList = () => {
   const [selectedGradeId, setSelectedGradeId] = useState<number | null>(null);
   const [filterValue, setFilterValue] = useState("");
 
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingGradeId, setDeletingGradeId] = useState<number | null>(null);
+  const [deletingGrade, setDeletingGrade] = useState(false);
+
   // Estado para almacenar los padres seleccionados
   const [selectedProfessors, setSelectedProfessors] = useState<Professor[]>([]);
   // Define el estado para el número de página actual
@@ -184,6 +189,10 @@ const GradeList = () => {
 
   const handleDelete = async (id: number) => {
     try {
+
+      setDeletingGradeId(id);
+      setDeletingGrade(true);
+
       const result = await Swal.fire({
         title: "Eliminar",
         text: "¿Está seguro de eliminar este grado?",
@@ -218,6 +227,9 @@ const GradeList = () => {
         "Se produjo un error al intentar eliminar el grado.",
         "error"
       );
+    }finally {
+      setDeletingGradeId(null);
+      setDeletingGrade(false);
     }
   };
 
@@ -232,6 +244,16 @@ const GradeList = () => {
     } catch (error) {
       console.error("Error al obtener grados:", error);
     }
+  };
+
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    if (selectedGradeId !== null) {
+      await handleUpdateGrade();
+    } else {
+      await handleAddGrade();
+    }
+    setIsSubmitting(false);
   };
 
   const fetchUnassociatedProfessors = async (gradeId: number) => {
@@ -517,7 +539,7 @@ const GradeList = () => {
   };
 
   return (
-    <div>
+    <div className="container">
       <h1>Grados</h1>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <Form.Control
@@ -531,14 +553,14 @@ const GradeList = () => {
           Agregar Grado
         </Button>
       </div>
-      <table className="table">
+      <Table striped bordered hover>
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Seccion</th>
-            <th>Descripcion</th>
+            <th>Sección</th>
+            <th>Descripción</th>
             <th>Coordinador</th>
-            <th>Actions</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -571,22 +593,28 @@ const GradeList = () => {
                     Editar
                   </Button>
                   <Button
-                    className="btn btn-danger"
+                    variant="danger"
                     onClick={() => handleDelete(grade.gradeId)}
+                    disabled={deletingGradeId === grade.gradeId}
                   >
-                    Eliminar
+                    {deletingGradeId === grade.gradeId && (
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        style={{ marginRight: '5px' }}
+                      />
+                    )}
+                    {deletingGradeId === grade.gradeId ? 'Eliminando...' : 'Eliminar'}
                   </Button>
-                  <Button
-                    variant="success"
-                    onClick={() => handleAddParentModalShow(grade.gradeId)}
-                  >
-                    Asignar coordinador
-                  </Button>
+                  <Button variant="success" onClick={() => handleAddParentModalShow(grade.gradeId)}>Asignar coordinador</Button>
                 </td>
               </tr>
             ))}
         </tbody>
-      </table>
+      </Table>
       <Pagination>
         {[...Array(totalPages)].map((_, pageIndex) => (
           <Pagination.Item
@@ -807,7 +835,7 @@ const GradeList = () => {
               )}
             </Form.Group>
             <Form.Group controlId="formSeccion">
-              <Form.Label>Seccion</Form.Label>
+              <Form.Label>Sección</Form.Label>
               <Form.Control
                 className="form-control"
                 type="text"
@@ -821,7 +849,7 @@ const GradeList = () => {
               )}
             </Form.Group>
             <Form.Group controlId="formDescription">
-              <Form.Label>Descripcion</Form.Label>
+              <Form.Label>Descripción</Form.Label>
               <Form.Control
                 className="form-control"
                 type="text"
@@ -837,17 +865,15 @@ const GradeList = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleAddModalClose}>
-            Cancelar
-          </Button>
+          <Button variant="secondary" onClick={handleAddModalClose} disabled={isSubmitting}>Cancelar</Button>
+            
           <Button
             variant="primary"
-            onClick={
-              selectedGradeId !== null ? handleUpdateGrade : handleAddGrade
-            }
+            onClick={handleSave}
+            disabled={isSubmitting}
           >
-            {selectedGradeId !== null ? "Guardar Cambios" : "Agregar"}
-          </Button>
+          {selectedGradeId !== null ? 'Guardar Cambios' : 'Agregar'}
+        </Button>
         </Modal.Footer>
       </Modal>
     </div>

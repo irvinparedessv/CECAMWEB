@@ -22,6 +22,7 @@ const Students = () => {
     firstName: "",
     lastName: "",
     enabled: true,
+    userPhoto: '',
     rolId: 1,
     gradeId: 1,
   });
@@ -36,6 +37,8 @@ const Students = () => {
   const [updatingStudent, setUpdatingStudent] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [parentsData, setParentsData] = useState<ParentsData[]>([]);
   const [errors, setErrors] = useState({
@@ -95,6 +98,7 @@ const Students = () => {
           firstName: selectedStudent.firstName,
           lastName: selectedStudent.lastName,
           enabled: selectedStudent.enabled,
+          userPhoto: '',
           rolId: selectedStudent.rolId,
           gradeId: 1,
         });
@@ -108,6 +112,7 @@ const Students = () => {
         firstName: "",
         lastName: "",
         enabled: true,
+        userPhoto: '',
         rolId: 1,
         gradeId: 1,
       });
@@ -267,6 +272,7 @@ const Students = () => {
       firstName: "",
       lastName: "",
       enabled: true,
+      userPhoto: '',
       rolId: 1,
       gradeId: 1,
     });
@@ -287,8 +293,9 @@ const Students = () => {
     }
 
     if (name === "email") {
-      const emailRegex = /^\S+@\S+\.\S+$/;
-      if (value !== "" && !emailRegex.test(value)) {
+      newValue = value.toLowerCase(); // Convertir a minúsculas
+      const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+      if (newValue !== "" && !emailRegex.test(newValue)) {
         errorMessage = "Ingrese un correo electrónico válido.";
       }
     }
@@ -299,23 +306,12 @@ const Students = () => {
         [name]: newValue,
       };
 
-      //Generar nombre de usuario si se actualiza el nombre o apellido
-      if (name === "firstName" || name === "lastName") {
-        updatedData.userName = generateUserName(
-          updatedData.firstName,
-          updatedData.lastName
-        );
-      }
+      
 
       return updatedData;
     });
 
-    if (name === "email") {
-      const emailRegex = /^\S+@\S+\.\S+$/;
-      if (value !== "" && !emailRegex.test(value)) {
-        errorMessage = "Ingrese un correo electrónico válido.";
-      }
-    }
+    
 
     // Actualizar estado de errores
     setErrors((prevErrors) => ({
@@ -330,6 +326,21 @@ const Students = () => {
       ...prevState,
       rolId: parseInt(value),
     }));
+  };
+
+  const handleSave = async () => {
+    if (Object.values(errors).some(error => error !== '')) {
+      alert("Por favor, corrija los errores antes de guardar.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    if (selectedStudentId !== null) {
+      await handleUpdateStudent();
+    } else {
+      await handleAddStudent();
+    }
+    setIsSubmitting(false);
   };
 
   const handleAddStudent = async () => {
@@ -486,19 +497,7 @@ const Students = () => {
     }
   };
 
-  const generateUserName = (firstName: string, lastName: string): string => {
-    if (!firstName || !lastName) {
-      return "";
-    }
-    const firstNames = firstName.split(" ");
-    const firstInitial = firstNames[0].toLowerCase();
-    const lastNames = lastName.split(" ");
-    let lastNamePart = "";
-    if (lastNames.length > 1) {
-      lastNamePart = lastNames.slice(1).join("");
-    }
-    return `${firstInitial}.${lastNames[0].toLowerCase()}${lastNamePart.toLowerCase()}24`;
-  };
+  
 
   return (
     <div className="content">
@@ -654,38 +653,7 @@ const Students = () => {
                 )}
               </Form.Group>
 
-              {/* <Form.Group controlId="formPassword">
-                <Form.Label>Password</Form.Label>
-                <Form.Control type="password" name="password" value={newStudentData.password} onChange={handleInputChange} />
-              </Form.Group> */}
-              {/* <Form.Group controlId="formUserName">
-                <Form.Label>Usuario</Form.Label>
-                <Form.Control type="text" name="userName" disabled={true} value={newStudentData.userName} onChange={handleInputChange} />
-              </Form.Group> */}
-              {/* <Form.Group controlId="formEnabled">
-                <Form.Label>Estado</Form.Label>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Activo"
-                    checked={newStudentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedStudentId}
-                    onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: true }))}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    name="enabled"
-                    label="Inactivo"
-                    checked={!newStudentData.enabled}
-                    readOnly={true}
-                    disabled={!selectedStudentId}
-                    onChange={() => setNewStudentData(prevState => ({ ...prevState, enabled: false }))}
-                  />
-                </div>
-              </Form.Group> */}
+              
               <Form.Group controlId="formRoleId">
                 <Form.Label>Rol</Form.Label>
                 <Form.Control
@@ -709,19 +677,14 @@ const Students = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleAddModalClose}>
-              Cancelar
-            </Button>
+          <Button variant="secondary" onClick={handleAddModalClose} disabled={isSubmitting}>Cancelar</Button>
             <Button
-              variant="primary"
-              onClick={
-                selectedStudentId !== null
-                  ? handleUpdateStudent
-                  : handleAddStudent
-              }
-            >
-              {selectedStudentId !== null ? "Guardar Cambios" : "Agregar"}
-            </Button>
+                variant="primary"
+                onClick={handleSave}
+                disabled={isSubmitting || Object.values(errors).some(error => error !== '')}
+              >
+                {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
+              </Button>
           </Modal.Footer>
         </Modal>
       </div>
