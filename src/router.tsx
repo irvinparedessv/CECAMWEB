@@ -319,6 +319,7 @@ import StudyPlan from "./views/StudyPlan/StudyPlan";
 import ListPlan from "./views/StudyPlan/ListPlan";
 import PlanEdit from "./views/StudyPlan/PlanEdit";
 import ProfessorSubjects from "./views/Professor/subjects/ProfessorSubjects";
+import AuthService from "./services/AuthService";
 
 interface PublicRouteProps {
   element: ReactElement;
@@ -331,10 +332,25 @@ const App = () => {
   const [roleName, setRoleName] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setIsAuthenticated(true);
-    }
+    const validateToken = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const response = await AuthService.validateToken(token);
+          console.log(response);
+          if (response.data && response.data.isvalid) {
+            setIsAuthenticated(true);
+          } else {
+            localStorage.clear();
+          }
+        } catch (error) {
+          console.error("Invalid token", error);
+          setIsAuthenticated(false);
+          localStorage.removeItem("token");
+        }
+      }
+    };
+    validateToken();
   }, []);
 
   useEffect(() => {

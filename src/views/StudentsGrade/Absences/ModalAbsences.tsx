@@ -1,13 +1,14 @@
-// src/components/ModalAttendance.tsx
-
 import React, { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import "./ModalAttendance.css"; // Asegúrate de importar el archivo CSS
+import { format } from "date-fns";
 
-import ModalAbsence from "./ModalAbsences";
+import "react-calendar/dist/Calendar.css";
+import "./ModalAttendance.css";
+
 import StudentService from "../../../services/StudentService";
+import { Button, Form } from "react-bootstrap";
+import toast from "react-hot-toast";
 
 interface ModalAttendanceProps {
   show: boolean;
@@ -20,12 +21,15 @@ interface Absence {
   hasPermission: boolean;
 }
 
-const ModalAbsences: React.FC<ModalAttendanceProps> = ({
+const ModalAttendance: React.FC<ModalAttendanceProps> = ({
   show,
   handleClose,
   studentId,
 }) => {
   const [absences, setAbsences] = useState<Absence[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [hasPermission, setHasPermission] = useState(false);
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
     const fetchAbsences = async () => {
@@ -42,10 +46,16 @@ const ModalAbsences: React.FC<ModalAttendanceProps> = ({
     }
   }, [studentId, show]);
 
+  const normalizeDate = (date: Date) => {
+    const isoString = date.toISOString();
+    return isoString.split("T")[0]; // returns only the date part (YYYY-MM-DD)
+  };
+
   const getTileClassName = ({ date, view }: any) => {
     if (view === "month") {
+      const normalizedDate = normalizeDate(date);
       const absence = absences.find(
-        (abs) => new Date(abs.date).toDateString() === date.toDateString()
+        (abs) => normalizeDate(new Date(abs.date)) === normalizedDate
       );
       if (absence) {
         return absence.hasPermission ? "absence-permission" : "absence";
@@ -61,7 +71,35 @@ const ModalAbsences: React.FC<ModalAttendanceProps> = ({
     }
     return false;
   };
-  const totalAbsences = absences.length;
+
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const handlePermissionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setHasPermission(e.target.checked);
+  };
+
+  const handleSaveAbsence = async () => {
+    if (selectedDate) {
+      try {
+        const professorId = localStorage.getItem("userId");
+        await StudentService.addAbsence(studentId, {
+          comment: comment,
+          professorId: professorId,
+          date: selectedDate,
+          hasPermission: hasPermission,
+        });
+        const response = await StudentService.getAbsencesByStudentId(studentId);
+        setAbsences(response.data);
+        setSelectedDate(null);
+        setHasPermission(false);
+        toast.success("AUSENCIA AGREDADA");
+      } catch (error) {
+        console.error("Error saving absence:", error);
+      }
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
@@ -70,7 +108,7 @@ const ModalAbsences: React.FC<ModalAttendanceProps> = ({
       </Modal.Header>
       <Modal.Body>
         <div className="total-absences">
-          <strong>Total de inasistencias: {totalAbsences}</strong>
+          <strong>Total de inasistencias: {absences.length}</strong>
         </div>
         <div className="color-indications">
           <div>
@@ -87,10 +125,36 @@ const ModalAbsences: React.FC<ModalAttendanceProps> = ({
         <Calendar
           tileClassName={getTileClassName}
           tileDisabled={tileDisabled}
+          onClickDay={handleDateClick}
         />
+        {selectedDate && (
+          <div>
+            <h5>
+              Agregar inasistencia para:{" "}
+              {format(new Date(selectedDate), "dd/MM/yyyy")}
+            </h5>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={hasPermission}
+                  onChange={handlePermissionChange}
+                />
+                Con permiso
+              </label>
+              <Form.Group>
+                <Form.Control
+                  onChange={(e) => setComment(e.target.value)}
+                  value={comment}
+                />
+              </Form.Group>
+            </div>
+            <Button onClick={handleSaveAbsence}>Guardar inasistencia</Button>
+          </div>
+        )}
       </Modal.Body>
     </Modal>
   );
 };
 
-export default ModalAbsences;
+export default ModalAttendance;

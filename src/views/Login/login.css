@@ -12,13 +12,13 @@
 }
 
 .bg-image {
-  background-image: url('../../assets/login.jpg');
+  background-image: url("../../assets/login.jpg");
   background-size: cover;
   background-position: center center;
 }
 
-.bg-img{
+.bg-img {
   color: white;
-background: rgb(158,27,67);
-background: linear-gradient(90deg, rgba(158,27,67,1) 0%, rgba(1,1,0,1) 99%);
+  background: rgb(27, 38, 158);
+  background: linear-gradient(90deg, #0a58ca 0%, rgba(1, 1, 0, 1) 99%);
 }

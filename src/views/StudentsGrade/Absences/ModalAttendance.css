@@ -39,3 +39,31 @@
 .react-calendar__tile--now {
   background: #00667f !important;
 }
+.total-absences {
+  margin-bottom: 10px;
+}
+
+.color-indications {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.color-box {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.absence {
+  background-color: red;
+}
+
+.absence-permission {
+  background-color: yellow;
+}
+
+.current-day {
+  background-color: lightblue;
+}
