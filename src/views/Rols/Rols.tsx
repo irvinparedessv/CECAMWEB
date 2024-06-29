@@ -6,6 +6,7 @@ import { Rol } from '../../types/Rol';
 import Swal from 'sweetalert2';
 import { Spinner } from 'react-bootstrap';
 import { UserInformation } from '../../types/Login';
+import URL_STORAGE from '../../services/imageConfig';
 
 const Students = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -35,7 +36,7 @@ const Students = () => {
   const [userPhotoUrl, setUserPhotoUrl] = useState('');
   const [parentsData, setParentsData] = useState<ParentsData[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const BASE_URL = 'http://localhost:8000/storage/';
+  const BASE_URL = URL_STORAGE;
   
   const [errors, setErrors] = useState({
     firstName: '',
@@ -235,7 +236,7 @@ const Students = () => {
   // }
 
   // const { firstName, lastName, userName, rolId, userPhoto, email } = userInfo;
-  const DEFAULT_USER_PHOTO_URL = 'http://localhost:8000/storage/userPhoto/default-user-photo.jpg';
+  const DEFAULT_USER_PHOTO_URL = URL_STORAGE+'userPhoto/default-user-photo.jpg';
   //const userPhotoUrl =  DEFAULT_USER_PHOTO_URL;
 
 

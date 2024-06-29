@@ -122,6 +122,7 @@ import UserService from '../../services/UserService';
 import AuthService from '../../services/AuthService';
 import './profiles.css';
 import axios from 'axios';
+import URL_STORAGE from '../../services/imageConfig';
 
 const Profiles = () => {
   const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
@@ -486,8 +487,8 @@ const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
   }
 
   const { firstName, lastName, userName, rolId, userPhoto, email } = userInfo;
-  const DEFAULT_USER_PHOTO_URL = 'http://localhost:8000/storage/userPhoto/default-user-photo.jpg';
-  const userPhotoUrl = userPhoto ? `http://localhost:8000/storage/${userPhoto}` : DEFAULT_USER_PHOTO_URL;
+  const DEFAULT_USER_PHOTO_URL = URL_STORAGE+'userPhoto/default-user-photo.jpg';
+  const userPhotoUrl = userPhoto ? URL_STORAGE+`${userPhoto}` : DEFAULT_USER_PHOTO_URL;
 
   return (
     <Container className="py-5">
