@@ -664,7 +664,8 @@ const Students = () => {
                             ? DEFAULT_USER_PHOTO_URL
                             : `${BASE_URL}${student.userPhoto}`
                         }
-                        alt={student.userPhoto}
+                        // alt="{student.userPhoto}"
+                        alt="no se encontro la imagen"
                         style={{ width: "50px", height: "50px" }}
                       />
                     </td>
