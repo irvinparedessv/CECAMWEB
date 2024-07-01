@@ -412,7 +412,7 @@ const App = () => {
   ];
 
   return (
-    <Router>
+    <Router basename="/app">
       {isAuthenticated && <Navbar logout={logout} />}
       <div className="col py-3 maincontainer">
         <Toaster
