@@ -311,6 +311,33 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    const { value: email } = await Swal.fire({
+      title: "Olvidé mi contraseña",
+      input: "email",
+      inputLabel: "Correo electrónico",
+      inputPlaceholder: "Ingresa tu correo electrónico",
+      showCancelButton: true,
+      confirmButtonText: "Enviar",
+      cancelButtonText: "Cancelar",
+      preConfirm: (email) => {
+        if (!email) {
+          Swal.showValidationMessage("Por favor, ingresa un correo electrónico");
+        }
+        return email;
+      },
+    });
+
+    if (email) {
+      try {
+        await AuthService.forgotPassword(email);
+        Swal.fire("Correo enviado", `Se enviará un correo a la dirección: ${email}`, "success");
+      } catch (error) {
+        Swal.fire("Error", "Hubo un problema al enviar el correo de restablecimiento", "error");
+      }
+    }
+  };
+
   return (
     <Container fluid>
       <Row className="no-gutter">
@@ -370,6 +397,11 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
                     >
                       Iniciar Sesión
                     </Button>
+                    <div className="text-center">
+                      <Button variant="link" onClick={handleForgotPassword}>
+                        Olvidé mi contraseña
+                      </Button>
+                    </div>
                   </Form>
                 </Col>
               </Row>
@@ -382,5 +414,6 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 };
 
 export default LoginForm;
+
 
 

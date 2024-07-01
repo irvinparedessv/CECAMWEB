@@ -160,6 +160,20 @@ const AuthService = {
     }
   },
 
+  forgotPassword: async (email: string): Promise<boolean> => {
+    try {
+      const response = await axios.post<{ success: boolean; message: string }>(`${API_BASE_URL}/forgot-password`, {
+        email,
+      });
+
+      return response.data.success;
+    } catch (error) {
+      console.error('Error al solicitar restablecimiento de contraseña:', error);
+      throw error;
+    }
+  },
+  
+
   getToken: (): string | null => {
     return localStorage.getItem("token");
   },
