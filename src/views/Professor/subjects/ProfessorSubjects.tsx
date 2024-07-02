@@ -1,16 +1,16 @@
-// src/components/ProfessorSubjects.js
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Card, Row, Col, Button } from "react-bootstrap";
 import "./style.css";
 import ProfessorService from "../../../services/ProfessorService";
 import ActivitiesModal from "../activities/ActivitiesModal";
 import NotesModal from "../notes/NotesSubjectStudentsModal";
+import AddActivityModal from "../activities/CreateActivityModal"; // Asumiendo que tienes un modal para agregar actividad
 
 const ProfessorSubjects = () => {
   const [subjects, setSubjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalNote, setShowModalNote] = useState(false);
+  const [showAddActivityModal, setShowAddActivityModal] = useState(false); // Nuevo estado
   const [notes, setNotes] = useState([]);
   const [activities, setActivities] = useState({});
   const [currentSubjectId, setCurrentSubjectId] = useState(null);
@@ -43,6 +43,7 @@ const ProfessorSubjects = () => {
       console.error("There was an error fetching the activities!", error);
     }
   };
+
   const handleShowModalNotes = async (subjectId, gradeId) => {
     try {
       const response = await ProfessorService.getNotes(subjectId, gradeId);
@@ -55,15 +56,29 @@ const ProfessorSubjects = () => {
       console.error("There was an error fetching the activities!", error);
     }
   };
+
+  const handleShowAddActivityModal = (subjectId, gradeId) => {
+    setCurrentSubjectId(subjectId);
+    setCurrentPlanId(gradeId);
+    setShowAddActivityModal(true);
+  };
+
   const handleCloseModal = () => {
     setShowModal(false);
     setActivities({});
     setCurrentSubjectId(null);
     setCurrentPlanId(null);
   };
+
   const handleCloseModalNote = () => {
     setShowModalNote(false);
     setActivities({});
+    setCurrentSubjectId(null);
+    setCurrentPlanId(null);
+  };
+
+  const handleCloseAddActivityModal = () => {
+    setShowAddActivityModal(false);
     setCurrentSubjectId(null);
     setCurrentPlanId(null);
   };
@@ -99,6 +114,18 @@ const ProfessorSubjects = () => {
                 >
                   Ver Notas
                 </Button>
+                <Button
+                  variant="success"
+                  className="ml-2"
+                  onClick={() =>
+                    handleShowAddActivityModal(
+                      subject.subjectId,
+                      subject.grade.gradeId
+                    )
+                  }
+                >
+                  Agregar Actividad
+                </Button>
               </Card.Body>
             </Card>
           </Col>
@@ -108,12 +135,17 @@ const ProfessorSubjects = () => {
         show={showModal}
         activities={activities}
         handleClose={handleCloseModal}
-        setShowModal={setShowModal}
       />
       <NotesModal
         show={showModalNote}
         notes={notes}
         handleClose={handleCloseModalNote}
+      />
+      <AddActivityModal
+        show={showAddActivityModal}
+        handleClose={handleCloseAddActivityModal}
+        subjectId={currentSubjectId}
+        gradeId={currentPlanId}
       />
     </div>
   );

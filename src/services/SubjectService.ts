@@ -16,7 +16,9 @@ const SubjectService = {
   },
   getAllSubjects: async () => {
     try {
-      const response = await axios.get<Subject[]>(`${API_BASE_URL}/subjects`);
+      const response = await axios.get<Subject[]>(
+        `${API_BASE_URL}/plans/subjects`
+      );
       return response.data;
     } catch (error) {
       console.error("Error al obtener materias:", error);

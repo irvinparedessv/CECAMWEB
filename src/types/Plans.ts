@@ -18,6 +18,9 @@ export interface Period {
 }
 
 export interface ActivitySave {
+  typeName?: string;
+  dueDate?: Date;
+  periodId?: string;
   typeId: string;
   description: string;
   percentage: number;

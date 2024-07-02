@@ -200,6 +200,18 @@ const GradeService = {
       throw error;
     }
   },
+  addActivity: async (data) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/grade/addActivity`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al agregar actividad:", error);
+      throw error;
+    }
+  },
 };
 
 export default GradeService;
