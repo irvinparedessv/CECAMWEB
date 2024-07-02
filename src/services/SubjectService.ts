@@ -1,6 +1,6 @@
 import axios from "axios";
 import API_BASE_URL from "./apiConfig";
-import { Subject } from "../types";
+import { Grade, Subject } from "../types";
 
 const SubjectService = {
   getAllSubjectsFilter: async (params) => {
@@ -17,7 +17,7 @@ const SubjectService = {
   getAllSubjects: async () => {
     try {
       const response = await axios.get<Subject[]>(
-        `${API_BASE_URL}/plans/subjects`
+        `${API_BASE_URL}/planes/subjects`
       );
       return response.data;
     } catch (error) {
