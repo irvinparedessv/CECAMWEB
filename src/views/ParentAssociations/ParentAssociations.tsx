@@ -395,43 +395,37 @@ const ParentAssociations = () => {
             </tr>
           </thead>
           <tbody>
-            {parentsAssociationNames
-              .filter((student) =>
-                student.studentName
-                  .toLowerCase()
-                  .includes(filterValue.toLowerCase())
-              )
-              .map((student, index) => (
-                <tr key={index}>
-                  <td>
-                    {student.studentName} {student.studentLastName}
-                  </td>
-                  {/* <td>{student.padres}</td> */}
-                  <td>
-                    {student.padres === 0 ? (
-                      <div style={{ color: "gray", fontStyle: "italic" }}>
-                        (no se han asociado padres)
-                      </div>
-                    ) : (
-                      <>
-                        {student.parentsName.split("\n").map((name, index) => (
-                          <div key={index}>{name}</div>
-                        ))}
-                      </>
-                    )}
-                  </td>
+            {parentsAssociationNames.map((student, index) => (
+              <tr key={index}>
+                <td>
+                  {student.studentName} {student.studentLastName}
+                </td>
+                {/* <td>{student.padres}</td> */}
+                <td>
+                  {student.padres === 0 ? (
+                    <div style={{ color: "gray", fontStyle: "italic" }}>
+                      (no se han asociado padres)
+                    </div>
+                  ) : (
+                    <>
+                      {student.parentsName.split("\n").map((name, index) => (
+                        <div key={index}>{name}</div>
+                      ))}
+                    </>
+                  )}
+                </td>
 
-                  <td>
-                    <Button
-                      variant="success"
-                      onClick={() => handleAddParentModalShow(student.id)}
-                    >
-                      Agregar padre
-                    </Button>
-                    {/* <Button variant="success" onClick={() => handleManageParents(student.id)}>Gestionar padres</Button> */}
-                  </td>
-                </tr>
-              ))}
+                <td>
+                  <Button
+                    variant="success"
+                    onClick={() => handleAddParentModalShow(student.id)}
+                  >
+                    Agregar padre
+                  </Button>
+                  {/* <Button variant="success" onClick={() => handleManageParents(student.id)}>Gestionar padres</Button> */}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </Table>
         <Pagination>
