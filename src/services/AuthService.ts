@@ -84,7 +84,7 @@ const AuthService = {
       );
       return response.data
         ? response.data
-        : { success: false, message: "No data returned" };
+        : { success: false, message: "Credenciales inválidas" };
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       throw error;

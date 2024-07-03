@@ -361,6 +361,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
                         placeholder="Ingrese correo o nombre de usuario"
                         value={emailOrUsername}
                         onChange={handleEmailOrUsernameChange}
+                        required
                       />
                     </Form.Group>
                     <Form.Group controlId="formPassword" className="mb-3">
@@ -371,6 +372,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
                           placeholder="Contraseña"
                           value={password}
                           onChange={handlePasswordChange}
+                          required
                         />
                       </div>
                     </Form.Group>
