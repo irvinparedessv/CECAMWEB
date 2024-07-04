@@ -63,8 +63,8 @@ const ParentAssociations = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentPageMain, setCurrentPageMain] = useState(1);
 
-  // Define la cantidad de elementos por página
-
+  // // Define la cantidad de elementos por página
+  // const itemsPerPage = 3;
   // Calcula el índice del primer elemento en la página actual
   const indexOfFirstItem = (currentPage - 1) * itemsPerPage;
   // Calcula el índice del último elemento en la página actual
