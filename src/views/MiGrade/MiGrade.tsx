@@ -55,7 +55,7 @@ const MiGrade = () => {
                     </div>
                     <div className="mb-4">
                       <h3 className="card-title mb-0">
-                        {grade.grade.description}
+                        {grade.grade.name}- {grade.grade.section}
                       </h3>
                     </div>
                     <div className="row align-items-center mb-2 d-flex">

@@ -18,7 +18,7 @@ interface Props {
 
 const NotesModal: React.FC<Props> = ({ notes, show, handleClose }) => {
   // Calcula la lista de estudiantes únicos
-  const students: StudentGrade[] = notes.reduce(
+  const students: StudentGrade[] = notes?.reduce(
     (acc: StudentGrade[], item: NotesStudents) => {
       item.notes.forEach((noteStudent) => {
         if (

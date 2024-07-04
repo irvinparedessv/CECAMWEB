@@ -320,6 +320,8 @@ import ListPlan from "./views/StudyPlan/ListPlan";
 import PlanEdit from "./views/StudyPlan/PlanEdit";
 import ProfessorSubjects from "./views/Professor/subjects/ProfessorSubjects";
 import AuthService from "./services/AuthService";
+import SubjectGradeList from "./views/SubjectGrade/SubjectGradeList";
+import CreateGradeSubject from "./views/SubjectGrade/CreateSubjectGrade";
 
 interface PublicRouteProps {
   element: ReactElement;
@@ -403,14 +405,6 @@ const App = () => {
     }
   };
 
-  const notasEjemplo = [
-    { materia: "Matemáticas", nota: 9.0 },
-    { materia: "Ciencias", nota: 8.5 },
-    { materia: "Historia", nota: 8.0 },
-    { materia: "Lenguaje", nota: 7.0 },
-    { materia: "Educacion", nota: 8.0 },
-  ];
-
   return (
     <Router basename="/app">
       {isAuthenticated && <Navbar logout={logout} />}
@@ -451,6 +445,13 @@ const App = () => {
             <Route path="/students/grade/:id" element={<StudentsGrade />} />
             <Route path="/register-subjects" element={<Subject />} />
             <Route path="/register-teachers" element={<Teacher />} />
+            <Route path="/subject-grade" element={<SubjectGradeList />} />
+            <Route path="/subject-grade-add" element={<CreateGradeSubject />} />
+            <Route
+              path="/subject-grade-edit"
+              element={<CreateGradeSubject />}
+            />
+
             <Route path="/subjects" element={<Subject />} />
             <Route path="/plans" element={<ListPlan />} />
             <Route path="/plans/add" element={<StudyPlan />} />
@@ -463,19 +464,7 @@ const App = () => {
               element={<ProfessorDashboard />}
             />
             <Route path="/mysubjects" element={<ProfessorSubjects />} />
-
             <Route path="/profiles" element={<Profiles />} />
-            <Route
-              path="/notes"
-              element={
-                <ReportGrade
-                  estudiante="Irvin Paredes"
-                  grado="7-A"
-                  key={"ds"}
-                  notas={notasEjemplo}
-                />
-              }
-            />
             <Route path="/observations" element={<Observation />} />
             <Route path="/migrades" element={<MiGrade />} />
           </Route>

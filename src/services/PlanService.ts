@@ -54,7 +54,16 @@ const PlanService = {
       });
       return response.data;
     } catch (error) {
-      console.error("Error al obtener usuarios:", error);
+      console.error("Error al obtener planes filtrados:", error);
+      throw error;
+    }
+  },
+  getAllPlans: async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/plans/allPlans`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener planes:", error);
       throw error;
     }
   },
@@ -105,6 +114,20 @@ const PlanService = {
       const response = await axios.post(`${API_BASE_URL}/plans/save`, {
         data,
       });
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+      throw error;
+    }
+  },
+  addPlan: async (gradeId: number, data: Plan) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/plans/add/${gradeId}`,
+        {
+          data,
+        }
+      );
       return response.data;
     } catch (error) {
       console.error("Error al obtener usuarios:", error);

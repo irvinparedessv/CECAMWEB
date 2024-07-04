@@ -38,7 +38,6 @@ const AddActivityModal: React.FC<Props> = ({
         const periodsResponse = await PlanService.getPeriods(); // Método para obtener periodos
 
         setActivities(activitiesResponse);
-        console.log(periodsResponse);
         setPeriods(periodsResponse);
       } catch (error) {
         console.error("Error fetching data:", error);

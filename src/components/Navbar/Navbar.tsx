@@ -312,6 +312,15 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                   Asignaturas
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/subject-grade"
+                  className="nav-link px-0 align-middle"
+                >
+                  <FontAwesomeIcon icon={faBookOpenReader} className="me-2" />
+                  Asociacion Materia-Profesores-Grado
+                </Link>
+              </li>
 
               {/* Agrega aquí más opciones específicas para otros roles si es necesario */}
             </>

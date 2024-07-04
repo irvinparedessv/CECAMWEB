@@ -1,3 +1,3 @@
-const URL_STORAGE = "https://iedusv.online/secapi/storage/app/public/"; // Reemplaza esto con la URL base de tu API
+const URL_STORAGE = "localhost/storage/app/public/";
 
 export default URL_STORAGE;

@@ -1,12 +1,51 @@
 // ModalStudentGrades.js
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Table, Accordion, Card } from "react-bootstrap";
-import { GradeService } from "../../../services";
 import ParentService from "../../../services/ParentService";
-import PlanService from "../../../services/PlanService";
+
+interface Subject {
+  subjectId: number;
+  subjectName: string;
+  code: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Activity {
+  activityId: number;
+  percentage: number;
+  description: string;
+  dueDate: string | null;
+  created_at: string;
+  updated_at: string;
+  periodId: number;
+  subjectId: number;
+  typeId: number;
+  gradeId: number | null;
+  details: { note: string }[];
+  subject: Subject;
+}
+
+interface Period {
+  periodId: number;
+  name: string;
+  percentage: number;
+  typePeriodId: number;
+}
+
+interface StudentGrades {
+  [subjectName: string]: {
+    [periodId: string]: Activity[];
+  };
+}
+
+interface GradesData {
+  student_grades: StudentGrades;
+  periods: Period[];
+}
 
 const ModalNotes = ({ show, handleClose, studentId }) => {
-  const [studentGrades, setStudentGrades] = useState([]);
+  const [studentGrades, setStudentGrades] = useState<StudentGrades>(null);
   const [periods, setPeriods] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -14,7 +53,7 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
     if (show) {
       const fetchData = async () => {
         try {
-          const response = await ParentService.getNotes(studentId);
+          const response: GradesData = await ParentService.getNotes(studentId);
           setStudentGrades(response.student_grades);
           setPeriods(response.periods);
           setIsLoading(false);
@@ -35,6 +74,31 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
       : null;
   };
 
+  const calculateGrade = (activity) => {
+    if (activity.details && activity.details.length > 0) {
+      return parseFloat(activity.details[0].note).toFixed(1);
+    }
+    return activity.gradeId !== null
+      ? parseFloat(activity.gradeId).toFixed(1)
+      : "N/A";
+  };
+
+  const calculateFinalGrade = (activities) => {
+    const note = activities
+      .reduce(
+        (total, activity) =>
+          total +
+          ((activity.details && activity.details.length > 0
+            ? parseFloat(activity.details[0].note)
+            : parseFloat(activity.gradeId)) *
+            activity.percentage) /
+            100,
+        0
+      )
+      .toFixed(1);
+    return note ? note : 0;
+  };
+
   return (
     <Modal show={show} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
@@ -44,79 +108,62 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
         {isLoading ? (
           <div>Loading...</div>
         ) : (
-          studentGrades.map((subject, subjectIndex) => (
+          Object.keys(studentGrades)?.map((subject, subjectIndex) => (
             <Accordion key={subjectIndex}>
               <Accordion.Item eventKey={subjectIndex.toString()}>
                 <Accordion.Header as={Card.Header} eventKey={subject}>
-                  <h3>
-                    {subject.subjectname.toUpperCase()} NOTA:{" "}
-                    {parseFloat(subject.generalgrade).toFixed(1)}
-                  </h3>
+                  <h3>{subject.toUpperCase()}</h3>
                 </Accordion.Header>
                 <Accordion.Body>
-                  {Object.keys(subject.details)?.map((period, periodIndex) => (
-                    <Accordion key={periodIndex + "SA"}>
-                      <Accordion.Item eventKey={periodIndex.toString()}>
-                        <Accordion.Header as={Card.Header} eventKey={period}>
-                          {getPeriodInfo(period)?.name || "Unknown Period"} -
-                          Nota Final :{" "}
-                          {subject.details[period]
-                            .reduce(
-                              (total, activity) =>
-                                total +
-                                (parseFloat(activity.note) *
-                                  activity.percentage) /
-                                  100,
-                              0
-                            )
-                            .toFixed(1)}
-                        </Accordion.Header>
-                        <Accordion.Body>
-                          <Card.Body>
-                            <Table striped bordered hover>
-                              <thead>
-                                <tr>
-                                  <th>Actividad</th>
-                                  <th>Porcentaje</th>
-                                  <th>Fecha</th>
-                                  <th>Nota</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {subject.details[period].map(
-                                  (activity, activityIndex) => (
-                                    <tr key={activityIndex}>
-                                      <td>{activity.activityname}</td>
-                                      <td>{activity.percentage}%</td>
-                                      <td>{activity.date}</td>
-                                      <td>
-                                        {parseFloat(activity.note).toFixed(1)}
-                                      </td>
-                                    </tr>
-                                  )
-                                )}
-                                <tr>
-                                  <td colSpan={3}>Final Grade</td>
-                                  <td>
-                                    {subject.details[period]
-                                      .reduce(
-                                        (total, activity) =>
-                                          total +
-                                          (parseFloat(activity.note) *
-                                            activity.percentage) /
-                                            100,
-                                        0
+                  {Object.keys(studentGrades[subject])?.map(
+                    (period, periodIndex) => (
+                      <Accordion key={periodIndex + "SA"}>
+                        <Accordion.Item eventKey={periodIndex.toString()}>
+                          <Accordion.Header as={Card.Header} eventKey={period}>
+                            {getPeriodInfo(period)?.name || "Unknown Period"} -{" "}
+                            {calculateFinalGrade(
+                              studentGrades[subject][period]
+                            )}
+                          </Accordion.Header>
+                          <Accordion.Body>
+                            <Card.Body>
+                              <Table striped bordered hover>
+                                <thead>
+                                  <tr>
+                                    <th>Actividad</th>
+                                    <th>Porcentaje</th>
+                                    <th>Fecha</th>
+                                    <th>Nota</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {studentGrades[subject][period] &&
+                                    studentGrades[subject][period].map(
+                                      (activity, activityIndex) => (
+                                        <tr key={activityIndex}>
+                                          <td>{activity.description}</td>
+                                          <td>{activity.percentage}%</td>
+                                          <td>{activity.dueDate || "N/A"}</td>
+                                          <td>{calculateGrade(activity)}</td>
+                                        </tr>
                                       )
-                                      .toFixed(1)}
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </Table>
-                          </Card.Body>
-                        </Accordion.Body>
-                      </Accordion.Item>
-                    </Accordion>
-                  ))}
+                                    )}
+                                  <tr>
+                                    <td colSpan={3}>Final Grade</td>
+                                    <td>
+                                      {calculateFinalGrade(
+                                        studentGrades[subject][period]
+                                      )}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+                            </Card.Body>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      </Accordion>
+                    )
+                  )}
                 </Accordion.Body>
               </Accordion.Item>
             </Accordion>

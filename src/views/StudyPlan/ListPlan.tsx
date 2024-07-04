@@ -1,26 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; // Importar Link desde react-router-dom
+import { Link } from "react-router-dom";
 import Table from "react-bootstrap/Table";
 import PlanService from "../../services/PlanService";
 import { Plan } from "./../../types/Plans";
-import { Form, Pagination } from "react-bootstrap";
+import { Form, Pagination, Button } from "react-bootstrap"; // Importar Button desde react-bootstrap
 import { itemsPerPage } from "../../const/Pagination";
 
 const ListPlan: React.FC = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [searchTerm, setSearchTerm] = useState(""); // Nuevo estado para el término de búsqueda
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchPlans();
   }, [currentPage, searchTerm]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
+
   const handlePageChange = async (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
+
   const fetchPlans = async () => {
     try {
       const params = {
@@ -29,7 +32,6 @@ const ListPlan: React.FC = () => {
         filter: searchTerm,
       };
       const response = await PlanService.getPlans(params);
-      console.log(response);
       setPlans(response.data.data);
       setTotalPages(response.data.last_page);
     } catch (error) {
@@ -46,8 +48,11 @@ const ListPlan: React.FC = () => {
           placeholder="Buscar por nombre o código"
           value={searchTerm}
           onChange={handleSearchChange}
-          style={{ width: "300px" }} // Ajusta el tamaño del campo de búsqueda
+          style={{ width: "300px" }}
         />
+        <Link to="/plans/add" className="btn btn-success">
+          Agregar Nuevo Plan
+        </Link>
       </div>
       <Table striped bordered hover>
         <thead>
@@ -55,7 +60,7 @@ const ListPlan: React.FC = () => {
             <th>Name</th>
             <th>Global Detalle</th>
             <th>Type Period</th>
-            <th>Actions</th> {/* Nueva columna para acciones */}
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>

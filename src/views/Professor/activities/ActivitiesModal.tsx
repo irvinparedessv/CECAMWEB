@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import { Modal, Button, Accordion, Card } from "react-bootstrap";
 import StudentNotesModal from "./StudentNotesModal";
 
-const ActivitiesModal = ({ show, handleClose, activities }) => {
+const ActivitiesModal = ({ show, handleClose, activities, gradeId }) => {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [showNotesModal, setShowNotesModal] = useState(false); // State para controlar la visibilidad del modal de notas
   const handleOpenNotesModal = (activity) => {
     setSelectedActivity(activity);
-
     setShowNotesModal(true);
     handleClose(); // Mostrar el modal de notas cuando se selecciona una actividad
   };
 
+  console.log("gradeId", gradeId);
   const handleCloseNotesModal = () => {
     setSelectedActivity(null);
     setShowNotesModal(false); // Ocultar el modal de notas al cerrarlo
@@ -63,6 +63,7 @@ const ActivitiesModal = ({ show, handleClose, activities }) => {
       {/* Modal de Notas */}
       {selectedActivity && (
         <StudentNotesModal
+          gradeId={gradeId}
           show={showNotesModal} // Mostrar modal de notas según el estado
           handleClose={handleCloseNotesModal} // Función para cerrar el modal de notas
           activity={selectedActivity} // Pasar la actividad seleccionada al modal de notas

@@ -31,10 +31,12 @@ interface StudentNotesModalProps {
   show: boolean;
   handleClose: () => void;
   activity: any;
+  gradeId: string;
 }
 
 const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
   show,
+  gradeId,
   handleClose,
   activity,
 }) => {
@@ -50,7 +52,7 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
       try {
         const response = await ProfessorService.studentsNoteByActivities(
           activity.activityId,
-          activity.gradeId
+          gradeId
         );
         setStudentsAct(response);
       } catch (error) {
@@ -74,15 +76,25 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
   const handleSaveNotes = async () => {
     try {
       const updatePromises = studentsAct.map((student) => {
-        const newNote = editedNotes[student.activityStudent.studentId];
-        if (newNote !== undefined) {
+        if (student.activityStudent) {
+          const newNote = editedNotes[student.activityStudent?.studentId];
+          if (newNote !== undefined) {
+            return ProfessorService.updateStudentNote(
+              student.activityStudent.activityId,
+              student.activityStudent.studentId,
+              { note: newNote }
+            );
+          }
+          return Promise.resolve();
+        } else {
+          const newNote = editedNotes[student.activityStudent?.studentId];
           return ProfessorService.updateStudentNote(
-            student.activityStudent.activityId,
-            student.activityStudent.studentId,
+            activity.activityId,
+            student.student.id,
             { note: newNote }
           );
+          return Promise.resolve();
         }
-        return Promise.resolve();
       });
 
       await Promise.all(updatePromises);
@@ -167,7 +179,7 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
           </thead>
           <tbody>
             {paginatedStudents.map((stud) => (
-              <tr key={stud.activityStudent.activityId}>
+              <tr key={stud.activityStudent?.activityId}>
                 <td>
                   {stud.student.firstName} {stud.student.lastName}
                 </td>
@@ -175,14 +187,14 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
                   <Form.Control
                     type="text"
                     value={
-                      editedNotes[stud.activityStudent.studentId] ||
-                      editedNotes[stud.activityStudent.studentId] === ""
-                        ? editedNotes[stud.activityStudent.studentId]
-                        : stud.activityStudent.note
+                      editedNotes[stud.activityStudent?.studentId] ||
+                      editedNotes[stud.activityStudent?.studentId] === ""
+                        ? editedNotes[stud.activityStudent?.studentId]
+                        : stud.activityStudent?.note
                     }
                     onChange={(e) =>
                       handleNoteChange(
-                        stud.activityStudent.studentId,
+                        stud.activityStudent?.studentId,
                         e.target.value
                       )
                     }
