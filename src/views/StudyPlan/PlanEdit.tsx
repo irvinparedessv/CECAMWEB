@@ -23,7 +23,6 @@ const PlanEdit: React.FC = () => {
   const [name, setName] = useState<string>("");
 
   const [typePeriod, setTypePeriod] = useState<string>("");
-  const [newSubject, setNewSubject] = useState<string>("");
   const [newActivitie, setNewActivitie] = useState<ActivitySave>({
     description: "",
     typeId: "",
@@ -32,7 +31,6 @@ const PlanEdit: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true); // Estado de carga
 
   const [isGlobal, setIsGlobal] = useState<string>("");
-  const [showModalSubject, setShowModalSubject] = useState<boolean>(false);
   const [showModalAct, setShowModalAct] = useState<boolean>(false);
 
   const [subjectsSave, setSubjectsSave] = useState<SaveSubject[]>([]);
@@ -65,9 +63,6 @@ const PlanEdit: React.FC = () => {
     fetchInitialData();
   }, []);
 
-  const handleAddSubject = () => {
-    // logic to add a new subject
-  };
   useEffect(() => {
     if (id) {
       const fetchPlan = async () => {
@@ -305,10 +300,6 @@ const PlanEdit: React.FC = () => {
       };
       setSubjectsSave((prevSubjects) => [...prevSubjects, newSubject]);
     }
-
-    // Restablecer el estado del nuevo sujeto y cerrar el modal
-    setNewSubject("");
-    setShowModalSubject(false);
   };
 
   return (
@@ -404,9 +395,6 @@ const PlanEdit: React.FC = () => {
                     >
                       Agregar Materia
                     </Button>
-                    <Button onClick={() => setShowModalSubject(true)}>
-                      Crear Nueva Materia
-                    </Button>
                   </div>
                 )}
               </div>
@@ -487,38 +475,7 @@ const PlanEdit: React.FC = () => {
               ))}
             </div>
           </div>
-          <Modal
-            show={showModalSubject}
-            onHide={() => setShowModalSubject(false)}
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>Agregar Materia</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Group controlId="formNombreMateria">
-                  <Form.Label>Nombre de la materia:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={newSubject}
-                    onChange={(e) => setNewSubject(e.target.value)}
-                    placeholder="Ingrese el nombre de la materia"
-                  />
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="secondary"
-                onClick={() => setShowModalSubject(false)}
-              >
-                Cancelar
-              </Button>
-              <Button variant="primary" onClick={handleAddSubject}>
-                Agregar
-              </Button>
-            </Modal.Footer>
-          </Modal>
+
           <Modal show={showModalAct} onHide={() => setShowModalAct(false)}>
             <Modal.Header closeButton>
               <Modal.Title>Agregar Actividad</Modal.Title>

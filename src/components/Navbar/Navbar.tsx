@@ -264,25 +264,26 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                   Padres
                 </Link>
               </li> */}
+
               <li>
-                <li>
-                  <Link to="/rols" className="nav-link px-0 align-middle">
-                    <FontAwesomeIcon icon={faUser} className="me-2" />
-                    Gestión de usuarios
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/students" className="nav-link px-0 align-middle">
-                    <FontAwesomeIcon icon={faUserGraduate} className="me-2" />
-                    Estudiantes
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/parents" className="nav-link px-0 align-middle">
-                    <FontAwesomeIcon icon={faUserGroup} className="me-2" />
-                    Padres
-                  </Link>
-                </li>
+                <Link to="/rols" className="nav-link px-0 align-middle">
+                  <FontAwesomeIcon icon={faUser} className="me-2" />
+                  Gestión de usuarios
+                </Link>
+              </li>
+              <li>
+                <Link to="/students" className="nav-link px-0 align-middle">
+                  <FontAwesomeIcon icon={faUserGraduate} className="me-2" />
+                  Estudiantes
+                </Link>
+              </li>
+              <li>
+                <Link to="/parents" className="nav-link px-0 align-middle">
+                  <FontAwesomeIcon icon={faUserGroup} className="me-2" />
+                  Padres
+                </Link>
+              </li>
+              <li>
                 <Link
                   to="/parentAssociations"
                   className="nav-link px-0 align-middle"
