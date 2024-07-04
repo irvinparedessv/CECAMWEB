@@ -86,6 +86,17 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
         }
       : null;
   };
+  const calculateGlobalGrade = (subjectGrades) => {
+    const periods = Object.keys(subjectGrades);
+    const totalGrade = periods.reduce((total, period) => {
+      const periodActivities = subjectGrades[period];
+      const periodGrade = parseFloat(calculateFinalGrade(periodActivities));
+      return total + periodGrade;
+    }, 0);
+
+    const globalGrade = (totalGrade / periods.length).toFixed(1);
+    return globalGrade;
+  };
 
   const calculateGrade = (activity) => {
     if (activity.details && activity.details.length > 0) {
@@ -103,7 +114,7 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
           total +
           ((activity.details && activity.details.length > 0
             ? parseFloat(activity.details[0].note)
-            : parseFloat(activity.gradeId)) *
+            : 0) *
             activity.percentage) /
             100,
         0
@@ -125,6 +136,7 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
               <Accordion.Item eventKey={subjectIndex.toString()}>
                 <Accordion.Header as={Card.Header} eventKey={subject}>
                   <h3>{subject.toUpperCase()}</h3>
+                  <h3>-NOTA: {calculateGlobalGrade(studentGrades[subject])}</h3>
                 </Accordion.Header>
                 <Accordion.Body>
                   {Object.keys(studentGrades[subject])?.map(
@@ -161,7 +173,7 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
                                       )
                                     )}
                                   <tr>
-                                    <td colSpan={3}>Final Grade</td>
+                                    <td colSpan={3}>Nota Total</td>
                                     <td>
                                       {calculateFinalGrade(
                                         studentGrades[subject][period]
