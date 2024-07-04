@@ -137,7 +137,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
         try {
           const user = await AuthService.getUserDetails();
 
-          if (user.changePassword === false) {
+          if (user.changePassword === 0) {
             // Eliminar el token si no se requiere cambio de contraseña
             sessionStorage.removeItem("token");
             localStorage.removeItem("token");
@@ -191,7 +191,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
         localStorage.setItem("userId", response.data.id.toString());
         localStorage.setItem("changePassword", response.data.changePassword.toString());
 
-        if (response.data.changePassword === false) {
+        if (response.data.changePassword === 0) {
           // Mostrar SweetAlert2 para cambiar la contraseña
           const { value: newPassword } = await Swal.fire({
             title: "Cambia tu contraseña",
