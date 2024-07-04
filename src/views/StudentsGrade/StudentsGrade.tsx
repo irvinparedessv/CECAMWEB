@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { GradeStudents } from "../../types";
 import { GradeService } from "../../services";
 import { useParams } from "react-router-dom";
-import { Button, Spinner } from "react-bootstrap";
+import { Button, Form, Spinner } from "react-bootstrap";
 import { Pagination } from "../../components/Pagination";
 import { itemsPerPage } from "../../const/Pagination";
 import ModalStudentGrade from "./ModalStudentGrade";
@@ -29,6 +29,7 @@ const StudentsGrade = () => {
   const [showAttendance, setShowAttendance] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [debouncedQuery, setDebouncedQuery] = useState<string>(searchQuery);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -73,27 +74,32 @@ const StudentsGrade = () => {
   };
 
   useEffect(() => {
-    fetchData(searchQuery);
-  }, [currentPage, searchQuery]);
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 500); // Espera de 500ms después de que el usuario deje de escribir
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    fetchData(searchQuery);
-  };
+    return () => {
+      clearTimeout(handler); // Limpia el timeout si el usuario sigue escribiendo
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchData(debouncedQuery);
+  }, [currentPage, debouncedQuery]);
 
   return (
     <div>
       <h1>Lista de Estudiantes</h1>
       {error && <p>{error}</p>}
-      <form onSubmit={handleSearch}>
-        <input
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <Form.Control
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar estudiante"
         />
-        <button type="submit">Buscar</button>
-      </form>
+      </div>
+
       <div className="col c_ButtonAdd">
         <Button className="btn btn-primary" onClick={handleModalOpen}>
           Modificar Estudiantes de {gradeStudent?.grade.name}{" "}
