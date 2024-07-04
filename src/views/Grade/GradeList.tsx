@@ -353,14 +353,19 @@ const GradeList = () => {
   const handleAddGrade = async () => {
     try {
       // Verificar campos obligatorios
-      if (!formData.name || !formData.section || !formData.description) {
+      if (
+        !formData.name ||
+        !formData.section ||
+        !formData.description ||
+        !formData.year
+      ) {
         return Swal.fire(
           "Error",
           "Por favor, complete todos los campos obligatorios.",
           "error"
         );
       }
-
+      setLoading(true);
       // Agregar el grado
       await GradeService.addGrade(formData);
       setShowAddModal(false);
@@ -373,6 +378,7 @@ const GradeList = () => {
       fetchGradeProfessors();
 
       Swal.fire("Éxito", "El grado ha sido agregado correctamente.", "success");
+      setLoading(false);
     } catch (error) {
       console.error("Error al insertar grado:", error);
       Swal.fire(
@@ -380,13 +386,19 @@ const GradeList = () => {
         "Se produjo un error al intentar agregar el grado.",
         "error"
       );
+      setLoading(false);
     }
   };
 
   const handleUpdateGrade = async () => {
     try {
       // Verificar campos obligatorios
-      if (!formData.name || !formData.section || !formData.description) {
+      if (
+        !formData.name ||
+        !formData.section ||
+        !formData.description ||
+        !formData.year
+      ) {
         return Swal.fire(
           "Error",
           "Por favor, complete todos los campos obligatorios.",
@@ -408,6 +420,7 @@ const GradeList = () => {
 
       // Actualizar el padre
       if (selectedGradeId !== null) {
+        setLoading(true);
         await GradeService.updateGrade(selectedGradeId, formData);
         setShowAddModal(false);
         fetchData();
@@ -419,8 +432,10 @@ const GradeList = () => {
           "Los cambios han sido guardados correctamente.",
           "success"
         );
+        setLoading(false);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error al actualizar padre:", error);
       Swal.fire(
         "Error",
@@ -968,6 +983,7 @@ const GradeList = () => {
             onClick={handleSave}
             disabled={isSubmitting}
           >
+            {isLoading && <Spinner animation="grow" />}
             {selectedGradeId !== null ? "Guardar Cambios" : "Agregar"}
           </Button>
         </Modal.Footer>

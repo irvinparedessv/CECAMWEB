@@ -4,7 +4,7 @@ import "./style.css";
 import ProfessorService from "../../../services/ProfessorService";
 import ActivitiesModal from "../activities/ActivitiesModal";
 import NotesModal from "../notes/NotesSubjectStudentsModal";
-import AddActivityModal from "../activities/CreateActivityModal"; // Asumiendo que tienes un modal para agregar actividad
+import AddActivityModal from "../activities/CreateActivityModal";
 
 const ProfessorSubjects = () => {
   const [subjects, setSubjects] = useState([]);

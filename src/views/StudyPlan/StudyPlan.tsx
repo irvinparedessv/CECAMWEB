@@ -485,6 +485,7 @@ const StudyPlan: React.FC = () => {
         <Modal.Body>
           <Form>
             <Form.Group controlId="formtype">
+              <Form.Label>Tipo de Actividad:</Form.Label>
               <Form.Select
                 onChange={(e) =>
                   setNewActivitie({
@@ -493,7 +494,7 @@ const StudyPlan: React.FC = () => {
                   })
                 }
               >
-                <option value={""}>Seleccionar Materia</option>
+                <option value={""}>Seleccionar Tipo</option>
                 {activities.map((activity, index) => (
                   <option key={index} value={activity.typeId}>
                     {activity.typeName}

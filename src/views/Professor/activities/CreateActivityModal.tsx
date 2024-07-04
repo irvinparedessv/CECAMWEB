@@ -79,7 +79,7 @@ const AddActivityModal: React.FC<Props> = ({
     try {
       const response = await GradeService.addActivity(data);
       handleClose();
-      toast.success("Actividad enviada exitosamente!");
+      toast.success("Actividad creada exitosamente!");
       resetForm();
     } catch (err) {
       toast.error("Error al enviar recordatorios de la actividad");
