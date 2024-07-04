@@ -25,6 +25,8 @@ export interface GradeProfessor {
   section: string;
   description: string;
   manager_professor?: Student;
+  year: number;
+  planId?: string;
 }
 
 export interface GradeStudents {
@@ -44,6 +46,7 @@ export interface GradeFormAdd {
   name: string;
   section: string;
   description: string;
+  year: number;
 }
 
 export interface GradeResponseOne {

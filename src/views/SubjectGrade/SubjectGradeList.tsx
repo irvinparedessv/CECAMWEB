@@ -108,7 +108,6 @@ const GradeSubjectList: React.FC = () => {
                 <th>Nombre de la Materia</th>
                 <th>Nombre del Profesor</th>
                 <th>Apellido del Profesor</th>
-                <th>Nombre del Plan</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -120,9 +119,8 @@ const GradeSubjectList: React.FC = () => {
                     {gradeSubject.grade.name}-{gradeSubject.grade.section}
                   </td>
                   <td>{gradeSubject.subject.subjectName}</td>
-                  <td>{gradeSubject.professor.firstName}</td>
-                  <td>{gradeSubject.professor.lastName}</td>
-                  <td>{gradeSubject.plan.name}</td>
+                  <td>{gradeSubject.professor?.firstName}</td>
+                  <td>{gradeSubject.professor?.lastName}</td>
                   <td>
                     <Button
                       variant="primary"
@@ -158,13 +156,6 @@ const GradeSubjectList: React.FC = () => {
           </Pagination>
         </>
       )}
-      <Form className="mb-12">
-        <Form.Group>
-          <Button onClick={() => navigate("/subject-grade-add")}>
-            CREAR NUEVA RELACION
-          </Button>
-        </Form.Group>
-      </Form>
     </div>
   );
 };

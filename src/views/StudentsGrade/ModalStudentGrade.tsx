@@ -83,7 +83,7 @@ const ModalStudentGrade: React.FC<Props> = ({
             setIsLoading(false);
             fetchData();
             fetchStudents();
-            toast.success(response.message);
+            //toast.success(response.message);
           }
         }),
         {

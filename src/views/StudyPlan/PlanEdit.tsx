@@ -341,6 +341,7 @@ const PlanEdit: React.FC = () => {
                     </div>
 
                     <Form.Select
+                      disabled
                       onChange={(e) => {
                         setTypePeriod(e.target.value);
                         setSubjectsSave([]);
@@ -363,6 +364,7 @@ const PlanEdit: React.FC = () => {
                       <label>Detalle</label>
                     </div>
                     <Form.Select
+                      disabled
                       onChange={(e) => handleGlobalChange(e.target.value)}
                       value={isGlobal}
                     >

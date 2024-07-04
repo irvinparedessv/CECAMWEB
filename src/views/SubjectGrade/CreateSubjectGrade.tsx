@@ -17,13 +17,11 @@ const CreateGradeSubject: React.FC = () => {
   const [formData, setFormData] = useState({
     subjectId: editData?.subject.subjectId || "",
     gradeId: editData?.grade.gradeId || "",
-    planId: editData?.plan.planId || "",
-    professorId: editData?.professor.id || "",
+    professorId: editData?.professor?.id || "",
   });
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [grades, setGrades] = useState<Grade[]>([]);
-  const [plans, setPlans] = useState<Plan[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,16 +29,13 @@ const CreateGradeSubject: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [subjectsData, gradesData, plansData, professorsData] =
-          await Promise.all([
-            SubjectService.getAllSubjects(),
-            GradeSubjectService.getAllGrades(),
-            GradeSubjectService.getAllPlans(),
-            GradeSubjectService.getAllProfessors(),
-          ]);
+        const [subjectsData, gradesData, professorsData] = await Promise.all([
+          SubjectService.getAllSubjects(),
+          GradeSubjectService.getAllGrades(),
+          GradeSubjectService.getAllProfessors(),
+        ]);
         setSubjects(subjectsData);
         setGrades(gradesData);
-        setPlans(plansData);
         console.log(professorsData);
         setProfessors(professorsData);
       } catch (error) {
@@ -63,12 +58,7 @@ const CreateGradeSubject: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (
-      !formData.subjectId ||
-      !formData.gradeId ||
-      !formData.planId ||
-      !formData.professorId
-    ) {
+    if (!formData.subjectId || !formData.gradeId || !formData.professorId) {
       alert("Por favor, complete todos los campos.");
       return;
     }
@@ -93,7 +83,6 @@ const CreateGradeSubject: React.FC = () => {
       setFormData({
         subjectId: "",
         gradeId: "",
-        planId: "",
         professorId: "",
       });
     } catch (error) {
@@ -146,24 +135,6 @@ const CreateGradeSubject: React.FC = () => {
               {grades.map((grade) => (
                 <option key={grade.gradeId} value={grade.gradeId}>
                   {grade.name} - {grade.section}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-
-          <Form.Group>
-            <Form.Label>Plan:</Form.Label>
-            <Form.Control
-              as="select"
-              name="planId"
-              value={formData.planId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccione un plan</option>
-              {plans.map((plan) => (
-                <option key={plan.planId} value={plan.planId}>
-                  {plan.name}
                 </option>
               ))}
             </Form.Control>

@@ -22,21 +22,29 @@ import StudentService from "../../services/StudentService";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { itemsPerPage } from "../../const/Pagination";
+import PlanService from "../../services/PlanService";
+import { Plan } from "../../types/Plans";
+import AddPlanModal from "./ModalPlan";
 
 const GradeList = () => {
   const navigate = useNavigate();
   const [grades, setGrades] = useState<GradeProfessor[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [error, setError] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showAddParentModal, setShowAddParentModal] = useState(false);
+  const [showAddPlan, setShowAddPlan] = useState(false);
+
   const [unassociatedProfessors, setUnassociatedProfessors] = useState<
     Professor[]
   >([]);
   const [selectedProfessorGrade, setSelectedProfessorGrade] =
     useState<GradeProfessors | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+
   const [gradeProfessors, setGradeProfessors] = useState<GradeProfessors[]>([]);
   const [filterValueProfessor, setFilterValueProfessor] = useState("");
   const [deletingProfessorId, setDeletingProfessorId] = useState<number | null>(
@@ -51,7 +59,6 @@ const GradeList = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedGradeId, setSelectedGradeId] = useState<number | null>(null);
   const [filterValue, setFilterValue] = useState("");
-
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingGradeId, setDeletingGradeId] = useState<number | null>(null);
@@ -74,6 +81,7 @@ const GradeList = () => {
     name: "",
     section: "",
     description: "",
+    year: 0,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -99,6 +107,7 @@ const GradeList = () => {
           name: selectedGrade.name,
           section: selectedGrade.section,
           description: selectedGrade.description,
+          year: selectedGrade.year,
         });
       }
     } else {
@@ -107,6 +116,7 @@ const GradeList = () => {
         name: "",
         section: "",
         description: "",
+        year: 0,
       });
     }
   };
@@ -119,6 +129,7 @@ const GradeList = () => {
       name: "",
       section: "",
       description: "",
+      year: 0,
     });
   };
   const fetchData = async () => {
@@ -129,10 +140,8 @@ const GradeList = () => {
         filter: filterValue,
       };
       const response = await GradeService.getAllGrades(params);
-      console.log(response);
       if (response.success) {
         setGrades(response.data.data);
-        console.log(response.data.data);
         setTotalPages(response.data.last_page);
       } else {
         setError("Failed to fetch grades");
@@ -141,7 +150,9 @@ const GradeList = () => {
       setError("Failed to fetch grades");
     }
   };
-
+  useEffect(() => {
+    fetchPlans();
+  }, []);
   useEffect(() => {
     fetchData();
     fetchGradeProfessors();
@@ -189,7 +200,6 @@ const GradeList = () => {
 
   const handleDelete = async (id: number) => {
     try {
-
       setDeletingGradeId(id);
       setDeletingGrade(true);
 
@@ -227,7 +237,7 @@ const GradeList = () => {
         "Se produjo un error al intentar eliminar el grado.",
         "error"
       );
-    }finally {
+    } finally {
       setDeletingGradeId(null);
       setDeletingGrade(false);
     }
@@ -239,6 +249,17 @@ const GradeList = () => {
       const response = await GradeService.getAllGradeProfessors();
 
       setGradeProfessors(response);
+      // const filteredProfessors = professorList.filter(professor => professor.rolId === 3);
+      // setProfessors(filteredProfessors);
+    } catch (error) {
+      console.error("Error al obtener grados:", error);
+    }
+  };
+  const fetchPlans = async () => {
+    try {
+      //const studentList = await ParentAssociationService.getAllUsers();
+      const response = await PlanService.getAllPlans();
+      setPlans(response);
       // const filteredProfessors = professorList.filter(professor => professor.rolId === 3);
       // setProfessors(filteredProfessors);
     } catch (error) {
@@ -263,6 +284,27 @@ const GradeList = () => {
     } catch (error) {
       console.error("Error al obtener padres no asociados:", error);
     }
+  };
+
+  const handleAddPlanModalShow = async (gradeId: number, planId?: number) => {
+    // if (gradeId !== null) {
+    //   setLoading(true);
+
+    //   const selectedGrade = grades.find(grade => grade.gradeId === gradeId);
+    //   setSelectedGrade(selectedGrade || null); // Guarda el grado seleccionado
+    //   setLoading(false);
+    //   setShowAddParentModal(true);
+    // }
+
+    const selectedPlan = plans.find((x) => x.planId === planId);
+    setSelectedPlan(selectedPlan || null);
+    setSelectedGradeId(gradeId);
+    setLoading(true);
+    if (selectedPlan) {
+      setLoading(true);
+    }
+    setLoading(false);
+    setShowAddPlan(true);
   };
 
   const handleAddParentModalShow = async (gradeId: number) => {
@@ -297,6 +339,12 @@ const GradeList = () => {
   const handleAddParentModalClose = () => {
     setShowAddParentModal(false);
     setSelectedProfessorGrade(null);
+    setSelectedProfessors([]);
+    //fetchGradeProfessors();
+  };
+  const handleAddPlanClose = () => {
+    setShowAddPlan(false);
+    setSelectedPlan(null);
     setSelectedProfessors([]);
     //fetchGradeProfessors();
   };
@@ -559,7 +607,9 @@ const GradeList = () => {
             <th>Nombre</th>
             <th>Sección</th>
             <th>Descripción</th>
+            <th>Año</th>
             <th>Coordinador</th>
+            <th>Plan</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -575,6 +625,7 @@ const GradeList = () => {
                 <td>{grade.name}</td>
                 <td>{grade.section}</td>
                 <td>{grade.description}</td>
+                <td>{grade.year}</td>
                 <td>
                   {grade.manager_professor?.firstName &&
                   grade.manager_professor?.lastName ? (
@@ -584,6 +635,13 @@ const GradeList = () => {
                       Sin Profesor Asociado
                     </span>
                   )}
+                </td>
+                <td>
+                  {grade.planId
+                    ? plans.find(
+                        (x) => Number(x.planId) == Number(grade.planId)
+                      )?.name
+                    : "-"}
                 </td>
                 <td>
                   <Button
@@ -604,12 +662,30 @@ const GradeList = () => {
                         size="sm"
                         role="status"
                         aria-hidden="true"
-                        style={{ marginRight: '5px' }}
+                        style={{ marginRight: "5px" }}
                       />
                     )}
-                    {deletingGradeId === grade.gradeId ? 'Eliminando...' : 'Eliminar'}
+                    {deletingGradeId === grade.gradeId
+                      ? "Eliminando..."
+                      : "Eliminar"}
                   </Button>
-                  <Button variant="success" onClick={() => handleAddParentModalShow(grade.gradeId)}>Asignar coordinador</Button>
+                  <Button
+                    variant="success"
+                    onClick={() => handleAddParentModalShow(grade.gradeId)}
+                  >
+                    Asignar coordinador
+                  </Button>
+                  <Button
+                    variant="success"
+                    onClick={() =>
+                      handleAddPlanModalShow(
+                        grade.gradeId,
+                        grade.planId ? Number(grade.planId) : null
+                      )
+                    }
+                  >
+                    Asignar Plan
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -862,20 +938,49 @@ const GradeList = () => {
                 <div className="error-message">{errors.description}</div>
               )}
             </Form.Group>
+            <Form.Group controlId="formDescription">
+              <Form.Label>Año</Form.Label>
+              <Form.Control
+                className="form-control"
+                type="number"
+                name="year"
+                value={formData.year}
+                onChange={handleChange}
+                required
+              />
+              {errors.description && (
+                <div className="error-message">{errors.description}</div>
+              )}
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleAddModalClose} disabled={isSubmitting}>Cancelar</Button>
-            
+          <Button
+            variant="secondary"
+            onClick={handleAddModalClose}
+            disabled={isSubmitting}
+          >
+            Cancelar
+          </Button>
+
           <Button
             variant="primary"
             onClick={handleSave}
             disabled={isSubmitting}
           >
-          {selectedGradeId !== null ? 'Guardar Cambios' : 'Agregar'}
-        </Button>
+            {selectedGradeId !== null ? "Guardar Cambios" : "Agregar"}
+          </Button>
         </Modal.Footer>
       </Modal>
+
+      {showAddPlan && (
+        <AddPlanModal
+          gradeId={selectedGradeId}
+          selectedPlan={selectedPlan}
+          plans={plans}
+          handleCloseModal={handleAddPlanClose}
+        />
+      )}
     </div>
   );
 };

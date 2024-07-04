@@ -11,8 +11,11 @@ import {
   TypePeriod,
 } from "../../types/Plans";
 import { Subject } from "../../types";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const StudyPlan: React.FC = () => {
+  const navigate = useNavigate();
   const [typePeriods, setTypePeriods] = useState<TypePeriod[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -161,7 +164,8 @@ const StudyPlan: React.FC = () => {
       subjectsGlobal: globalSubjects,
     };
     PlanService.savePlan(dataSave);
-    alert("Guardado");
+    toast.success("Guardado");
+    navigate("/plans");
   };
 
   const handleAddActivity = () => {
