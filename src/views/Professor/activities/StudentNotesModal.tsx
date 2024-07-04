@@ -107,6 +107,8 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
         });
 
       await Promise.all(updatePromises);
+      toast.success("NOTA INGRESADA CORRECTAMENTE");
+
       handleClose();
       // Optionally refresh the notes or the activities list if needed
     } catch (error) {

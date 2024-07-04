@@ -162,14 +162,10 @@ const App = () => {
             <Route path="/profiles" element={<Profiles />} />
             <Route path="/register-student" element={<Register />} />
             <Route path="/grades" element={<GradeList />} />
-            <Route path="/students/grade/:id" element={<StudentsGrade />} />
             <Route path="/register-subjects" element={<Subject />} />
             <Route path="/subjects" element={<Subject />} />
-
             <Route path="/subject-grade" element={<SubjectGradeList />} />
             <Route path="/subject-grade-add" element={<CreateGradeSubject />} />
-
-            <Route path="/attendance/grade/:id" element={<Attendance />} />
             <Route path="/observations" element={<Observation />} />
           </Route>
 
@@ -190,6 +186,8 @@ const App = () => {
             <Route path="/mysubjects" element={<ProfessorSubjects />} />
             <Route path="/profiles" element={<Profiles />} />
             <Route path="/migrades" element={<MiGrade />} />
+            <Route path="/students/grade/:id" element={<StudentsGrade />} />
+            <Route path="/attendance/grade/:id" element={<Attendance />} />
           </Route>
 
           <Route
