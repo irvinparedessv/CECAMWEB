@@ -292,12 +292,9 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                 </Link>
               </li>
               <li>
-                <Link to="/grades" className="nav-link px-0 align-middle">
-                  <FontAwesomeIcon
-                    icon={faSchoolCircleCheck}
-                    className="me-2"
-                  />
-                  Grados
+                <Link to="/subjects" className="nav-link px-0 align-middle">
+                  <FontAwesomeIcon icon={faBookOpenReader} className="me-2" />
+                  Asignaturas
                 </Link>
               </li>
               <li>
@@ -307,11 +304,15 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
                 </Link>
               </li>
               <li>
-                <Link to="/subjects" className="nav-link px-0 align-middle">
-                  <FontAwesomeIcon icon={faBookOpenReader} className="me-2" />
-                  Asignaturas
+                <Link to="/grades" className="nav-link px-0 align-middle">
+                  <FontAwesomeIcon
+                    icon={faSchoolCircleCheck}
+                    className="me-2"
+                  />
+                  Grados
                 </Link>
               </li>
+
               <li>
                 <Link
                   to="/subject-grade"

@@ -40,7 +40,7 @@ const AddPlanModal: React.FC<AddPlanModalProps> = ({
         setIsLoading(false);
         setShowConfirmation(false);
         handleCloseModal(false);
-        navigate("/plans");
+        navigate("/grades");
       } catch (error) {
         console.error("Error al agregar el plan:", error);
         setIsLoading(false);
