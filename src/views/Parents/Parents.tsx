@@ -189,7 +189,7 @@ const Parents = () => {
     }));
   };
 
-  const handleAddParent = async () => {
+ const handleAddParent = async () => {
     try {
       // Verificar campos obligatorios
       if (
@@ -203,24 +203,42 @@ const Parents = () => {
           "error"
         );
       }
-
+  
+      // Mostrar Swal de carga
+      Swal.fire({
+        title: 'Guardando padre...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
       // Verificar si el correo ya existe
       const emailExists = await ParentService.checkEmailExists(
         newParentData.email
       );
       if (emailExists) {
+        Swal.close();
         return Swal.fire("Error", "El correo ya existe.", "error");
       }
-
-      // Guardar el padre
+  
+      // Guardar el estudiante
       await ParentService.insertUser(newParentData);
       setShowAddModal(false);
       fetchParents();
-
-      // Mostrar una alerta de éxito
-      Swal.fire("Éxito", "El padre ha sido agregado correctamente.", "success");
+  
+      // Cerrar Swal de carga y mostrar una alerta de éxito
+      Swal.close();
+      Swal.fire(
+        "Éxito",
+        "El padre ha sido agregado correctamente.",
+        "success"
+      );
     } catch (error) {
       console.error("Error al insertar padre:", error);
+  
+      // Cerrar Swal de carga y mostrar una alerta de error
+      Swal.close();
       Swal.fire(
         "Error",
         "Se produjo un error al intentar agregar el padre.",

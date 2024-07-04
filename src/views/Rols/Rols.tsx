@@ -452,7 +452,8 @@ const Students = () => {
       if (
         !newStudentData.firstName ||
         !newStudentData.lastName ||
-        !newStudentData.email
+        !newStudentData.email ||
+        !newStudentData.rolId
       ) {
         return Swal.fire(
           "Error",
@@ -460,21 +461,32 @@ const Students = () => {
           "error"
         );
       }
-
+  
+      // Mostrar Swal de carga
+      Swal.fire({
+        title: 'Guardando usuario...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
       // Verificar si el correo ya existe
       const emailExists = await StudentService.checkEmailExists(
         newStudentData.email
       );
       if (emailExists) {
+        Swal.close();
         return Swal.fire("Error", "El correo ya existe.", "error");
       }
-
+  
       // Guardar el estudiante
       await StudentService.insertUser(newStudentData);
       setShowAddModal(false);
       fetchStudents();
-
-      // Mostrar una alerta de éxito
+  
+      // Cerrar Swal de carga y mostrar una alerta de éxito
+      Swal.close();
       Swal.fire(
         "Éxito",
         "El usuario ha sido agregado correctamente.",
@@ -482,6 +494,9 @@ const Students = () => {
       );
     } catch (error) {
       console.error("Error al insertar usuario:", error);
+  
+      // Cerrar Swal de carga y mostrar una alerta de error
+      Swal.close();
       Swal.fire(
         "Error",
         "Se produjo un error al intentar agregar el usuario.",
