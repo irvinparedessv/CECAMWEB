@@ -68,10 +68,10 @@ const GradeService = {
   //     throw error;
   //   }
   // },
-  getStudents: async (id: number, page: number) => {
+  getStudents: async (id: number, page: number, query: string = "") => {
     try {
       const response = await axiosInstance.get<StudentsGradeResponse>(
-        `${API_BASE_URL}/students/grade/${id}?page=${page}&itemsperpage=${itemsPerPage}`
+        `${API_BASE_URL}/students/grade/${id}?page=${page}&itemsperpage=${itemsPerPage}&search=${query}`
       );
       return response.data;
     } catch (error) {
