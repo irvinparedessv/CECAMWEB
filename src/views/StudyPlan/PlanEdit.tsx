@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Accordion, Spinner } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./study.css";
 import SubjectService from "./../../services/SubjectService";
 import PlanService from "../../services/PlanService";
@@ -13,6 +13,7 @@ import {
 } from "../../types/Plans";
 import { Subject } from "../../types";
 import { Plan } from "../../types/PlanEdit";
+import Swal from "sweetalert2";
 
 const PlanEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Obtener planId desde los parámetros de la ruta
@@ -32,6 +33,7 @@ const PlanEdit: React.FC = () => {
 
   const [isGlobal, setIsGlobal] = useState<string>("");
   const [showModalAct, setShowModalAct] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [subjectsSave, setSubjectsSave] = useState<SaveSubject[]>([]);
   const [globalSubjects, setGlobalSubjects] = useState<SaveSubject[]>([]);
@@ -39,6 +41,7 @@ const PlanEdit: React.FC = () => {
   const [selectedSubjectIndex, setSelectedSubjectIndex] = useState<
     number | null
   >(null);
+  const navigate = useNavigate();
 
   const staticTypes = [
     { name: "DETALLE ACTIVIDADES POR MATERIA", value: false },
@@ -111,7 +114,12 @@ const PlanEdit: React.FC = () => {
       !newActivitie.description ||
       !newActivitie.percentage
     ) {
-      alert("Por favor completa todos los campos.");
+      Swal.fire({
+        icon: "error",
+        title: "Validacion",
+        text: "Por favor complete todos los campos!",
+        allowOutsideClick: true,
+      });
       return;
     }
 
@@ -196,14 +204,19 @@ const PlanEdit: React.FC = () => {
 
     setSubjectsSave(updatedSubjects);
   };
-  const savePlan = () => {
+  const savePlan = async () => {
     if (
       name === "" ||
       typePeriod === "" ||
       isGlobal === "" ||
       subjectsSave.length === 0
     ) {
-      alert("Por favor complete todos los campos!");
+      Swal.fire({
+        icon: "error",
+        title: "Validacion",
+        text: "Por favor complete todos los campos!",
+        allowOutsideClick: true,
+      });
       return;
     }
     if (
@@ -211,10 +224,15 @@ const PlanEdit: React.FC = () => {
         subject.periods.some((period) => period.activities.length === 0)
       )
     ) {
-      alert("Debe agregarse al menos una actividad al periodo!");
+      Swal.fire({
+        icon: "error",
+        title: "Validacion",
+        text: "Debe agregarse al menos una actividad al periodo!",
+        allowOutsideClick: true,
+      });
       return;
     }
-
+    setLoading(true);
     const dataSave = {
       idPlan: id,
       namePlan: name,
@@ -223,8 +241,25 @@ const PlanEdit: React.FC = () => {
       subjects: subjectsSave,
       subjectsGlobal: globalSubjects,
     };
-    PlanService.editPlan(dataSave);
-    alert("Guardado");
+    try {
+      await PlanService.editPlan(dataSave);
+      Swal.fire({
+        icon: "success",
+        title: "Guardado",
+        text: "Se ha editado el plan correctamente.",
+        allowOutsideClick: true,
+      });
+      navigate("/plans");
+    } catch (err) {
+      console.log(err);
+      Swal.fire({
+        icon: "error",
+        title: "Guardado",
+        text: err?.response?.data?.message,
+        allowOutsideClick: true,
+      });
+    }
+    setLoading(false);
   };
   const handleGlobalChange = (value: string) => {
     setIsGlobal(value);
@@ -270,24 +305,42 @@ const PlanEdit: React.FC = () => {
           );
 
     if (alreadyExists) {
-      alert("La materia ya ha sido seleccionada.");
+      Swal.fire({
+        icon: "error",
+        title: "Validacion",
+        text: "La materia ya ha sido seleccionada.",
+        allowOutsideClick: true,
+      });
       return;
     }
 
     if (isGlobal === "true") {
       // Si es global, agregar la materia a globalSubjects
-      const newGlobalSubject: SaveSubject = {
-        subject: selectedSubject,
-        periods: selectedPeriods.map((period) => ({
-          period,
-          totalPercentage: 0,
-          activities: [],
-        })),
-      };
-      setGlobalSubjects((prevGlobalSubjects) => [
-        ...prevGlobalSubjects,
-        newGlobalSubject,
-      ]);
+      // Si es global, agregar la materia a globalSubjects
+      if (globalSubjects.length > 0) {
+        //tomar actividades del subject
+        const newGlobalSubject: SaveSubject = {
+          subject: selectedSubject,
+          periods: globalSubjects[0].periods,
+        };
+        setGlobalSubjects((prevGlobalSubjects) => [
+          ...prevGlobalSubjects,
+          newGlobalSubject,
+        ]);
+      } else {
+        const newGlobalSubject: SaveSubject = {
+          subject: selectedSubject,
+          periods: selectedPeriods.map((period) => ({
+            period,
+            totalPercentage: 0,
+            activities: [],
+          })),
+        };
+        setGlobalSubjects((prevGlobalSubjects) => [
+          ...prevGlobalSubjects,
+          newGlobalSubject,
+        ]);
+      }
     } else {
       // Si no es global, agregar la materia a subjectsSave
       const newSubject: SaveSubject = {
@@ -544,7 +597,10 @@ const PlanEdit: React.FC = () => {
               </Button>
             </Modal.Footer>
           </Modal>
-          <Button onClick={savePlan}>EDITAR</Button>
+          <Button onClick={savePlan}>
+            {" "}
+            {loading && <Spinner animation="grow" />}EDITAR
+          </Button>
         </>
       )}
     </div>
