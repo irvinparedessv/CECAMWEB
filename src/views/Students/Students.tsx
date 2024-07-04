@@ -329,11 +329,6 @@ const Students = () => {
   };
 
   const handleSave = async () => {
-    if (Object.values(errors).some(error => error !== '')) {
-      alert("Por favor, corrija los errores antes de guardar.");
-      return;
-    }
-
     setIsSubmitting(true);
     if (selectedStudentId !== null) {
       await handleUpdateStudent();
@@ -694,7 +689,7 @@ const Students = () => {
             <Button
                 variant="primary"
                 onClick={handleSave}
-                disabled={isSubmitting || Object.values(errors).some(error => error !== '')}
+                disabled={isSubmitting}
               >
                 {selectedStudentId !== null ? 'Guardar Cambios' : 'Agregar'}
               </Button>

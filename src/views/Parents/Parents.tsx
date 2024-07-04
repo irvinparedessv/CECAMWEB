@@ -167,11 +167,6 @@ const Parents = () => {
   };
 
   const handleSave = async () => {
-    if (Object.values(errors).some(error => error !== '')) {
-      alert("Por favor, corrija los errores antes de guardar.");
-      return;
-    }
-
     setIsSubmitting(true);
     if (selectedParentId !== null) {
       await handleUpdateParent();
@@ -595,7 +590,7 @@ const Parents = () => {
             <Button
               variant="primary"
               onClick={handleSave}
-              disabled={isSubmitting || Object.values(errors).some(error => error !== '')}
+              disabled={isSubmitting}
             >
           {selectedParentId !== null ? 'Guardar Cambios' : 'Agregar'}
         </Button>
