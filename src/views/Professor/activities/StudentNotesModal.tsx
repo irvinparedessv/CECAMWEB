@@ -11,6 +11,7 @@ import ProfessorService from "../../../services/ProfessorService";
 import { Student } from "../../../types/Student";
 import { itemsPerPage } from "../../../const/Pagination";
 import { removeAccents } from "../../../utils/text";
+import toast from "react-hot-toast";
 
 interface ActivityStudent {
   student: Student;
@@ -73,29 +74,37 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
     }));
   };
 
-  const handleSaveNotes = async () => {
+  const handleSaveNotes = async (id) => {
     try {
-      const updatePromises = studentsAct.map((student) => {
-        if (student.activityStudent) {
-          const newNote = editedNotes[student.activityStudent?.studentId];
-          if (newNote !== undefined) {
-            return ProfessorService.updateStudentNote(
-              student.activityStudent.activityId,
-              student.activityStudent.studentId,
-              { note: newNote }
-            );
+      const updatePromises = studentsAct
+        .filter((o) => o.student.id == id)
+        .map((student) => {
+          if (student.activityStudent) {
+            const newNote = editedNotes[student.student.id];
+            if (newNote !== undefined && newNote >= 0 && newNote <= 10) {
+              return ProfessorService.updateStudentNote(
+                student.activityStudent.activityId,
+                student.activityStudent.studentId,
+                { note: newNote }
+              );
+            } else {
+              toast.error("DEBE SER UNA NOTA VÁLIDA");
+              return Promise.reject("Nota inválida");
+            }
+          } else {
+            const newNote = editedNotes[student.student.id];
+            if (newNote !== undefined && newNote >= 0 && newNote <= 10) {
+              return ProfessorService.updateStudentNote(
+                activity.activityId,
+                student.student.id,
+                { note: newNote }
+              );
+            } else {
+              toast.error("DEBE SER UNA NOTA VÁLIDA");
+              return Promise.reject("Nota inválida");
+            }
           }
-          return Promise.resolve();
-        } else {
-          const newNote = editedNotes[student.activityStudent?.studentId];
-          return ProfessorService.updateStudentNote(
-            activity.activityId,
-            student.student.id,
-            { note: newNote }
-          );
-          return Promise.resolve();
-        }
-      });
+        });
 
       await Promise.all(updatePromises);
       handleClose();
@@ -187,21 +196,21 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
                   <Form.Control
                     type="text"
                     value={
-                      editedNotes[stud.activityStudent?.studentId] ||
-                      editedNotes[stud.activityStudent?.studentId] === ""
-                        ? editedNotes[stud.activityStudent?.studentId]
-                        : stud.activityStudent?.note
+                      editedNotes[stud.student.id] ||
+                      editedNotes[stud.student.id] === ""
+                        ? editedNotes[stud.student.id]
+                        : stud.activityStudent?.note || 0
                     }
                     onChange={(e) =>
-                      handleNoteChange(
-                        stud.activityStudent?.studentId,
-                        e.target.value
-                      )
+                      handleNoteChange(stud.student.id, e.target.value)
                     }
                   />
                 </td>
                 <td>
-                  <Button variant="primary" onClick={handleSaveNotes}>
+                  <Button
+                    variant="primary"
+                    onClick={() => handleSaveNotes(stud.student.id)}
+                  >
                     Guardar
                   </Button>
                 </td>
