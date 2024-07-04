@@ -40,8 +40,6 @@
 //   message?: string;
 // }
 
-
-
 export interface Login {
   usernames: string;
   password: string;
@@ -56,7 +54,7 @@ export interface UserInformation {
   roleName: string;
   userPhoto: string; // Añadir el campo userPhoto
   rolId: number;
-  changePassword?: boolean;
+  changePassword?: number;
 }
 
 export interface LoginResponse {
@@ -65,7 +63,3 @@ export interface LoginResponse {
   token?: string;
   message?: string;
 }
-
-
-
-

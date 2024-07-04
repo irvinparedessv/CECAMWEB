@@ -11,6 +11,14 @@ interface Subject {
   updated_at: string;
 }
 
+interface ActivityDetail {
+  activityId: number;
+  studentId: number;
+  note: number;
+  notePercentage: number;
+  notePeriod: number;
+}
+
 interface Activity {
   activityId: number;
   percentage: number;
@@ -22,7 +30,7 @@ interface Activity {
   subjectId: number;
   typeId: number;
   gradeId: number | null;
-  details: { note: string }[];
+  details: ActivityDetail[] | null;
   subject: Subject;
 }
 
@@ -54,6 +62,7 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
       const fetchData = async () => {
         try {
           const response: GradesData = await ParentService.getNotes(studentId);
+          console.log(response.student_grades);
           setStudentGrades(response.student_grades);
           setPeriods(response.periods);
           setIsLoading(false);
@@ -70,21 +79,25 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
   const getPeriodInfo = (periodId) => {
     const period = periods.find((p) => p.periodId == periodId);
     return period
-      ? { name: period.name, percentage: period.percentage, type: period.type }
+      ? {
+          name: period.name,
+          percentage: period.percentage,
+          type: period.typePeriodId,
+        }
       : null;
   };
 
   const calculateGrade = (activity) => {
     if (activity.details && activity.details.length > 0) {
-      return parseFloat(activity.details[0].note).toFixed(1);
+      return parseFloat(activity.details[0].note.toFixed(1));
     }
     return activity.gradeId !== null
-      ? parseFloat(activity.gradeId).toFixed(1)
+      ? parseFloat(activity.gradeId.toFixed(1))
       : "N/A";
   };
 
   const calculateFinalGrade = (activities) => {
-    const note = activities
+    return activities
       .reduce(
         (total, activity) =>
           total +
@@ -96,7 +109,6 @@ const ModalNotes = ({ show, handleClose, studentId }) => {
         0
       )
       .toFixed(1);
-    return note ? note : 0;
   };
 
   return (

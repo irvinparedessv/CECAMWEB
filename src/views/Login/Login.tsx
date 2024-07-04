@@ -137,7 +137,7 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
         try {
           const user = await AuthService.getUserDetails();
 
-          if (user.changePassword === false) {
+          if (user.changePassword === 0) {
             // Eliminar el token si no se requiere cambio de contraseña
             sessionStorage.removeItem("token");
             localStorage.removeItem("token");
@@ -189,9 +189,12 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
         sessionStorage.setItem("token", response.token ?? "");
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
         localStorage.setItem("userId", response.data.id.toString());
-        localStorage.setItem("changePassword", response.data.changePassword.toString());
+        localStorage.setItem(
+          "changePassword",
+          response.data.changePassword.toString()
+        );
 
-        if (response.data.changePassword === false) {
+        if (response.data.changePassword === 0) {
           // Mostrar SweetAlert2 para cambiar la contraseña
           const { value: newPassword } = await Swal.fire({
             title: "Cambia tu contraseña",
@@ -213,53 +216,94 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
             allowOutsideClick: false,
             showCancelButton: false,
             didOpen: () => {
-              const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
-              const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
-              const showNewPasswordCheckbox = document.getElementById('show-new-password') as HTMLInputElement;
-              const showConfirmPasswordCheckbox = document.getElementById('show-confirm-password') as HTMLInputElement;
+              const newPasswordInput = document.getElementById(
+                "newPassword"
+              ) as HTMLInputElement;
+              const confirmPasswordInput = document.getElementById(
+                "confirmPassword"
+              ) as HTMLInputElement;
+              const showNewPasswordCheckbox = document.getElementById(
+                "show-new-password"
+              ) as HTMLInputElement;
+              const showConfirmPasswordCheckbox = document.getElementById(
+                "show-confirm-password"
+              ) as HTMLInputElement;
 
-              showNewPasswordCheckbox.addEventListener('change', () => {
-                newPasswordInput.type = showNewPasswordCheckbox.checked ? 'text' : 'password';
+              showNewPasswordCheckbox.addEventListener("change", () => {
+                newPasswordInput.type = showNewPasswordCheckbox.checked
+                  ? "text"
+                  : "password";
               });
 
-              showConfirmPasswordCheckbox.addEventListener('change', () => {
-                confirmPasswordInput.type = showConfirmPasswordCheckbox.checked ? 'text' : 'password';
+              showConfirmPasswordCheckbox.addEventListener("change", () => {
+                confirmPasswordInput.type = showConfirmPasswordCheckbox.checked
+                  ? "text"
+                  : "password";
               });
             },
             preConfirm: async () => {
-              const newPassword = (document.getElementById("newPassword") as HTMLInputElement).value;
-              const confirmPassword = (document.getElementById("confirmPassword") as HTMLInputElement).value;
+              const newPassword = (
+                document.getElementById("newPassword") as HTMLInputElement
+              ).value;
+              const confirmPassword = (
+                document.getElementById("confirmPassword") as HTMLInputElement
+              ).value;
 
               if (!newPassword || newPassword !== confirmPassword) {
-                await Swal.showValidationMessage("Las contraseñas no coinciden");
+                await Swal.showValidationMessage(
+                  "Las contraseñas no coinciden"
+                );
                 return false;
               }
 
-              if (newPassword.length < 8 || !/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-                await Swal.showValidationMessage('La contraseña debe tener al menos 8 caracteres, incluir minúsculas, mayúsculas y números.');
+              if (
+                newPassword.length < 8 ||
+                !/[a-z]/.test(newPassword) ||
+                !/[A-Z]/.test(newPassword) ||
+                !/[0-9]/.test(newPassword)
+              ) {
+                await Swal.showValidationMessage(
+                  "La contraseña debe tener al menos 8 caracteres, incluir minúsculas, mayúsculas y números."
+                );
                 return false;
               }
 
               try {
                 // Cambiar la contraseña
-                const changePasswordSuccess = await AuthService.changeTemporalPassword(response.data.id, newPassword);
-                
+                const changePasswordSuccess =
+                  await AuthService.changeTemporalPassword(
+                    response.data.id,
+                    newPassword
+                  );
+
                 if (changePasswordSuccess) {
-                  await Swal.fire("Contraseña cambiada correctamente", "", "success");
+                  await Swal.fire(
+                    "Contraseña cambiada correctamente",
+                    "",
+                    "success"
+                  );
 
                   // Mueve el token de sessionStorage a localStorage después de cambiar la contraseña
-                  const tokenFromSession = sessionStorage.getItem('token');
+                  const tokenFromSession = sessionStorage.getItem("token");
                   if (tokenFromSession) {
-                    localStorage.setItem('token', tokenFromSession);
-                    sessionStorage.removeItem('token');
-                    localStorage.setItem('changePassword', "false");
+                    localStorage.setItem("token", tokenFromSession);
+                    sessionStorage.removeItem("token");
+                    localStorage.setItem("changePassword", "false");
                   }
                 } else {
-                  await Swal.fire("Error al cambiar la contraseña", "", "error");
+                  await Swal.fire(
+                    "Error al cambiar la contraseña",
+                    "",
+                    "error"
+                  );
                 }
               } catch (error) {
                 console.error("Error al cambiar la contraseña:", error);
-                await Swal.fire("Error", "Hubo un problema al cambiar la contraseña", "error");
+                await Swal.fire(
+                  "Error",
+                  "Hubo un problema al cambiar la contraseña",
+                  "error"
+                );
                 return false;
               }
 
@@ -322,7 +366,9 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
       cancelButtonText: "Cancelar",
       preConfirm: (email) => {
         if (!email) {
-          Swal.showValidationMessage("Por favor, ingresa un correo electrónico");
+          Swal.showValidationMessage(
+            "Por favor, ingresa un correo electrónico"
+          );
         }
         return email;
       },
@@ -331,9 +377,17 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
     if (email) {
       try {
         await AuthService.forgotPassword(email);
-        Swal.fire("Correo enviado", `Se enviará un correo a la dirección: ${email}`, "success");
+        Swal.fire(
+          "Correo enviado",
+          `Se enviará un correo a la dirección: ${email}`,
+          "success"
+        );
       } catch (error) {
-        Swal.fire("Error", "Hubo un problema al enviar el correo de restablecimiento", "error");
+        Swal.fire(
+          "Error",
+          "Hubo un problema al enviar el correo de restablecimiento",
+          "error"
+        );
       }
     }
   };
@@ -376,8 +430,10 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
                         />
                       </div>
                     </Form.Group>
-                    <Form.Group controlId="formBasicCheckbox" className="mb-2 d-flex justify-content-between">
- 
+                    <Form.Group
+                      controlId="formBasicCheckbox"
+                      className="mb-2 d-flex justify-content-between"
+                    >
                       <Form.Check
                         type="checkbox"
                         label="Recuérdame"
@@ -416,6 +472,3 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
 };
 
 export default LoginForm;
-
-
-

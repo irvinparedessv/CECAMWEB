@@ -179,7 +179,7 @@ const StudentNotesModal: React.FC<StudentNotesModalProps> = ({
           </thead>
           <tbody>
             {paginatedStudents.map((stud) => (
-              <tr key={stud.activityStudent?.activityId}>
+              <tr key={stud.student.id}>
                 <td>
                   {stud.student.firstName} {stud.student.lastName}
                 </td>
