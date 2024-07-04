@@ -345,16 +345,6 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
             aria-labelledby="dropdownUser1"
           >
             <li>
-              <a className="dropdown-item" href="#">
-                New project...
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#">
-                Settings
-              </a>
-            </li>
-            <li>
               <Link to="/profiles" className="dropdown-item">
                 Perfil
               </Link>
