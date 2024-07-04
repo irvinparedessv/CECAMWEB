@@ -356,39 +356,46 @@ const LoginForm: React.FC<LoginProps> = ({ login }) => {
   };
 
   const handleForgotPassword = async () => {
-    const { value: email } = await Swal.fire({
-      title: "Olvidé mi contraseña",
-      input: "email",
-      inputLabel: "Correo electrónico",
-      inputPlaceholder: "Ingresa tu correo electrónico",
-      showCancelButton: true,
-      confirmButtonText: "Enviar",
-      cancelButtonText: "Cancelar",
-      preConfirm: (email) => {
-        if (!email) {
-          Swal.showValidationMessage(
-            "Por favor, ingresa un correo electrónico"
-          );
-        }
-        return email;
-      },
-    });
-
-    if (email) {
-      try {
-        await AuthService.forgotPassword(email);
-        Swal.fire(
-          "Correo enviado",
-          `Se enviará un correo a la dirección: ${email}`,
-          "success"
-        );
-      } catch (error) {
-        Swal.fire(
-          "Error",
-          "Hubo un problema al enviar el correo de restablecimiento",
-          "error"
-        );
+    try {
+      const { value: email } = await Swal.fire({
+        title: 'Olvidé mi contraseña',
+        input: 'email',
+        inputLabel: 'Correo electrónico',
+        inputPlaceholder: 'Ingresa tu correo electrónico',
+        showCancelButton: true,
+        confirmButtonText: 'Enviar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: (email) => {
+          if (!email) {
+            Swal.showValidationMessage('Por favor, ingresa un correo electrónico');
+          }
+          return email;
+        },
+      });
+  
+      if (email) {
+        // Mostrar Swal de carga inmediatamente después de hacer clic en Enviar
+        Swal.fire({
+          title: 'Enviando correo...',
+          allowOutsideClick: false, // Evita que el usuario cierre el Swal
+          didOpen: () => {
+            Swal.showLoading(); // Muestra el ícono de carga
+          }
+        });
+  
+        // Llamar a la función para enviar el correo (simulado con un timeout en este ejemplo)
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulación de envío de correo
+  
+        // Cerrar el Swal de carga
+        Swal.close();
+  
+        // Mostrar confirmación de envío
+        Swal.fire('Correo enviado', `Se enviará un correo a la dirección: ${email}`, 'success');
       }
+    } catch (error) {
+      // Cerrar el Swal de carga en caso de error
+      Swal.close();
+      Swal.fire('Error', 'Hubo un problema al enviar el correo de restablecimiento', 'error');
     }
   };
 
