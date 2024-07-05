@@ -19,7 +19,7 @@ export interface Period {
 
 export interface ActivitySave {
   typeName?: string;
-  dueDate?: Date;
+  dueDate?: Date | string;
   periodId?: string;
   typeId: string;
   description: string;

@@ -67,6 +67,14 @@ const ProfessorSubjects = () => {
     }
   };
 
+  const refreshNote = async () => {
+    const response = await ProfessorService.getNotes(
+      currentSubjectId,
+      currentPlanId
+    );
+    setNotes(response);
+  };
+
   const handleShowAddActivityModal = (subjectId, gradeId) => {
     setCurrentSubjectId(subjectId);
     setCurrentPlanId(gradeId);
@@ -162,6 +170,7 @@ const ProfessorSubjects = () => {
       <NotesModal
         show={showModalNote}
         notes={notes}
+        refreshNote={refreshNote}
         handleClose={handleCloseModalNote}
       />
       <AddActivityModal

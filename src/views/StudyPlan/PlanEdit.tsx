@@ -28,6 +28,7 @@ const PlanEdit: React.FC = () => {
     description: "",
     typeId: "",
     percentage: 0,
+    dueDate: "",
   });
   const [isLoading, setIsLoading] = useState<boolean>(true); // Estado de carga
 
@@ -112,7 +113,8 @@ const PlanEdit: React.FC = () => {
     if (
       !newActivitie.typeId ||
       !newActivitie.description ||
-      !newActivitie.percentage
+      !newActivitie.percentage ||
+      !newActivitie.dueDate
     ) {
       Swal.fire({
         icon: "error",
@@ -174,7 +176,12 @@ const PlanEdit: React.FC = () => {
 
         setSubjectsSave(newSubjectsSave);
         setShowModalAct(false);
-        setNewActivitie({ description: "", typeId: "", percentage: 0 });
+        setNewActivitie({
+          description: "",
+          typeId: "",
+          percentage: 0,
+          dueDate: "",
+        });
       }
     }
   };
@@ -577,6 +584,19 @@ const PlanEdit: React.FC = () => {
                           setNewActivitie({
                             ...newActivitie,
                             percentage: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </Form.Group>
+                    <Form.Group controlId="formPorcentaje">
+                      <Form.Label>Fecha:</Form.Label>
+                      <Form.Control
+                        type="date"
+                        value={newActivitie.dueDate.toString()}
+                        onChange={(e) =>
+                          setNewActivitie({
+                            ...newActivitie,
+                            dueDate: e.target.value,
                           })
                         }
                       />

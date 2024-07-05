@@ -23,6 +23,11 @@
   justify-content: center;
   font-size: xx-large;
 }
+.c_ModalNotes {
+  .modal-content {
+    width: 125% !important;
+  }
+}
 /* ===========
     Variabels
    =========== */
